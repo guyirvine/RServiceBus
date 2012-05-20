@@ -22,5 +22,5 @@ end
 #require "./Transport/ZeroMq"
 #transport = Transport_ZeroMq.new()
 require "./Transport/RabbitMq"
-transport = Transport_RabbitMq.new()
-transport.Listen( handlerList )
+transport = Transport_RabbitMq.new(handlerList, "error")
+transport.Run()
