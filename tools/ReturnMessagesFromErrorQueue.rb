@@ -1,11 +1,11 @@
 require "amqp"
+require "yaml"
 
+require "../MessageTypes/ErrorMessage"
 
-queueName = "hello"
 errorQueueName = "error"
 AMQP.start(:host => "localhost") do |connection|
 	channel = AMQP::Channel.new(connection)
-	queue   = channel.queue(queueName)
 	errorQueue   = channel.queue( errorQueueName )
 
 	Signal.trap("INT") do
@@ -14,11 +14,28 @@ AMQP.start(:host => "localhost") do |connection|
 		end
 	end
 
+	errorQueue.status do |number_of_messages, number_of_consumers|
+		puts
+		puts "Attempting to return #{number_of_messages} to their source queue"
+		puts
 
-	errorQueue.subscribe do |body|
-		puts body
-		channel.default_exchange.publish(body, :routing_key => queueName)
+
+		1.upto(number_of_messages) do |request_nbr|
+    	    errorQueue.pop( { :ack=>true } ) do |metadata, payload|
+    	    	puts "#" + request_nbr.to_s + ": " + payload
+				errorMsg = YAML::load(payload)
+				queueName = errorMsg.sourceQueue
+		
+		
+				channel.default_exchange.publish(errorMsg.msg, :routing_key => queueName)
+				metadata.ack
+        	end
+		end
 	end
-	
-end
 
+	
+    EventMachine.add_timer(0.5) do
+      connection.close { EventMachine.stop }
+    end # EventMachine.add_timer
+
+end
