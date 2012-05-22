@@ -7,7 +7,7 @@ require "uuidtools"
 class RServiceBus_Agent
 
 
-	def sendMsg(channel, messageObj, queueName, returnAddress)
+	def _sendMsg(channel, messageObj, queueName, returnAddress)
 		msg = RServiceBus_Message.new( messageObj, returnAddress )
 		serialized_object = YAML::dump(msg)
 
@@ -17,7 +17,12 @@ class RServiceBus_Agent
 	end
 
 
-	def send(messageObj, queueName, returnAddress )
+	def sendMsg(channel, messageObj, queueName, returnAddress)
+		self._sendMsg(channel, messageObj, queueName, returnAddress)
+	end
+
+
+	def send(messageObj=nil, queueName=nil, returnAddress=nil )
 		AMQP.start(:host => "localhost") do |connection|
 			channel = AMQP::Channel.new(connection)
 

@@ -8,7 +8,14 @@ class HelloWorld
 	end
 end
 
+class Agent<RServiceBus_Agent
+	def sendMsg(channel, messageObj, queueName, returnAddress)
+		0.upto(100) do |request_nbr|
+			self._sendMsg(channel, HelloWorld.new( "Hello World! " + request_nbr.to_s ), "hello", "helloResponse" )
+		end
+	end
 
-0.upto(0) do |request_nbr|
-	agent = RServiceBus_Agent.new().send(HelloWorld.new( "Hello World! " + request_nbr.to_s ), "hello", "helloResponse" )
 end
+
+Agent.new().send()
+
