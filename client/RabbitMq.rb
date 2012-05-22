@@ -2,7 +2,7 @@ require "amqp"
 require "yaml"
 
 
-require "../Agent/RabbitMq"
+require "../RServiceBus"
 
 
 class HelloWorld
