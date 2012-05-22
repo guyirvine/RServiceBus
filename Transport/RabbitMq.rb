@@ -5,9 +5,14 @@ require "./MessageTypes"
 
 class Transport_RabbitMq
 
-	def initialize( handlerList, errorQueueName )
-		@handlerList = handlerList
+	attr_writer :handlerList
+
+	@handlerList
+	@localQueue
+
+	def initialize( errorQueueName )
 		@errorQueueName = errorQueueName
+		@localQueue = "localQ"
 	end
 
 	def Run()
@@ -34,25 +39,38 @@ class Transport_RabbitMq
 
 		@queue.subscribe do |body|
 			begin
-				msg = YAML::load(body)
-				self.HandleMessage( msg )
+				@msg = YAML::load(body)
+				self.HandleMessage()
 	    	rescue Exception => e
-				msg.addErrorMsg( @queue.name, e )
-				serialized_object = YAML::dump(msg)
+				@msg.addErrorMsg( @queue.name, e )
+				serialized_object = YAML::dump(@msg)
 				@channel.default_exchange.publish(serialized_object, :routing_key => @errorQueueName)
     		end
 		end
 	end
 
-	def HandleMessage(msg)
-		msgName = msg.msg.class.name
+	def HandleMessage()
+		msgName = @msg.msg.class.name
 		handler = @handlerList[msgName]
+
 		if handler == nil then
 			raise "No Handler Found"
 	    else
 			puts "Handler Found"
-   			handler.Handle( msg.msg )
+   			handler.Handle( @msg.msg )
     	end
+	end
+
+	def Reply( string )
+		puts "Reply: " + string + " To: " + @msg.returnAddress
+
+
+		msg = RServiceBus_Message.new( string, @localQueue )
+		serialized_object = YAML::dump(msg)
+
+
+		queue = @channel.queue(@msg.returnAddress)
+		@channel.default_exchange.publish(serialized_object, :routing_key => @msg.returnAddress)
 	end
 
 end
