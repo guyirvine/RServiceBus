@@ -1,7 +1,3 @@
-require "amqp"
-require "yaml"
-
-
 require "../RServiceBus"
 
 
@@ -14,5 +10,5 @@ end
 
 
 0.upto(0) do |request_nbr|
-	agent = Agent_RabbitMq.new().send(HelloWorld.new( "Hello World! " + request_nbr.to_s ), "hello", "helloResponse" )
+	agent = RServiceBus_Agent.new().send(HelloWorld.new( "Hello World! " + request_nbr.to_s ), "hello", "helloResponse" )
 end

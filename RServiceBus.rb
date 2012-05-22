@@ -1,10 +1,42 @@
-require 'rubygems'
+require "rubygems"
 require "amqp"
 require "yaml"
 require "uuidtools"
 
 
-class Agent_RabbitMq
+class RServiceBus_Agent
+
+
+	def sendMsg(channel, messageObj, queueName, returnAddress)
+		msg = RServiceBus_Message.new( messageObj, returnAddress )
+		serialized_object = YAML::dump(msg)
+
+		queue = channel.queue(queueName)
+
+		channel.default_exchange.publish(serialized_object, :routing_key => queueName)
+	end
+
+
+	def send(messageObj, queueName, returnAddress )
+		AMQP.start(:host => "localhost") do |connection|
+			channel = AMQP::Channel.new(connection)
+
+
+			self.sendMsg(channel, messageObj, queueName, returnAddress)
+
+
+			EM.add_timer(0.5) do
+				connection.close do
+					EM.stop { exit }
+				end
+			end
+		end
+	end
+
+end
+
+
+class RServiceBus_Agent2
 
 
 	def send(messageObj, queueName, returnAddress )
