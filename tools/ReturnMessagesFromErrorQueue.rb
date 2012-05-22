@@ -1,7 +1,16 @@
 require "amqp"
 require "yaml"
 
-require "../MessageTypes/ErrorMessage"
+require "../MessageTypes"
+
+
+class HelloWorld
+	attr_reader :name
+	def initialize( name )
+		@name = name
+	end
+end
+
 
 errorQueueName = "error"
 AMQP.start(:host => "localhost") do |connection|
@@ -23,11 +32,11 @@ AMQP.start(:host => "localhost") do |connection|
 		1.upto(number_of_messages) do |request_nbr|
     	    errorQueue.pop( { :ack=>true } ) do |metadata, payload|
     	    	puts "#" + request_nbr.to_s + ": " + payload
-				errorMsg = YAML::load(payload)
-				queueName = errorMsg.sourceQueue
+				msg = YAML::load(payload)
+				queueName = msg.errorMsg.sourceQueue
 		
 		
-				channel.default_exchange.publish(errorMsg.msg, :routing_key => queueName)
+				channel.default_exchange.publish(msg, :routing_key => queueName)
 				metadata.ack
         	end
 		end
