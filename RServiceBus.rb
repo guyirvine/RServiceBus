@@ -4,7 +4,10 @@ require "yaml"
 require "uuidtools"
 
 
-class RServiceBus_Agent
+module RServiceBus
+
+
+class Agent
 
 
 	def _sendMsg(channel, messageObj, queueName, returnAddress)
@@ -39,6 +42,7 @@ class RServiceBus_Agent
 	end
 
 end
+
 
 
 class RServiceBus_Agent2
@@ -104,7 +108,7 @@ class RServiceBus_Message
 end
 
 
-class RServiceBus
+class Host
 
 	attr_writer :handlerList
 
@@ -205,8 +209,11 @@ class RServiceBus
 end
 
 
+end
+
+
 if __FILE__ == $0
-	RServiceBus.new("error")
+	RServiceBus::Host.new("error")
 		.loadHandlers()
 		.run()
 end
