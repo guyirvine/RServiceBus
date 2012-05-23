@@ -2,6 +2,10 @@ require "rubygems"
 require "amqp"
 require "yaml"
 require "uuidtools"
+require "log4r"
+
+
+include Log4r
 
 
 module RServiceBus
@@ -68,10 +72,7 @@ class Message
 		@errorMsg = nil
 	end
 
-	def addErrorMsg( sourceQueue, e )
-		errorString = e.message + ". " + e.backtrace[0]
-		puts errorString
-
+	def addErrorMsg( sourceQueue, errorString )
 		@errorMsg = RServiceBus::ErrorMessage.new( sourceQueue, errorString )
 	end
 
@@ -84,19 +85,42 @@ end
 
 class Host
 
-	attr_writer :handlerList
+	attr_writer :handlerList, :errorQueueName, :localQueueName, :incomingQueueName, :appName, :logger
+	attr_reader :appName, :logger
+
+	@appName
 
 	@handlerList
-	@localQueue
 
-	def initialize( errorQueueName )
-		@errorQueueName = errorQueueName
-		@localQueue = "localQ"
+	@errorQueueName
+	@localQueueName
+	@incomingQueueName
+	
+	# DEBUG < INFO < WARN < ERROR < FATAL
+	@logger
+
+
+	def loadConfig(configFilename)
+		if File.exists?(configFilename) then
+			require configFilename
+			RServiceBusConfig.new().loadConfig( self )
+#			loadConfig( self )
+			return
+		end
+
+		@errorQueueName = "error"
+		@localQueueName = "local"
+		@incomingQueueName = "hello2"
+
+	end
+
+	def initialize( configFilename = "./RServiceBusConfig.rb" )
+		self.loadConfig(configFilename)
 	end
 
 
 	def loadHandlers
-		puts "Load Message Handlers"
+		self.logger.info "Load Message Handlers"
 
 
 		@handlerList = {};
@@ -105,29 +129,30 @@ class Host
 			fileName = filePath.sub( "MessageHandler/", "")
 			messageName = fileName.sub( ".rb", "" )
 			handlerName = "MessageHandler_" + messageName
-			puts filePath + ":" + fileName + ":" + messageName + ":" + handlerName
+			self.logger.debug handlerName
+			self.logger.debug filePath + ":" + fileName + ":" + messageName + ":" + handlerName
 
 
 			require requirePath
 			handler = Object.const_get(handlerName).new();
 			if defined?( handler.Bus ) then
-				puts "Writing"
+				self.logger.debug "Setting Bus attribute for: " + handlerName
 				handler.Bus = self
 			end if
 			@handlerList[messageName] = handler;
 
-			puts "Loaded Handler for: " + messageName
+			self.logger.info "Loaded Handler: " + handlerName + " for: " + messageName
 		end
-		
+
 		return self
 	end
 
 	def run
-		puts "Wait for Msgs"
+		self.logger.info "Starting the Host"
 
 		AMQP.start(:host => "localhost") do |connection|
 			@channel = AMQP::Channel.new(connection)
-			@queue   = @channel.queue("hello")
+			@queue   = @channel.queue(@incomingQueueName)
 			@errorQueue   = @channel.queue( @errorQueueName )
 
 			Signal.trap("INT") do
@@ -142,14 +167,17 @@ class Host
 
 
 	def StartListeningToEndpoints
-		puts " [*] Waiting for messages. To exit press CTRL+C"
+		self.logger.info "Waiting for messages. To exit press CTRL+C"
 
 		@queue.subscribe do |body|
 			begin
 				@msg = YAML::load(body)
 				self.HandleMessage()
 	    	rescue Exception => e
-				@msg.addErrorMsg( @queue.name, e )
+				errorString = e.message + ". " + e.backtrace[0]
+				self.logger.error errorString
+
+				@msg.addErrorMsg( @queue.name, errorString )
 				serialized_object = YAML::dump(@msg)
 				@channel.default_exchange.publish(serialized_object, :routing_key => @errorQueueName)
     		end
@@ -161,24 +189,26 @@ class Host
 		handler = @handlerList[msgName]
 
 		if handler == nil then
+			self.logger.warn "No handler found for: " + msgName
 			raise "No Handler Found"
 	    else
-			puts "Handler Found"
+			self.logger.debug "Handler found for: " + msgName
    			handler.Handle( @msg.msg )
     	end
 	end
 
 	def Reply( string )
-		puts "Reply: " + string + " To: " + @msg.returnAddress
+		self.logger.debug "Reply: " + string + " To: " + @msg.returnAddress
 
 
-		msg = RServiceBus::Message.new( string, @localQueue )
+		msg = RServiceBus::Message.new( string, @localQueueName )
 		serialized_object = YAML::dump(msg)
 
 
 		queue = @channel.queue(@msg.returnAddress)
 		@channel.default_exchange.publish(serialized_object, :routing_key => @msg.returnAddress)
 	end
+
 
 end
 
@@ -187,7 +217,7 @@ end
 
 
 if __FILE__ == $0
-	RServiceBus::Host.new("error")
+	RServiceBus::Host.new()
 		.loadHandlers()
 		.run()
 end

@@ -1,4 +1,5 @@
 NServiceBus*
-*log*
-*out*
-*err*
+*.log
+out
+err
+*DS_Store*
