@@ -11,7 +11,7 @@ class Agent
 
 
 	def _sendMsg(channel, messageObj, queueName, returnAddress)
-		msg = RServiceBus_Message.new( messageObj, returnAddress )
+		msg = RServiceBus::Message.new( messageObj, returnAddress )
 		serialized_object = YAML::dump(msg)
 
 		queue = channel.queue(queueName)
@@ -44,33 +44,7 @@ class Agent
 end
 
 
-
-class RServiceBus_Agent2
-
-
-	def send(messageObj, queueName, returnAddress )
-		AMQP.start(:host => "localhost") do |connection|
-			channel = AMQP::Channel.new(connection)
-
-			msg = RServiceBus_Message.new( messageObj, returnAddress )
-			serialized_object = YAML::dump(msg)
-
-			queue = channel.queue(queueName)
-
-			channel.default_exchange.publish(serialized_object, :routing_key => queueName)
-
-			EM.add_timer(0.5) do
-				connection.close do
-					EM.stop { exit }
-				end
-			end
-		end
-	end
-
-end
-
-
-class RServiceBus_ErrorMessage
+class ErrorMessage
 
 	attr_reader :sourceQueue, :errorMsg
 
@@ -82,7 +56,7 @@ class RServiceBus_ErrorMessage
 end
 
 
-class RServiceBus_Message
+class Message
 
 	attr_reader :returnAddress, :msgId, :errorMsg
 
@@ -98,7 +72,7 @@ class RServiceBus_Message
 		errorString = e.message + ". " + e.backtrace[0]
 		puts errorString
 
-		@errorMsg = RServiceBus_ErrorMessage.new( sourceQueue, errorString )
+		@errorMsg = RServiceBus::ErrorMessage.new( sourceQueue, errorString )
 	end
 
 	def msg
@@ -198,7 +172,7 @@ class Host
 		puts "Reply: " + string + " To: " + @msg.returnAddress
 
 
-		msg = RServiceBus_Message.new( string, @localQueue )
+		msg = RServiceBus::Message.new( string, @localQueue )
 		serialized_object = YAML::dump(msg)
 
 
