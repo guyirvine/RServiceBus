@@ -175,23 +175,31 @@ class Host
 
 		@handlerList = {};
 		Dir["MessageHandler/*.rb"].each do |filePath|
-			requirePath = "./" + filePath.sub( ".rb", "")
-			fileName = filePath.sub( "MessageHandler/", "")
-			messageName = fileName.sub( ".rb", "" )
-			handlerName = "MessageHandler_" + messageName
-			self.logger.debug handlerName
-			self.logger.debug filePath + ":" + fileName + ":" + messageName + ":" + handlerName
+			begin
+				requirePath = "./" + filePath.sub( ".rb", "")
+				fileName = filePath.sub( "MessageHandler/", "")
+				messageName = fileName.sub( ".rb", "" )
+				handlerName = "MessageHandler_" + messageName
+				self.logger.debug handlerName
+				self.logger.debug filePath + ":" + fileName + ":" + messageName + ":" + handlerName
 
 
-			require requirePath
-			handler = Object.const_get(handlerName).new();
-			if defined?( handler.Bus ) then
-				self.logger.debug "Setting Bus attribute for: " + handlerName
-				handler.Bus = self
-			end if
-			@handlerList[messageName] = handler;
+				require requirePath
+				handler = Object.const_get(handlerName).new();
+				if defined?( handler.Bus ) then
+					self.logger.debug "Setting Bus attribute for: " + handlerName
+					handler.Bus = self
+				end if
+				@handlerList[messageName] = handler;
 
-			self.logger.info "Loaded Handler: " + handlerName + " for: " + messageName
+				self.logger.info "Loaded Handler: " + handlerName + " for: " + messageName
+			rescue Exception => e
+				self.logger.fatal "Exception loading handler from file: " + filePath
+				self.logger.fatal e.message
+				self.logger.fatal e.backtrace[0]
+
+				abort()
+			end
 		end
 
 		return self
