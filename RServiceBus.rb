@@ -109,13 +109,15 @@ class Config
 		return default
 	end
 
-	def loadConfig( host )
-		configFilename = "RServiceBus.yml"
-		if File.exists?(configFilename) then
-			@config = YAML.load_file(configFilename)
-		else
-			@config = Array.new
+	def loadConfig( host, configFilePath )
+		configFilePath = configFilePath.nil? ? "RServiceBus.yml" : configFilePath
+		if !File.exists?(configFilePath) then
+			puts "Config file could not be found at: " + configFilePath
+			puts "(You can specifiy a config file with: ruby RServiceBus [your config file path]"
+			abort()
 		end
+
+		@config = YAML.load_file(configFilePath)
 
 		host.appName = self.getValue( "host", "appName", "CreateUser" )
 		host.errorQueueName = self.getValue( "host", "errorQueueName", "error" )
@@ -160,12 +162,8 @@ class Host
 	@logger
 
 
-	def loadConfig()
-		RServiceBus::Config.new().loadConfig( self )
-	end
-
-	def initialize()
-		self.loadConfig()
+	def initialize(configFilePath=nil)
+		RServiceBus::Config.new().loadConfig( self, configFilePath )
 	end
 
 
@@ -275,7 +273,12 @@ end
 
 
 if __FILE__ == $0
-	RServiceBus::Host.new()
+	if ARGV.length > 1 then
+        abort( "Usage: RServiceBus [config file name]" )
+	end
+	configFilePath = ARGV.length == 0 ? nil : ARGV[0]
+
+	RServiceBus::Host.new(configFilePath)
 		.loadHandlers()
 		.run()
 end
