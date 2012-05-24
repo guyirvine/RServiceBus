@@ -183,7 +183,14 @@ class Host
 
 
 				require requirePath
-				handler = Object.const_get(handlerName).new();
+				begin
+					handler = Object.const_get(handlerName).new();
+				rescue Exception => e
+					self.logger.fatal "Expected class name: " + handlerName + ", not found in file: " +  filePath
+					self.logger.fatal "**** Check in " + filePath + " that the class is named : " + handlerName
+					self.logger.fatal "( In case its not that )"
+					raise
+				end
 				if defined?( handler.Bus ) then
 					self.logger.debug "Setting Bus attribute for: " + handlerName
 					handler.Bus = self
