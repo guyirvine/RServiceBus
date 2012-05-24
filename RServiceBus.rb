@@ -83,6 +83,66 @@ class Message
 end
 
 
+class Config
+#host:
+##	appName: CreateUser
+##	errorQueueName: error
+#	localQueueName: userservice
+#	incomingQueueName: user
+#
+#logger:
+##	level: Log4r::INFO
+##	stdout: false
+##	fileName: false
+##	fileFormat: "[%l] %d :: %m"
+
+
+	@config
+
+	def getValue( section, name, default )
+		if @config.has_key?(section) then
+			if @config[section].nil? then
+				return default
+			end
+			return @config[section].has_key?(name) ? @config[section][name] : default
+		end
+		return default
+	end
+
+	def loadConfig( host )
+		configFilename = "RServiceBus.yml"
+		if File.exists?(configFilename) then
+			@config = YAML.load_file(configFilename)
+		else
+			@config = Array.new
+		end
+
+		host.appName = self.getValue( "host", "appName", "CreateUser" )
+		host.errorQueueName = self.getValue( "host", "errorQueueName", "error" )
+		host.localQueueName = self.getValue( "host", "localQueueName", "local" )
+		host.incomingQueueName = self.getValue( "host", "incomingQueueName", "incoming" )
+
+		host.logger = Logger.new "rservicebus." + host.appName
+		loggingLevel = self.getValue( "logger", "level", Log4r::INFO )
+
+		if self.getValue( "logger", "stdout", true ) != false then
+			Outputter.stdout.level = loggingLevel
+			host.logger.outputters = Outputter.stdout
+		end
+
+		fileName = self.getValue( "logger", "fileName", host.appName + ".log" );
+		if fileName != false then
+			file = FileOutputter.new(host.appName + ".file", :filename => fileName,:trunc => false)
+			file.level = loggingLevel
+			file.formatter = PatternFormatter.new(:pattern => self.getValue( "logger", "fileFormat", "[%l] %d :: %m" ))
+			host.logger.add( file )
+		end
+
+
+	end
+end
+
+
 class Host
 
 	attr_writer :handlerList, :errorQueueName, :localQueueName, :incomingQueueName, :appName, :logger
@@ -100,22 +160,12 @@ class Host
 	@logger
 
 
-	def loadConfig(configFilename)
-		if File.exists?(configFilename) then
-			require configFilename
-			RServiceBusConfig.new().loadConfig( self )
-#			loadConfig( self )
-			return
-		end
-
-		@errorQueueName = "error"
-		@localQueueName = "local"
-		@incomingQueueName = "hello2"
-
+	def loadConfig()
+		RServiceBus::Config.new().loadConfig( self )
 	end
 
-	def initialize( configFilename = "./RServiceBusConfig.rb" )
-		self.loadConfig(configFilename)
+	def initialize()
+		self.loadConfig()
 	end
 
 
