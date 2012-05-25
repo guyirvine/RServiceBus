@@ -5,6 +5,7 @@ class HelloWorld
 	end
 end
 
+
 class MessageHandler_HelloWorld
 
 	attr_writer :Bus

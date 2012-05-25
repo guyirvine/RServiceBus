@@ -1,12 +1,6 @@
-require "../RServiceBus"
+require "./RServiceBus"
+require "./Contract"
 
-
-class HelloWorld
-	attr_reader :name
-	def initialize( name )
-		@name = name
-	end
-end
 
 class Agent<RServiceBus::Agent
 	def sendMsg(channel, messageObj, queueName, returnAddress)
