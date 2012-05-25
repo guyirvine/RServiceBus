@@ -1,10 +1,4 @@
-class HelloWorld
-	attr_reader :name
-	def initialize( name )
-		@name = name
-	end
-end
-
+require "./Contract.rb"
 
 class MessageHandler_HelloWorld
 
@@ -13,6 +7,7 @@ class MessageHandler_HelloWorld
 	@Bus
 
 	def Handle( msg )
+#raise "Manually generated error for testng"
 		puts "Handling Hello World: " + msg.name
 		@Bus.Reply( "Hey" )
 	end

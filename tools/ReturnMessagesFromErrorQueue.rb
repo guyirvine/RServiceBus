@@ -33,10 +33,10 @@ AMQP.start(:host => "localhost") do |connection|
     	    errorQueue.pop( { :ack=>true } ) do |metadata, payload|
     	    	puts "#" + request_nbr.to_s + ": " + payload
 				msg = YAML::load(payload)
-				queueName = msg.errorMsg.sourceQueue
-		
-		
-				channel.default_exchange.publish(msg, :routing_key => queueName)
+				queueName = msg.getLastErrorMsg.sourceQueue
+
+
+				channel.default_exchange.publish(payload, :routing_key => queueName)
 				metadata.ack
         	end
 		end

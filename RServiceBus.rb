@@ -62,18 +62,22 @@ end
 
 class Message
 
-	attr_reader :returnAddress, :msgId, :errorMsg
+	attr_reader :returnAddress, :msgId
 
 	def initialize( msg, returnAddress )
 		@_msg=YAML::dump(msg)
 		@returnAddress=returnAddress
 		
 		@msgId=UUIDTools::UUID.random_create
-		@errorMsg = nil
+		@errorList = Array.new
 	end
 
 	def addErrorMsg( sourceQueue, errorString )
-		@errorMsg = RServiceBus::ErrorMessage.new( sourceQueue, errorString )
+		@errorList << RServiceBus::ErrorMessage.new( sourceQueue, errorString )
+	end
+
+	def getLastErrorMsg
+		return @errorList.last
 	end
 
 	def msg
@@ -119,27 +123,28 @@ class Config
 
 		@config = YAML.load_file(configFilePath)
 
-		host.appName = self.getValue( "host", "appName", "CreateUser" )
+		appName = self.getValue( "host", "appName", "CreateUser" )
+		host.appName = appName
 		host.errorQueueName = self.getValue( "host", "errorQueueName", "error" )
 		host.localQueueName = self.getValue( "host", "localQueueName", "local" )
 		host.incomingQueueName = self.getValue( "host", "incomingQueueName", "incoming" )
 
-		host.logger = Logger.new "rservicebus." + host.appName
+		logger = Logger.new "rservicebus." + appName
 		loggingLevel = self.getValue( "logger", "level", Log4r::INFO )
 
 		if self.getValue( "logger", "stdout", true ) != false then
 			Outputter.stdout.level = loggingLevel
-			host.logger.outputters = Outputter.stdout
+			logger.outputters = Outputter.stdout
 		end
 
-		fileName = self.getValue( "logger", "fileName", host.appName + ".log" );
+		fileName = self.getValue( "logger", "fileName", appName + ".log" );
 		if fileName != false then
-			file = FileOutputter.new(host.appName + ".file", :filename => fileName,:trunc => false)
+			file = FileOutputter.new(appName + ".file", :filename => fileName,:trunc => false)
 			file.level = loggingLevel
 			file.formatter = PatternFormatter.new(:pattern => self.getValue( "logger", "fileFormat", "[%l] %d :: %m" ))
-			host.logger.add( file )
+			logger.add( file )
 		end
-
+		host.logger = logger
 
 	end
 end
@@ -148,7 +153,6 @@ end
 class Host
 
 	attr_writer :handlerList, :errorQueueName, :localQueueName, :incomingQueueName, :appName, :logger
-	attr_reader :appName, :logger
 
 	@appName
 
@@ -168,7 +172,7 @@ class Host
 
 
 	def loadHandlers
-		self.logger.info "Load Message Handlers"
+		@logger.info "Load Message Handlers"
 
 
 		@handlerList = {};
@@ -178,30 +182,30 @@ class Host
 				fileName = filePath.sub( "MessageHandler/", "")
 				messageName = fileName.sub( ".rb", "" )
 				handlerName = "MessageHandler_" + messageName
-				self.logger.debug handlerName
-				self.logger.debug filePath + ":" + fileName + ":" + messageName + ":" + handlerName
+				@logger.debug handlerName
+				@logger.debug filePath + ":" + fileName + ":" + messageName + ":" + handlerName
 
 
 				require requirePath
 				begin
 					handler = Object.const_get(handlerName).new();
 				rescue Exception => e
-					self.logger.fatal "Expected class name: " + handlerName + ", not found in file: " +  filePath
-					self.logger.fatal "**** Check in " + filePath + " that the class is named : " + handlerName
-					self.logger.fatal "( In case its not that )"
+					@logger.fatal "Expected class name: " + handlerName + ", not found in file: " +  filePath
+					@logger.fatal "**** Check in " + filePath + " that the class is named : " + handlerName
+					@logger.fatal "( In case its not that )"
 					raise
 				end
 				if defined?( handler.Bus ) then
-					self.logger.debug "Setting Bus attribute for: " + handlerName
+					@logger.debug "Setting Bus attribute for: " + handlerName
 					handler.Bus = self
 				end if
 				@handlerList[messageName] = handler;
 
-				self.logger.info "Loaded Handler: " + handlerName + " for: " + messageName
+				@logger.info "Loaded Handler: " + handlerName + " for: " + messageName
 			rescue Exception => e
-				self.logger.fatal "Exception loading handler from file: " + filePath
-				self.logger.fatal e.message
-				self.logger.fatal e.backtrace[0]
+				@logger.fatal "Exception loading handler from file: " + filePath
+				@logger.fatal e.message
+				@logger.fatal e.backtrace[0]
 
 				abort()
 			end
@@ -211,7 +215,7 @@ class Host
 	end
 
 	def run
-		self.logger.info "Starting the Host"
+		@logger.info "Starting the Host"
 
 		AMQP.start(:host => "localhost") do |connection|
 			@channel = AMQP::Channel.new(connection)
@@ -230,7 +234,7 @@ class Host
 
 
 	def StartListeningToEndpoints
-		self.logger.info "Waiting for messages. To exit press CTRL+C"
+		@logger.info "Waiting for messages. To exit press CTRL+C"
 
 		@queue.subscribe do |body|
 			begin
@@ -238,7 +242,7 @@ class Host
 				self.HandleMessage()
 	    	rescue Exception => e
 				errorString = e.message + ". " + e.backtrace[0]
-				self.logger.error errorString
+				@logger.error errorString
 
 				@msg.addErrorMsg( @queue.name, errorString )
 				serialized_object = YAML::dump(@msg)
@@ -252,16 +256,21 @@ class Host
 		handler = @handlerList[msgName]
 
 		if handler == nil then
-			self.logger.warn "No handler found for: " + msgName
+			@logger.warn "No handler found for: " + msgName
 			raise "No Handler Found"
 	    else
-			self.logger.debug "Handler found for: " + msgName
-   			handler.Handle( @msg.msg )
+			@logger.debug "Handler found for: " + msgName
+			begin
+	   			handler.Handle( @msg.msg )
+	   		rescue Exception => e
+				@logger.error "An error occured in Handler: " + handler.class.name
+				raise e
+	   		end
     	end
 	end
 
 	def Reply( string )
-		self.logger.debug "Reply: " + string + " To: " + @msg.returnAddress
+		@logger.debug "Reply: " + string + " To: " + @msg.returnAddress
 
 
 		msg = RServiceBus::Message.new( string, @localQueueName )
