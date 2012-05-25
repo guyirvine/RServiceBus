@@ -150,6 +150,75 @@ class Config
 	end
 end
 
+class HandlerLoader
+
+	attr_reader :messageName, :handler
+
+	@host
+
+	@logger
+	@filepath
+
+	@requirePath
+	@handlerName
+
+	@messageName
+	@handler
+
+	def initialize( logger, filePath, host )
+		@host = host
+
+		@logger = logger
+		@filePath = filePath
+	end
+
+	def parseFilepath
+		@requirePath = "./" + @filePath.sub( ".rb", "")
+		fileName = @filePath.sub( "MessageHandler/", "")
+		@messageName = fileName.sub( ".rb", "" )
+		@handlerName = "MessageHandler_" + @messageName
+
+		@logger.debug @handlerName
+		@logger.debug @filePath + ":" + fileName + ":" + @messageName + ":" + @handlerName
+	end
+
+	def loadHandlerFromFile
+		require @requirePath
+		begin
+			@handler = Object.const_get(@handlerName).new();
+		rescue Exception => e
+			@logger.fatal "Expected class name: " + @handlerName + ", not found after require: " +  @requirePath
+			@logger.fatal "**** Check in " + @filePath + " that the class is named : " + @handlerName
+			@logger.fatal "( In case its not that )"
+			raise e
+		end
+	end
+	
+	def setBusAttributeIfRequested
+		if defined?( @handler.Bus ) then
+			@handler.Bus = @host
+			@logger.debug "Bus attribute set for: " + @handlerName
+		end
+	end
+
+	def loadHandler()
+		begin
+			self.parseFilepath
+			self.loadHandlerFromFile
+			self.setBusAttributeIfRequested
+			@logger.info "Loaded Handler: " + @handlerName
+		rescue Exception => e
+			@logger.fatal "Exception loading handler from file: " + @filePath
+			@logger.fatal e.message
+			@logger.fatal e.backtrace[0]
+
+			abort()
+		end
+
+	end
+
+end
+
 
 class Host
 
@@ -180,38 +249,9 @@ class Host
 
 		@handlerList = {};
 		Dir["MessageHandler/*.rb"].each do |filePath|
-			begin
-				requirePath = "./" + filePath.sub( ".rb", "")
-				fileName = filePath.sub( "MessageHandler/", "")
-				messageName = fileName.sub( ".rb", "" )
-				handlerName = "MessageHandler_" + messageName
-				@logger.debug handlerName
-				@logger.debug filePath + ":" + fileName + ":" + messageName + ":" + handlerName
-
-
-				require requirePath
-				begin
-					handler = Object.const_get(handlerName).new();
-				rescue Exception => e
-					@logger.fatal "Expected class name: " + handlerName + ", not found in file: " +  filePath
-					@logger.fatal "**** Check in " + filePath + " that the class is named : " + handlerName
-					@logger.fatal "( In case its not that )"
-					raise
-				end
-				if defined?( handler.Bus ) then
-					@logger.debug "Setting Bus attribute for: " + handlerName
-					handler.Bus = self
-				end if
-				@handlerList[messageName] = handler;
-
-				@logger.info "Loaded Handler: " + handlerName + " for: " + messageName
-			rescue Exception => e
-				@logger.fatal "Exception loading handler from file: " + filePath
-				@logger.fatal e.message
-				@logger.fatal e.backtrace[0]
-
-				abort()
-			end
+			handlerLoader = HandlerLoader.new( @logger, filePath, self )
+			handlerLoader.loadHandler
+			@handlerList[handlerLoader.messageName] = handlerLoader.handler;
 		end
 
 		return self
