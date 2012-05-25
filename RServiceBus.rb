@@ -126,6 +126,7 @@ class Config
 		appName = self.getValue( "host", "appName", "CreateUser" )
 		host.appName = appName
 		host.errorQueueName = self.getValue( "host", "errorQueueName", "error" )
+		host.maxRetries = self.getValue( "host", "maxRetries", 5 )
 		host.localQueueName = self.getValue( "host", "localQueueName", "local" )
 		host.incomingQueueName = self.getValue( "host", "incomingQueueName", "incoming" )
 
@@ -152,13 +153,15 @@ end
 
 class Host
 
-	attr_writer :handlerList, :errorQueueName, :localQueueName, :incomingQueueName, :appName, :logger
+	attr_writer :handlerList, :errorQueueName, :maxRetries, :localQueueName, :incomingQueueName, :appName, :logger
 
 	@appName
 
 	@handlerList
 
 	@errorQueueName
+	@maxRetries
+
 	@localQueueName
 	@incomingQueueName
 	
@@ -237,10 +240,13 @@ class Host
 		@logger.info "Waiting for messages. To exit press CTRL+C"
 
 		@queue.subscribe do |body|
+			retries = @maxRetries
 			begin
 				@msg = YAML::load(body)
 				self.HandleMessage()
 	    	rescue Exception => e
+		    	retry if (retries -= 1) > 0
+
 				errorString = e.message + ". " + e.backtrace[0]
 				@logger.error errorString
 

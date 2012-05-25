@@ -1,6 +1,7 @@
 host:
   appName: HelloWorld
   errorQueueName: error
+  maxRetries: 2
   localQueueName: hello
   incomingQueueName: hello
 
