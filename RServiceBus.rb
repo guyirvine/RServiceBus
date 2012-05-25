@@ -123,7 +123,7 @@ class Config
 
 		@config = YAML.load_file(configFilePath)
 
-		appName = self.getValue( "host", "appName", "CreateUser" )
+		appName = self.getValue( "host", "appName", "RServiceBus" )
 		host.appName = appName
 		host.errorQueueName = self.getValue( "host", "errorQueueName", "error" )
 		host.maxRetries = self.getValue( "host", "maxRetries", 5 )
@@ -222,6 +222,7 @@ end
 
 class Host
 
+	attr_reader :logger
 	attr_writer :handlerList, :errorQueueName, :maxRetries, :localQueueName, :incomingQueueName, :appName, :logger
 
 	@appName
