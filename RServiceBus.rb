@@ -129,6 +129,7 @@ class Config
 		host.maxRetries = self.getValue( "host", "maxRetries", 5 )
 		host.localQueueName = self.getValue( "host", "localQueueName", "local" )
 		host.incomingQueueName = self.getValue( "host", "incomingQueueName", "incoming" )
+		host.forwardReceivedMessagesTo = self.getValue( "host", "forwardReceivedMessagesTo", nil )
 
 		logger = Logger.new "rservicebus." + appName
 		loggingLevel = self.getValue( "logger", "level", Log4r::INFO )
@@ -223,7 +224,7 @@ end
 class Host
 
 	attr_reader :logger
-	attr_writer :handlerList, :errorQueueName, :maxRetries, :localQueueName, :incomingQueueName, :appName, :logger
+	attr_writer :handlerList, :errorQueueName, :maxRetries, :localQueueName, :incomingQueueName, :appName, :logger, :forwardReceivedMessagesTo
 
 	@appName
 
@@ -235,11 +236,15 @@ class Host
 	@localQueueName
 	@incomingQueueName
 	
+	@forwardReceivedMessagesTo
+	@forwardReceivedMessagesToQueue
+	
 	# DEBUG < INFO < WARN < ERROR < FATAL
 	@logger
 
 
 	def initialize(configFilePath=nil)
+		@forwardReceivedMessagesToQueue = nil
 		RServiceBus::Config.new().loadConfig( self, configFilePath )
 	end
 
@@ -265,6 +270,10 @@ class Host
 			@channel = AMQP::Channel.new(connection)
 			@queue   = @channel.queue(@incomingQueueName)
 			@errorQueue   = @channel.queue( @errorQueueName )
+			if !@forwardReceivedMessagesTo.nil? then
+				@logger.info "Forwarding all received messages to: " + @forwardReceivedMessagesTo.to_s
+				@forwardReceivedMessagesToQueue = @channel.queue( @forwardReceivedMessagesTo )
+			end
 
 			Signal.trap("INT") do
 				connection.close do
@@ -285,6 +294,9 @@ class Host
 			begin
 				@msg = YAML::load(body)
 				self.HandleMessage()
+				if !@forwardReceivedMessagesTo.nil? then
+					@channel.default_exchange.publish(body, :routing_key => @forwardReceivedMessagesTo)
+				end
 	    	rescue Exception => e
 		    	retry if (retries -= 1) > 0
 

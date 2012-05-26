@@ -4,6 +4,7 @@ host:
   maxRetries: 2
   localQueueName: hello
   incomingQueueName: hello
+#  forwardReceivedMessagesTo: audit
 
 logger:
 #  level: Log4r::INFO
