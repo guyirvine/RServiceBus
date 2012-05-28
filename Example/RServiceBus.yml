@@ -11,3 +11,6 @@ logger:
 #  stdout: true
 #  fileName: false
 #  fileFormat: "[%l] %d :: %m"
+
+MessageEndpointMappings:
+  AnotherMessage: AnotherQueue

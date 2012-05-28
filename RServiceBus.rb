@@ -113,6 +113,16 @@ class Config
 		return default
 	end
 
+	def loadMessageEndpointMappings( host )
+		messageEndpointMappings=Hash.new
+
+		if @config.has_key?( "MessageEndpointMappings" ) then
+			@config["MessageEndpointMappings"].each{ |k,v| messageEndpointMappings[k] = v }
+		end
+
+		host.messageEndpointMappings=messageEndpointMappings
+	end
+
 	def loadConfig( host, configFilePath )
 		configFilePath = configFilePath.nil? ? "RServiceBus.yml" : configFilePath
 		if !File.exists?(configFilePath) then
@@ -147,6 +157,9 @@ class Config
 			logger.add( file )
 		end
 		host.logger = logger
+
+
+		self.loadMessageEndpointMappings( host )
 
 	end
 end
@@ -224,7 +237,7 @@ end
 class Host
 
 	attr_reader :logger
-	attr_writer :handlerList, :errorQueueName, :maxRetries, :localQueueName, :incomingQueueName, :appName, :logger, :forwardReceivedMessagesTo
+	attr_writer :handlerList, :errorQueueName, :maxRetries, :localQueueName, :incomingQueueName, :appName, :logger, :forwardReceivedMessagesTo, :messageEndpointMappings
 
 	@appName
 
@@ -239,6 +252,8 @@ class Host
 	@forwardReceivedMessagesTo
 	@forwardReceivedMessagesToQueue
 	
+	@messageEndpointMappings
+	
 	# DEBUG < INFO < WARN < ERROR < FATAL
 	@logger
 
@@ -246,6 +261,7 @@ class Host
 	def initialize(configFilePath=nil)
 		@forwardReceivedMessagesToQueue = nil
 		RServiceBus::Config.new().loadConfig( self, configFilePath )
+		@logger.info "MessageEndpointMappings: " + @messageEndpointMappings.to_s
 	end
 
 
@@ -340,6 +356,26 @@ class Host
 		@channel.default_exchange.publish(serialized_object, :routing_key => @msg.returnAddress)
 	end
 
+
+	def Send( msg )
+		@logger.debug "Bus.Send"
+
+
+		msgName = msg.class.name
+		if !@messageEndpointMappings.has_key?( msgName ) then
+			@logger.warn "No end point mapping found for: " + msgName
+			@logger.warn "**** Check in RServiceBus.yml that the section MessageEndpointMappings contains an entry named : " + msgName
+			raise "No end point mapping found for: " + msgName
+		end
+		rMsg = RServiceBus::Message.new( msg, "herdservice" )
+		serialized_object = YAML::dump(rMsg)
+
+		queueName = @messageEndpointMappings[msgName]
+		queue = @channel.queue(queueName)
+
+		@logger.debug "Sending: " + msgName + " to: " + queueName
+		@channel.default_exchange.publish(serialized_object, :routing_key => queueName)
+	end
 
 end
 
