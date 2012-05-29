@@ -7,7 +7,7 @@ host:
 #  forwardReceivedMessagesTo: audit
 
 logger:
-#  level: Log4r::INFO
+#  level: DEBUG
 #  stdout: true
 #  fileName: false
 #  fileFormat: "[%l] %d :: %m"

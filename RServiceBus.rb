@@ -95,7 +95,7 @@ class Config
 #	incomingQueueName: user
 #
 #logger:
-##	level: Log4r::INFO
+##	level: INFO
 ##	stdout: false
 ##	fileName: false
 ##	fileFormat: "[%l] %d :: %m"
@@ -123,8 +123,32 @@ class Config
 		host.messageEndpointMappings=messageEndpointMappings
 	end
 
+	def getLoggingLevel
+	# DEBUG < INFO < WARN < ERROR < FATAL
+		loggingLevel = self.getValue( "logger", "level", "INFO" ).upcase
+		case loggingLevel
+			when "DEBUG"
+				return Log4r::DEBUG
+			when "INFO"
+				return Log4r::INFO
+			when "WARN"
+				return Log4r::WARN
+			when "ERROR"
+				return Log4r::ERROR
+			when "FATAL"
+				return Log4r::FATAL
+			else
+				puts "Logging level, " + loggingLevel + " specified in config file, " + @configFilePath + " unknown."
+				puts "**** Check file " + @configFilePath + ". Check in section 'logger', for the property 'level'. Current value is, " + loggingLevel + ", must be one of: DEBUG, INFO, WARN, ERROR, FATAL"
+				abort()
+		end
+		
+	end
+
+
 	def loadConfig( host, configFilePath )
 		configFilePath = configFilePath.nil? ? "RServiceBus.yml" : configFilePath
+		@configFilePath = configFilePath
 		if !File.exists?(configFilePath) then
 			puts "Config file could not be found at: " + configFilePath
 			puts "(You can specifiy a config file with: ruby RServiceBus [your config file path]"
@@ -142,7 +166,7 @@ class Config
 		host.forwardReceivedMessagesTo = self.getValue( "host", "forwardReceivedMessagesTo", nil )
 
 		logger = Logger.new "rservicebus." + appName
-		loggingLevel = self.getValue( "logger", "level", Log4r::INFO )
+		loggingLevel = self.getLoggingLevel()
 
 		if self.getValue( "logger", "stdout", true ) != false then
 			Outputter.stdout.level = loggingLevel
