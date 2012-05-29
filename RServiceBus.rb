@@ -91,8 +91,6 @@ class Config
 #host:
 ##	appName: CreateUser
 ##	errorQueueName: error
-#	localQueueName: userservice
-#	incomingQueueName: user
 #
 #logger:
 ##	level: INFO
@@ -159,10 +157,9 @@ class Config
 
 		appName = self.getValue( "host", "appName", "RServiceBus" )
 		host.appName = appName
+		host.localQueueName = appName
 		host.errorQueueName = self.getValue( "host", "errorQueueName", "error" )
 		host.maxRetries = self.getValue( "host", "maxRetries", 5 )
-		host.localQueueName = self.getValue( "host", "localQueueName", "local" )
-		host.incomingQueueName = self.getValue( "host", "incomingQueueName", "incoming" )
 		host.forwardReceivedMessagesTo = self.getValue( "host", "forwardReceivedMessagesTo", nil )
 
 		logger = Logger.new "rservicebus." + appName
@@ -261,7 +258,7 @@ end
 class Host
 
 	attr_reader :logger
-	attr_writer :handlerList, :errorQueueName, :maxRetries, :localQueueName, :incomingQueueName, :appName, :logger, :forwardReceivedMessagesTo, :messageEndpointMappings
+	attr_writer :handlerList, :errorQueueName, :maxRetries, :localQueueName, :appName, :logger, :forwardReceivedMessagesTo, :messageEndpointMappings
 
 	@appName
 
@@ -271,7 +268,6 @@ class Host
 	@maxRetries
 
 	@localQueueName
-	@incomingQueueName
 	
 	@forwardReceivedMessagesTo
 	@forwardReceivedMessagesToQueue
@@ -308,7 +304,7 @@ class Host
 
 		AMQP.start(:host => "localhost") do |connection|
 			@channel = AMQP::Channel.new(connection)
-			@queue   = @channel.queue(@incomingQueueName)
+			@queue   = @channel.queue(@localQueueName)
 			@errorQueue   = @channel.queue( @errorQueueName )
 			if !@forwardReceivedMessagesTo.nil? then
 				@logger.info "Forwarding all received messages to: " + @forwardReceivedMessagesTo.to_s
@@ -371,10 +367,8 @@ class Host
 	def Reply( string )
 		@logger.debug "Reply: " + string + " To: " + @msg.returnAddress
 
-
 		msg = RServiceBus::Message.new( string, @localQueueName )
 		serialized_object = YAML::dump(msg)
-
 
 		queue = @channel.queue(@msg.returnAddress)
 		@channel.default_exchange.publish(serialized_object, :routing_key => @msg.returnAddress)
