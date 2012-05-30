@@ -1,0 +1,1 @@
+ruby RServiceBus.rb ./RServiceBus.MySubscriber1.yml

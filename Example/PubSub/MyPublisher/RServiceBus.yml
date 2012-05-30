@@ -1,0 +1,10 @@
+host:
+  appName: MyPublisher
+  errorQueueName: error
+  maxRetries: 2
+
+logger:
+#  level: DEBUG
+#  stdout: true
+  fileName: false
+#  fileFormat: "[%l] %d :: %m"

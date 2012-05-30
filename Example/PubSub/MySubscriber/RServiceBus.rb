@@ -351,7 +351,7 @@ class Host
 	end
 
 	def addSubscrption( eventName, queueName )
-		@logger.info "Adding subscrption for, " + eventName + ", to, " + queueName
+		@logger.debug "Adding subscrption for, " + eventName + ", to, " + queueName
 		redis = Redis.new
 		key = @appName + ".Subscriptions." + eventName
 		redis.sadd key, queueName

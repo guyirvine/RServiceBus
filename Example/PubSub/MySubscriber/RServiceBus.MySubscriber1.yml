@@ -1,0 +1,13 @@
+host:
+  appName: MySubscriber1
+  errorQueueName: error
+  maxRetries: 2
+
+logger:
+#  level: DEBUG
+#  stdout: true
+  fileName: false
+#  fileFormat: "[%l] %d :: %m"
+
+MessageEndpointMappings:
+  HelloWorldEvent: MyPublisher
