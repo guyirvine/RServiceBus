@@ -4,13 +4,20 @@ require "yaml"
 require "uuidtools"
 require "log4r"
 require "redis"
-
+require "json"
 
 include Log4r
 
-
 module RServiceBus
 
+def RServiceBus.convertDTOToJson( obj )
+	hash = {}; 
+	obj.instance_variables.each {|var| hash[var.to_s.delete("@")] = obj.instance_variable_get(var) }
+	
+	newOne = hash.to_json
+
+	return newOne
+end
 
 class Agent
 
@@ -23,7 +30,6 @@ class Agent
 
 		channel.default_exchange.publish(serialized_object, :routing_key => queueName)
 	end
-
 
 	def sendMsg(channel, messageObj, queueName, returnAddress)
 		self._sendMsg(channel, messageObj, queueName, returnAddress)
@@ -217,14 +223,30 @@ class HandlerLoader
 		@filePath = filePath
 	end
 
+	def getMessageName( fileName )
+		if fileName.count( "/" ) == 1 then
+			return fileName.match( /\/(.+)\./ )[1]
+		end
+				
+		if fileName.count( "/" ) == 2 then
+			return fileName.match( /\/(.+)\// )[1]
+		end
+		
+		
+		puts "Filepath, " + fileName + ", not in the expected format."
+		puts "Expected format either,"
+		puts "MessageHandler/Hello.rb, or"
+		puts "MessageHandler/Hello/One.rb, or"
+		abort();
+	end
+
 	def parseFilepath
 		@requirePath = "./" + @filePath.sub( ".rb", "")
-		fileName = @filePath.sub( "MessageHandler/", "")
-		@messageName = fileName.sub( ".rb", "" )
-		@handlerName = "MessageHandler_" + @messageName
+		@messageName = self.getMessageName( @filePath )
+		@handlerName = @filePath.sub( ".rb", "").gsub( "/", "_" )
 
 		@logger.debug @handlerName
-		@logger.debug @filePath + ":" + fileName + ":" + @messageName + ":" + @handlerName
+		@logger.debug @filePath + ":" + @messageName + ":" + @handlerName
 	end
 
 	def loadHandlerFromFile
@@ -297,15 +319,30 @@ class Host
 	end
 
 
-	def loadHandlers
+	def loadHandlers( baseDir="MessageHandler/*" )
 		@logger.info "Load Message Handlers"
+		@logger.debug "Checking, " + baseDir
+		
 
 
 		@handlerList = {};
-		Dir["MessageHandler/*.rb"].each do |filePath|
-			handlerLoader = HandlerLoader.new( @logger, filePath, self )
-			handlerLoader.loadHandler
-			@handlerList[handlerLoader.messageName] = handlerLoader.handler;
+		Dir[baseDir].each do |filePath|
+			if !filePath.end_with?( "." ) then
+				@logger.debug "Filepath, " + filePath
+				
+				if File.directory?( filePath ) then
+					self.loadHandlers( filePath + "/*" )
+				else
+					handlerLoader = HandlerLoader.new( @logger, filePath, self )
+					handlerLoader.loadHandler
+
+					if !@handlerList.has_key?( handlerLoader.messageName ) then
+						@handlerList[handlerLoader.messageName] = Array.new
+					end
+				
+					@handlerList[handlerLoader.messageName] << handlerLoader.handler;
+				end
+			end
 		end
 
 		return self
@@ -415,15 +452,17 @@ class Host
 
 	def HandleMessage()
 		msgName = @msg.msg.class.name
-		handler = @handlerList[msgName]
+		handlerList = @handlerList[msgName]
 
-		if handler == nil then
+		if handlerList == nil then
 			@logger.warn "No handler found for: " + msgName
 			raise "No Handler Found"
 	    else
 			@logger.debug "Handler found for: " + msgName
 			begin
-	   			handler.Handle( @msg.msg )
+				handlerList.each do |handler|
+		   			handler.Handle( @msg.msg )
+		   		end
 	   		rescue Exception => e
 				@logger.error "An error occured in Handler: " + handler.class.name
 				raise e

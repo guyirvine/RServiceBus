@@ -8,7 +8,7 @@ proving to be a workable framework.
 
 ##Principles
 	*Why are you doing it and what can go wrong
-	*Dont solve infrastructure problems with code
+	*Dont solve infrastructure problems with software
 		*Infrastructure in this case refers to anything not specific to the application domain
 
 ##Points of view in the framework

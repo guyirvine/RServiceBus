@@ -3,3 +3,4 @@ NServiceBus*
 out
 err
 *DS_Store*
+rservicebus-*.gem

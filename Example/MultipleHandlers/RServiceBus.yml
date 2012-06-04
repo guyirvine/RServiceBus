@@ -1,0 +1,16 @@
+host:
+  appName: HelloWorldMultiple
+  errorQueueName: error
+  maxRetries: 2
+#  localQueueName: hello
+#  incomingQueueName: hello
+#  forwardReceivedMessagesTo: audit
+
+logger:
+  level: DEBUG
+#  stdout: true
+#  fileName: false
+#  fileFormat: "[%l] %d :: %m"
+
+MessageEndpointMappings:
+  AnotherMessage: AnotherQueue
