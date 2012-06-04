@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+#
+# The application 'rservicebus' is installed as part of a gem, and
+# this file is here to facilitate running it.
+#
+
+require 'rubygems'
+require 'rservicebus'
+
+if ARGV.length > 1 then
+	abort( "Usage: RServiceBus [config file name]" )
+end
+
+configFilePath = ARGV.length == 0 ? nil : ARGV[0]
+
+RServiceBus::Host.new(configFilePath)
+	.loadHandlers()
+	.loadSubscriptions()
+	.sendSubscriptions()
+	.run()
