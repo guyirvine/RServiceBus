@@ -13,7 +13,8 @@ end
 
 configFilePath = ARGV.length == 0 ? nil : ARGV[0]
 
-RServiceBus::Host.new(configFilePath)
+RServiceBus::Host.new()
+	.loadConfig(configFilePath)
 	.loadHandlers()
 	.loadSubscriptions()
 	.sendSubscriptions()

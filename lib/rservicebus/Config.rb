@@ -2,7 +2,7 @@ module RServiceBus
 
 class Config
 #host:
-##	appName: CreateUser
+##	@appName: CreateUser
 ##	errorQueueName: error
 #
 #logger:
@@ -11,8 +11,12 @@ class Config
 ##	fileName: false
 ##	fileFormat: "[%l] %d :: %m"
 
-
+	attr_reader :appName
 	@config
+	@appName
+	def initialize()
+		abort( "You cannot call this class directly. Recommended subclass: ConfigFromFile" )
+	end
 
 	def getValue( section, name, default )
 		if @config.has_key?(section) then
@@ -55,11 +59,10 @@ class Config
 		
 	end
 
-
-	def loadHostSection()
-		appName = self.getValue( "host", "appName", "RServiceBus" )
-		host.appName = appName
-		host.localQueueName = appName
+	def loadHostSection( host )
+		@appName = self.getValue( "host", "appName", "RServiceBus" )
+		host.appName = @appName
+		host.localQueueName = @appName
 		host.errorQueueName = self.getValue( "host", "errorQueueName", "error" )
 		host.maxRetries = self.getValue( "host", "maxRetries", 5 )
 		host.forwardReceivedMessagesTo = self.getValue( "host", "forwardReceivedMessagesTo", nil )
@@ -67,22 +70,8 @@ class Config
 	end
 
 
-	def loadConfig( host, configFilePath )
-		configFilePath = configFilePath.nil? ? "RServiceBus.yml" : configFilePath
-		@configFilePath = configFilePath
-		if !File.exists?(configFilePath) then
-			puts "Config file could not be found at: " + configFilePath
-			puts "(You can specifiy a config file with: ruby RServiceBus [your config file path]"
-			abort()
-		end
-
-		@config = YAML.load_file(configFilePath)
-
-
-		self.loadHostSection()
-
-
-		logger = Logger.new "rservicebus." + appName
+	def configureLogging( host )
+		logger = Logger.new "rservicebus." + @appName
 		loggingLevel = self.getLoggingLevel()
 
 		if self.getValue( "logger", "stdout", true ) != false then
@@ -90,19 +79,56 @@ class Config
 			logger.outputters = Outputter.stdout
 		end
 
-		fileName = self.getValue( "logger", "fileName", appName + ".log" );
+		fileName = self.getValue( "logger", "fileName", @appName + ".log" );
 		if fileName != false then
-			file = FileOutputter.new(appName + ".file", :filename => fileName,:trunc => false)
+			file = FileOutputter.new(@appName + ".file", :filename => fileName,:trunc => false)
 			file.level = loggingLevel
 			file.formatter = PatternFormatter.new(:pattern => self.getValue( "logger", "fileFormat", "[%l] %d :: %m" ))
 			logger.add( file )
 		end
 		host.logger = logger
+	end
 
-
+	def processConfig( host )
+		self.loadHostSection(host)
+		self.configureLogging(host)
 		self.loadMessageEndpointMappings( host )
 
+
+		return self
 	end
+
 end
+
+
+class ConfigFromFile<Config
+
+	def getConfigurationFilePath(configFilePath)
+		configFilePath = configFilePath.nil? ? "RServiceBus.yml" : configFilePath
+		if !File.exists?(configFilePath) then
+			puts "Config file could not be found at: " + configFilePath
+			puts "(You can specifiy a config file with: ruby RServiceBus [your config file path]"
+			abort()
+		end
+
+		return configFilePath
+	end
+
+
+	def initialize(configFilePath )
+		configFilePath = self.getConfigurationFilePath(configFilePath)
+		@config = YAML.load_file(configFilePath)
+	end
+
+end
+
+class ConfigFromYAMLObject<Config
+
+	def initialize(config )
+		@config = config
+	end
+
+end
+
 
 end
