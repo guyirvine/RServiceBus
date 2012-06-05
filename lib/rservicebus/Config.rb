@@ -11,9 +11,12 @@ class Config
 ##	fileName: false
 ##	fileFormat: "[%l] %d :: %m"
 
-	attr_reader :appName
+	attr_reader :appName, :handlerPathList
 	@config
 	@appName
+	
+	@handlerPathList
+	
 	def initialize()
 		abort( "You cannot call this class directly. Recommended subclass: ConfigFromFile" )
 	end
@@ -56,8 +59,20 @@ class Config
 				puts "**** Check file " + @configFilePath + ". Check in section 'logger', for the property 'level'. Current value is, " + loggingLevel + ", must be one of: DEBUG, INFO, WARN, ERROR, FATAL"
 				abort()
 		end
-		
 	end
+
+	def loadHandlerPathList(host)
+		path = self.getValue( "host", "messageHandlerPath", "MessageHandler" )
+
+		@handlerPathList = Array.new
+		path.split( "," ).each do |path|
+			path = path.strip.chomp( "/" )
+			@handlerPathList << path
+		end
+
+		host.handlerPathList = @handlerPathList
+	end
+
 
 	def loadHostSection( host )
 		@appName = self.getValue( "host", "appName", "RServiceBus" )
@@ -67,6 +82,7 @@ class Config
 		host.maxRetries = self.getValue( "host", "maxRetries", 5 )
 		host.forwardReceivedMessagesTo = self.getValue( "host", "forwardReceivedMessagesTo", nil )
 
+		self.loadHandlerPathList(host)
 	end
 
 
@@ -105,7 +121,7 @@ class ConfigFromFile<Config
 
 	def getConfigurationFilePath(configFilePath)
 		configFilePath = configFilePath.nil? ? "RServiceBus.yml" : configFilePath
-		if !File.exists?(configFilePath) then
+		if File.exists?(configFilePath) == false then
 			puts "Config file could not be found at: " + configFilePath
 			puts "(You can specifiy a config file with: ruby RServiceBus [your config file path]"
 			abort()

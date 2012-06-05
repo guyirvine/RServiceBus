@@ -3,10 +3,12 @@ module RServiceBus
 class Host
 
 	attr_reader :logger
-	attr_writer :handlerList, :errorQueueName, :maxRetries, :localQueueName, :appName, :logger, :forwardReceivedMessagesTo, :messageEndpointMappings
+	attr_writer :handlerPathList, :handlerList, :errorQueueName, :maxRetries, :localQueueName, :appName, :logger, :forwardReceivedMessagesTo, :messageEndpointMappings
 
 	@appName
 
+
+	@handlerPathList
 	@handlerList
 
 	@errorQueueName
@@ -34,19 +36,18 @@ class Host
 	end
 
 
-	def loadHandlers( baseDir="MessageHandler/*" )
-		@logger.info "Load Message Handlers"
+	def loadHandlersFromPath(baseDir)
+		@logger.info "Load Message Handlers From Path"
 		@logger.debug "Checking, " + baseDir
-		
 
 
 		@handlerList = {};
-		Dir[baseDir].each do |filePath|
+		Dir[baseDir + "/*"].each do |filePath|
 			if !filePath.end_with?( "." ) then
 				@logger.debug "Filepath, " + filePath
 				
 				if File.directory?( filePath ) then
-					self.loadHandlers( filePath + "/*" )
+					self.loadHandlersFromPath( filePath )
 				else
 					handlerLoader = HandlerLoader.new( @logger, filePath, self )
 					handlerLoader.loadHandler
@@ -58,6 +59,16 @@ class Host
 					@handlerList[handlerLoader.messageName] << handlerLoader.handler;
 				end
 			end
+		end
+
+		return self
+	end
+
+	def loadHandlers()
+		@logger.info "Load Message Handlers"
+
+		@handlerPathList.each do |path|
+			self.loadHandlersFromPath(path)
 		end
 
 		return self
@@ -174,14 +185,14 @@ class Host
 			raise "No Handler Found"
 	    else
 			@logger.debug "Handler found for: " + msgName
-			begin
 				handlerList.each do |handler|
-		   			handler.Handle( @msg.msg )
+					begin
+			   			handler.Handle( @msg.msg )
+	   				rescue Exception => e
+						@logger.error "An error occured in Handler: " + handler.class.name
+						raise e
+			   		end
 		   		end
-	   		rescue Exception => e
-				@logger.error "An error occured in Handler: " + handler.class.name
-				raise e
-	   		end
     	end
 	end
 
