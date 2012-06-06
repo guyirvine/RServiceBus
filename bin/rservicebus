@@ -28,22 +28,11 @@ optparse = OptionParser.new do|opts|
    opts.banner = "Usage: rservicebus [options]"
 
    # Define the options, and what they do
-   options[:daemon] = false
-   opts.on( '-d', '--daemon', 'Daemonize this process' ) do
-     options[:daemon] = true
-   end
- 
-   # Define the options, and what they do
    options[:config] = nil
    opts.on( '-c', '--config FILE', 'Path tp configuration FILE' ) do |file|
      options[:config] = file
    end
 
-   options[:pidfile] = "/var/run/rservicebus.pid"
-   opts.on( '-p', '--pidfile FILE', 'Path tp configuration FILE' ) do |file|
-     options[:pidfile] = file
-   end
- 
    # This displays the help screen, all programs are
    # assumed to have this option.
    opts.on( '-h', '--help', 'Display this screen' ) do
@@ -53,11 +42,4 @@ optparse = OptionParser.new do|opts|
 end
 optparse.parse!
 
-if options[:daemon] ==true then
-	child_pid = fork do
-		run_rservicebus(options[:config])
-	end
-	File.open( options[:pidfile], 'w') {|f| f.write(child_pid) }
-else
-	run_rservicebus(options[:config])
-end
+run_rservicebus(options[:config])
