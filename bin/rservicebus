@@ -38,6 +38,11 @@ optparse = OptionParser.new do|opts|
    opts.on( '-c', '--config FILE', 'Path tp configuration FILE' ) do |file|
      options[:config] = file
    end
+
+   options[:pidfile] = "/var/run/rservicebus.pid"
+   opts.on( '-p', '--pidfile FILE', 'Path tp configuration FILE' ) do |file|
+     options[:pidfile] = file
+   end
  
    # This displays the help screen, all programs are
    # assumed to have this option.
@@ -52,6 +57,7 @@ if options[:daemon] ==true then
 	child_pid = fork do
 		run_rservicebus(options[:config])
 	end
+	File.open( options[:pidfile], 'w') {|f| f.write(child_pid) }
 else
 	run_rservicebus(options[:config])
 end

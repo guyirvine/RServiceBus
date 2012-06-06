@@ -1,7 +1,7 @@
 require "amqp"
 require "yaml"
 
-require "../RServiceBus"
+require "rservicebus"
 
 
 class HelloWorld

@@ -143,6 +143,21 @@ class Host
 				end
 			end
 
+
+                        Signal.trap("TERM") do
+                                connection.close do
+                                        EM.stop { exit }
+                                end
+                        end
+
+
+                        Signal.trap("KILL") do
+                                connection.close do
+                                        EM.stop { exit }
+                                end
+                        end
+
+
 			self.StartListeningToEndpoints
 		end
 	end
