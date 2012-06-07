@@ -33,6 +33,8 @@ class Host
 		RServiceBus::ConfigFromFile.new(configFilePath).processConfig( self )
 		@logger.info "MessageEndpointMappings: " + @messageEndpointMappings.to_s
 		
+		@beanstalk = Beanstalk::Pool.new(['localhost:11300'])
+
 		return self
 	end
 
@@ -129,7 +131,6 @@ class Host
 		@logger.info "Starting the Host"
 
 
-		@beanstalk = Beanstalk::Pool.new(['localhost:11300'])
 		@beanstalk.watch( @localQueueName )
 		if !@forwardReceivedMessagesTo.nil? then
 			@logger.info "Forwarding all received messages to: " + @forwardReceivedMessagesTo.to_s
@@ -203,7 +204,7 @@ class Host
 		rMsg = RServiceBus::Message.new( msg, @localQueueName )
 		serialized_object = YAML::dump(rMsg)
 		@logger.debug "Sending: " + msg.class.name + " to: " + queueName
-		self._SendAlreadyWrappedAndSerialised( msg, queueName )
+		self._SendAlreadyWrappedAndSerialised( serialized_object, queueName )
 	end
 
 	def Reply( msg )
@@ -226,7 +227,7 @@ class Host
 
 		queueName = @messageEndpointMappings[msgName]
 		
-		self._Send( msg, queueName )
+		self._SendNeedsWrapping( msg, queueName )
 	end
 
 	def Publish( msg )
@@ -240,7 +241,7 @@ class Host
 		end
 
 		subscription.each do |subscriber|
-			self._Send( msg, subscriber )
+			self._SendNeedsWrapping( msg, subscriber )
 		end
 
 		
@@ -254,7 +255,7 @@ class Host
 		subscription = Subscription.new( eventName )
 
 
-		self._Send( subscription, queueName )
+		self._SendNeedsWrapping( subscription, queueName )
 	end
 
 end

@@ -1,15 +1,8 @@
-require "./RServiceBus"
+require "rservicebus"
 require "./Contract"
 
+agent = RServiceBus::Agent.new()
 
-class Agent<RServiceBus::Agent
-	def sendMsg(channel, messageObj, queueName, returnAddress)
-		1.upto(2) do |request_nbr|
-			self._sendMsg(channel, HelloWorld.new( "Hello World! " + request_nbr.to_s ), "HelloWorldMultiple", "helloResponse" )
-		end
-	end
-
+1.upto(2) do |request_nbr|
+	agent.sendMsg(HelloWorld.new( "Hello World! " + request_nbr.to_s ), "HelloWorldMultiple", "helloResponse")
 end
-
-Agent.new().send()
-

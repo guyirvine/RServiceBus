@@ -4,7 +4,7 @@ host:
   maxRetries: 2
 
 logger:
-#  level: DEBUG
+  level: DEBUG
 #  stdout: true
   fileName: false
 #  fileFormat: "[%l] %d :: %m"
