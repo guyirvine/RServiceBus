@@ -5,11 +5,6 @@ class Config
 ##	@appName: CreateUser
 ##	errorQueueName: error
 #
-#logger:
-##	level: INFO
-##	stdout: false
-##	fileName: false
-##	fileFormat: "[%l] %d :: %m"
 
 	attr_reader :appName, :handlerPathList
 	@config
@@ -17,55 +12,33 @@ class Config
 	
 	@handlerPathList
 	
-	def initialize()
-		abort( "You cannot call this class directly. Recommended subclass: ConfigFromFile" )
-	end
-
-	def getValue( section, name, default )
-		if @config.has_key?(section) then
-			if @config[section].nil? then
-				return default
-			end
-			return @config[section].has_key?(name) ? @config[section][name] : default
+	def getValue( name, default=nil )
+		if ENV[name].nil? then
+			return default
 		end
-		return default
+		
+		return ENV[name]
 	end
 
 	def loadMessageEndpointMappings( host )
+		mapping = self.getValue( "RSERVICEBUS_MESSAGEENDPOINTMAPPINGS" )
+
 		messageEndpointMappings=Hash.new
-		if @config.has_key?( "MessageEndpointMappings" ) then
-			@config["MessageEndpointMappings"].each{ |k,v| messageEndpointMappings[k] = v }
+		if !mapping.nil? then
+			mapping.split( ";" ).each do |line|
+				match = line.match( /(.+):(.+)/ )
+				messageEndpointMappings[match[0]] = match[1]
+			end
 		end
 
 		host.messageEndpointMappings=messageEndpointMappings
 	end
 
-	def getLoggingLevel
-	# DEBUG < INFO < WARN < ERROR < FATAL
-		loggingLevel = self.getValue( "logger", "level", "INFO" ).upcase
-		case loggingLevel
-			when "DEBUG"
-				return Log4r::DEBUG
-			when "INFO"
-				return Log4r::INFO
-			when "WARN"
-				return Log4r::WARN
-			when "ERROR"
-				return Log4r::ERROR
-			when "FATAL"
-				return Log4r::FATAL
-			else
-				puts "Logging level, " + loggingLevel + " specified in config file, " + @configFilePath + " unknown."
-				puts "**** Check file " + @configFilePath + ". Check in section 'logger', for the property 'level'. Current value is, " + loggingLevel + ", must be one of: DEBUG, INFO, WARN, ERROR, FATAL"
-				abort()
-		end
-	end
-
 	def loadHandlerPathList(host)
-		path = self.getValue( "host", "messageHandlerPath", "MessageHandler" )
+		path = self.getValue( "RSERVICEBUS_MESSAGEHANDLERPATH", "MessageHandler" )
 
 		@handlerPathList = Array.new
-		path.split( "," ).each do |path|
+		path.split( ";" ).each do |path|
 			path = path.strip.chomp( "/" )
 			@handlerPathList << path
 		end
@@ -75,8 +48,10 @@ class Config
 
 
 	def loadHostSection( host )
-		@appName = self.getValue( "host", "appName", "RServiceBus" )
-		host.appName = @appName
+		path = self.getValue( "RSERVICEBUS_APPNAME", "RServiceBus" )
+		localQueueName = self.getValue( "RSERVICEBUS_APPNAME", "RServiceBus" )
+#		@appName = self.getValue( "host", "appName", "RServiceBus" )
+#		host.appName = @appName
 		host.localQueueName = @appName
 		host.errorQueueName = self.getValue( "host", "errorQueueName", "error" )
 		host.maxRetries = self.getValue( "host", "maxRetries", 5 )

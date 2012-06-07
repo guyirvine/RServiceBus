@@ -6,7 +6,7 @@ class HandlerLoader
 
 	@host
 
-	@logger
+	@baseDir
 	@filepath
 
 	@requirePath
@@ -15,20 +15,21 @@ class HandlerLoader
 	@messageName
 	@handler
 
-	def initialize( logger, filePath, host )
+	def initialize( baseDir, filePath, host )
 		@host = host
 
-		@logger = logger
+		@baseDir = baseDir
 		@filePath = filePath
 	end
 
-	def getMessageName( fileName )
-		if fileName.count( "/" ) == 1 then
-			return fileName.match( /\/(.+)\./ )[1]
+	def getMessageName( baseDir, fileName )
+		name = fileName.sub( baseDir + "/", "" )
+		if name.count( "/" ) == 0 then
+			return name.match( /(.+)\./ )[1]
 		end
 				
-		if fileName.count( "/" ) == 2 then
-			return fileName.match( /\/(.+)\// )[1]
+		if name.count( "/" ) == 1 then
+			return name.match( /\/(.+)\./ )[1]
 		end
 		
 		
@@ -41,11 +42,11 @@ class HandlerLoader
 
 	def parseFilepath
 		@requirePath = "./" + @filePath.sub( ".rb", "")
-		@messageName = self.getMessageName( @filePath )
-		@handlerName = @filePath.sub( ".rb", "").gsub( "/", "_" )
+		@messageName = self.getMessageName( @baseDir, @filePath )
+		@handlerName = @filePath.sub( ".rb", "").sub( @baseDir, "MessageHandler" ).gsub( "/", "_" )
 
-		@logger.debug @handlerName
-		@logger.debug @filePath + ":" + @messageName + ":" + @handlerName
+		puts @handlerName
+		puts @filePath + ":" + @messageName + ":" + @handlerName
 	end
 
 	def loadHandlerFromFile
@@ -53,9 +54,9 @@ class HandlerLoader
 		begin
 			@handler = Object.const_get(@handlerName).new();
 		rescue Exception => e
-			@logger.fatal "Expected class name: " + @handlerName + ", not found after require: " +  @requirePath
-			@logger.fatal "**** Check in " + @filePath + " that the class is named : " + @handlerName
-			@logger.fatal "( In case its not that )"
+			puts "Expected class name: " + @handlerName + ", not found after require: " +  @requirePath
+			puts "**** Check in " + @filePath + " that the class is named : " + @handlerName
+			puts "( In case its not that )"
 			raise e
 		end
 	end
@@ -63,7 +64,7 @@ class HandlerLoader
 	def setBusAttributeIfRequested
 		if defined?( @handler.Bus ) then
 			@handler.Bus = @host
-			@logger.debug "Bus attribute set for: " + @handlerName
+			puts "Bus attribute set for: " + @handlerName
 		end
 	end
 
@@ -72,11 +73,11 @@ class HandlerLoader
 			self.parseFilepath
 			self.loadHandlerFromFile
 			self.setBusAttributeIfRequested
-			@logger.info "Loaded Handler: " + @handlerName
+			puts "Loaded Handler: " + @handlerName + ", for, " + @messageName
 		rescue Exception => e
-			@logger.fatal "Exception loading handler from file: " + @filePath
-			@logger.fatal e.message
-			@logger.fatal e.backtrace[0]
+			puts "Exception loading handler from file: " + @filePath
+			puts e.message
+			puts e.backtrace[0]
 
 			abort()
 		end
