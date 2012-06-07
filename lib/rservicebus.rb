@@ -1,5 +1,5 @@
 require "rubygems"
-require "amqp"
+require 'beanstalk-client'
 require "yaml"
 require "uuidtools"
 require "log4r"

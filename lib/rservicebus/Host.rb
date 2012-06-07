@@ -26,6 +26,7 @@ class Host
 	# DEBUG < INFO < WARN < ERROR < FATAL
 	@logger
 
+	@beanstalk
 
 	def loadConfig(configFilePath=nil)
 		@forwardReceivedMessagesToQueue = nil
@@ -40,12 +41,11 @@ class Host
 		@logger.info "Load Message Handlers From Path"
 		@logger.debug "Checking, " + baseDir
 
-
 		@handlerList = {};
 		Dir[baseDir + "/*"].each do |filePath|
 			if !filePath.end_with?( "." ) then
 				@logger.debug "Filepath, " + filePath
-				
+
 				if File.directory?( filePath ) then
 					self.loadHandlersFromPath( filePath )
 				else
@@ -55,7 +55,7 @@ class Host
 					if !@handlerList.has_key?( handlerLoader.messageName ) then
 						@handlerList[handlerLoader.messageName] = Array.new
 					end
-				
+
 					@handlerList[handlerLoader.messageName] << handlerLoader.handler;
 				end
 			end
@@ -128,45 +128,23 @@ class Host
 	def run
 		@logger.info "Starting the Host"
 
-		AMQP.start(:host => "localhost") do |connection|
-			@channel = AMQP::Channel.new(connection)
-			@queue   = @channel.queue(@localQueueName)
-			@errorQueue   = @channel.queue( @errorQueueName )
-			if !@forwardReceivedMessagesTo.nil? then
-				@logger.info "Forwarding all received messages to: " + @forwardReceivedMessagesTo.to_s
-				@forwardReceivedMessagesToQueue = @channel.queue( @forwardReceivedMessagesTo )
-			end
 
-			Signal.trap("INT") do
-				connection.close do
-					EM.stop { exit }
-				end
-			end
-
-
-                        Signal.trap("TERM") do
-                                connection.close do
-                                        EM.stop { exit }
-                                end
-                        end
-
-
-                        Signal.trap("KILL") do
-                                connection.close do
-                                        EM.stop { exit }
-                                end
-                        end
-
-
-			self.StartListeningToEndpoints
+		@beanstalk = Beanstalk::Pool.new(['localhost:11300'])
+		@beanstalk.watch( @localQueueName )
+		if !@forwardReceivedMessagesTo.nil? then
+			@logger.info "Forwarding all received messages to: " + @forwardReceivedMessagesTo.to_s
 		end
+
+		self.StartListeningToEndpoints
 	end
 
 
 	def StartListeningToEndpoints
 		@logger.info "Waiting for messages. To exit press CTRL+C"
 
-		@queue.subscribe do |body|
+		loop do
+			job = @beanstalk.reserve
+			body = job.body
 			retries = @maxRetries
 			begin
 				@msg = YAML::load(body)
@@ -175,18 +153,19 @@ class Host
 				else
 					self.HandleMessage()
 					if !@forwardReceivedMessagesTo.nil? then
-						@channel.default_exchange.publish(body, :routing_key => @forwardReceivedMessagesTo)
+						self._SendAlreadyWrappedAndSerialised(body,@forwardReceivedMessagesTo)
 					end
 				end
+				job.delete
 	    	rescue Exception => e
-		    	retry if (retries -= 1) > 0
+		    	retry if (retries -= 1) > 0		    	
 
 				errorString = e.message + ". " + e.backtrace[0]
 				@logger.error errorString
 
-				@msg.addErrorMsg( @queue.name, errorString )
+				@msg.addErrorMsg( @localQueueName, errorString )
 				serialized_object = YAML::dump(@msg)
-				@channel.default_exchange.publish(serialized_object, :routing_key => @errorQueueName)
+				self._SendAlreadyWrappedAndSerialised(serialized_object, @errorQueueName)
     		end
 		end
 	end
@@ -211,44 +190,26 @@ class Host
     	end
 	end
 
-	def __Send( msg, queueName, channel )
-		@logger.debug "Bus.__Send"
+	def _SendAlreadyWrappedAndSerialised( serialized_object, queueName )
+		@logger.debug "Bus._SendAlreadyWrappedAndSerialised"
+
+		@beanstalk.use( queueName )
+		@beanstalk.put( serialized_object )
+	end
+
+	def _SendNeedsWrapping( msg, queueName )
+		@logger.debug "Bus._SendNeedsWrapping"
 
 		rMsg = RServiceBus::Message.new( msg, @localQueueName )
 		serialized_object = YAML::dump(rMsg)
-
-		queue = channel.queue(queueName)
 		@logger.debug "Sending: " + msg.class.name + " to: " + queueName
-		channel.default_exchange.publish(serialized_object, :routing_key => queueName)
-	end
-
-	def _Send( msg, queueName )
-		@logger.debug "Bus._Send"
-
-		if @channel.nil? then
-			AMQP.start(:host => "localhost") do |connection|
-				channel = AMQP::Channel.new(connection)
-				self.__Send( msg, queueName, channel )
-
-				EM.add_timer(0.1) do
-					connection.close do
-						EM.stop { exit }
-					end
-				end
-
-			end
-		else
-			self.__Send( msg, queueName, @channel )
-		end
+		self._SendAlreadyWrappedAndSerialised( msg, queueName )
 	end
 
 	def Reply( msg )
 		@logger.debug "Reply with: " + msg.class.name + " To: " + @msg.returnAddress
 
-		rMsg = RServiceBus::Message.new( msg, @localQueueName )
-		serialized_object = YAML::dump(rMsg)
-
-		self._Send( msg, @msg.returnAddress )
+		self._SendNeedsWrapping( msg, @msg.returnAddress )
 	end
 
 

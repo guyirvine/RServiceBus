@@ -1,5 +1,4 @@
-require "amqp"
-
+require "beanstalk-client"
 
 if ARGV.length == 1 then
 	queueName = ARGV[0]
@@ -12,24 +11,24 @@ else
 end
 
 
-AMQP.start(:host => "localhost") do |connection|
-	channel = AMQP::Channel.new(connection)
-	queue   = channel.queue(queueName)
-
-	finalPayload = nil
-	1.upto(index) do |nbr|
-		queue.pop( { :ack=>true } ) do |metadata, payload|
-			puts nbr.to_s + ":" + index.to_s
-			if nbr == index then
-				puts payload
-			end
-		end	
+beanstalk = Beanstalk::Pool.new(['localhost:11300'])
+jobList = Array.new
+begin
+	beanstalk.watch(queueName)
+	1.upto(index) do
+		job = beanstalk.reserve 1
+		jobList << job
 	end
-	
-	puts finalPayload
-
-
-    EventMachine.add_timer(0.5) do
-      connection.close { EventMachine.stop }
-    end # EventMachine.add_timer
+	puts jobList.last.body
+rescue Exception => e
+	if e.message == "TIMED_OUT" then
+		puts "Timeout"
+	else
+		raise
+	end
 end
+
+jobList.each do |job|
+	job.release
+end
+

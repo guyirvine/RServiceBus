@@ -2,7 +2,6 @@ host:
   appName: HelloWorld
   errorQueueName: error
   maxRetries: 2
-  messageHandlerPath: /Users/girvine/Ruby/rservicebus/Example/Req/RServiceBus.yml
 
 logger:
   level: DEBUG

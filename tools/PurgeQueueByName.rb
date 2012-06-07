@@ -6,17 +6,26 @@ if ARGV.length != 1 then
 end
 queueName = ARGV[0]
 
-AMQP.start(:host => "localhost") do |connection|
-	channel = AMQP::Channel.new(connection)
-	queue   = channel.queue(queueName)
+require "beanstalk-client"
 
-	queue.purge do |_|
-		puts "Purged queue: #{queue.name}"
-	end
-
-	EventMachine.add_timer(0.5) do
-		connection.close { EventMachine.stop }
-	end # EventMachine.add_timer
-    	
+if ARGV.length == 1 then
+	queueName = ARGV[0]
+	index = 1
+else
+	abort( "Usage: PurgeQueueByName <queue name>" )
 end
 
+
+beanstalk = Beanstalk::Pool.new(['localhost:11300'])
+begin
+	beanstalk.watch(queueName)
+	loop do
+		job = beanstalk.reserve 1
+		job.delete
+	end
+rescue Exception => e
+	if e.message == "TIMED_OUT" then
+	else
+		raise
+	end
+end
