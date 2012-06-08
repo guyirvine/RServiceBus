@@ -1,8 +1,8 @@
-# A sample Gemfile
 source "https://rubygems.org"
 
-gem "amqp"
-gem "uuidtools"
-gem "log4r"
-gem "redis"
-gem "json"
+require 'beanstalk-client'
+require "yaml"
+require "uuidtools"
+require "redis"
+require "json"
+

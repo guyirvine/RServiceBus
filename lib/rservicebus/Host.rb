@@ -2,9 +2,6 @@ module RServiceBus
 
 class Host
 
-#	attr_reader :logger
-#	attr_writer :handlerPathList, :handlerList, :errorQueueName, :maxRetries, :localQueueName, :appName, :logger, :forwardReceivedMessagesTo, :messageEndpointMappings
-
 	@appName
 
 	@handlerPathList
@@ -27,13 +24,17 @@ class Host
 	@verbose
 
 	def log(string, ver=false)
+		type = ver ? "VERB" : "INFO"
 		if @verbose || !ver then
-			puts string
+			timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
+			puts "[#{type}] #{timestamp} :: #{string}"
 		end
 	end
 
 	def getValue( name, default=nil )
-		return ENV["RSERVICEBUS_#{name}"].nil? ? default : ENV["RSERVICEBUS_#{name}"];
+		value = ENV["#{name}"].nil? ? default : ENV["#{name}"];
+		self.log "Env value: #{name}: #{value}", true
+		return value
 	end
 
 	def loadMessageEndpointMappings()
@@ -53,7 +54,7 @@ class Host
 	end
 
 	def loadHandlerPathList()
-		path = self.getValue( "MESSAGEHANDLER_PATH", "MessageHandler" )
+		path = self.getValue( "MSGHANDLERPATH", "MessageHandler" )
 		handlerPathList = Array.new
 		path.split( ";" ).each do |path|
 			path = path.strip.chomp( "/" )
@@ -61,7 +62,7 @@ class Host
 		end
 
 		@handlerPathList = handlerPathList
-		
+
 		return self
 	end
 
@@ -76,6 +77,16 @@ class Host
 		return self
 	end
 
+	def loadContracts()
+		if self.getValue( "CONTRACTS" ).nil? then
+			return self
+		end
+		
+		self.getValue( "CONTRACTS" ).split( ";" ) do |path|
+			require path
+		end
+		return self
+	end
 
 	def configureLogging()
 		@verbose = !self.getValue( "VERBOSE", nil ).nil?
@@ -83,11 +94,19 @@ class Host
 		return self
 	end
 
+	def configureBeanstalk
+		beanstalkHost = self.getValue( "BEANSTALK", "localhost:11300" )
+		@beanstalk = Beanstalk::Pool.new([beanstalkHost])
+
+		return self
+	end
+
 	def initialize()
-		@beanstalk = Beanstalk::Pool.new(['localhost:11300'])
 
 		self.loadHostSection()
 			.configureLogging()
+			.configureBeanstalk()
+			.loadContracts()
 			.loadMessageEndpointMappings()
 			.loadHandlerPathList()
 			.loadHandlers()

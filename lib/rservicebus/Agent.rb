@@ -8,7 +8,7 @@ class Agent
 		@beanstalk = Beanstalk::Pool.new(['localhost:11300'])
 	end
 
-	def sendMsg(messageObj, queueName, returnAddress)
+	def sendMsg(messageObj, queueName, returnAddress=nil)
 		msg = RServiceBus::Message.new( messageObj, returnAddress )
 		serialized_object = YAML::dump(msg)
 

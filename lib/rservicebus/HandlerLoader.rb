@@ -31,8 +31,7 @@ class HandlerLoader
 		if name.count( "/" ) == 1 then
 			return name.match( /\/(.+)\./ )[1]
 		end
-		
-		
+
 		puts "Filepath, " + fileName + ", not in the expected format."
 		puts "Expected format either,"
 		puts "MessageHandler/Hello.rb, or"
@@ -40,8 +39,20 @@ class HandlerLoader
 		abort();
 	end
 
+	def getRequirePath( filePath )
+		if File.exists?( filePath ) then
+			return filePath.sub( ".rb", "")
+		end		
+		
+		if File.exists?( "./" + filePath ) then
+			return "./" + filePath.sub( ".rb", "")
+		end
+
+		abort( "Filepath, " + filePath + ", given for MessageHandler require doesn't exist" );
+	end
+
 	def parseFilepath
-		@requirePath = "./" + @filePath.sub( ".rb", "")
+		@requirePath = self.getRequirePath( @filePath )
 		@messageName = self.getMessageName( @baseDir, @filePath )
 		@handlerName = @filePath.sub( ".rb", "").sub( @baseDir, "MessageHandler" ).gsub( "/", "_" )
 
