@@ -27,7 +27,7 @@ class HandlerLoader
 		if name.count( "/" ) == 0 then
 			return name.match( /(.+)\./ )[1]
 		end
-				
+
 		if name.count( "/" ) == 1 then
 			return name.match( /\/(.+)\./ )[1]
 		end
