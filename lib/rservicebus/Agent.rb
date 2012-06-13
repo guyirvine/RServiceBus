@@ -4,8 +4,8 @@ require 'beanstalk-client'
 class Agent
 	@beanstalk
 	
-	def initialize()
-		@beanstalk = Beanstalk::Pool.new(['localhost:11300'])
+	def initialize(url=['localhost:11300'])
+		@beanstalk = Beanstalk::Pool.new(url)
 	end
 
 	def sendMsg(messageObj, queueName, returnAddress=nil)

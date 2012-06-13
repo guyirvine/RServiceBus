@@ -11,6 +11,7 @@ require "rservicebus/ErrorMessage"
 require "rservicebus/Message"
 require "rservicebus/Subscription"
 require "rservicebus/HandlerLoader"
+require "rservicebus/ConfigureAppResource"
 require "rservicebus/Host"
 
 

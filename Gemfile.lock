@@ -1,17 +1,9 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    amq-client (0.9.2)
-      amq-protocol (>= 0.9.0)
-      eventmachine
-    amq-protocol (0.9.0)
-    amqp (0.9.4)
-      amq-client (~> 0.9.2)
-      amq-protocol (>= 0.9.0)
-      eventmachine
-    eventmachine (0.12.10)
+    beanstalk-client (1.1.1)
+    haml (3.1.6)
     json (1.7.3)
-    log4r (1.1.10)
     redis (3.0.1)
     uuidtools (2.1.2)
 
@@ -19,8 +11,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  amqp
+  beanstalk-client
+  haml
   json
-  log4r
   redis
   uuidtools

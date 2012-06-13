@@ -1,8 +1,8 @@
 source "https://rubygems.org"
 
-require 'beanstalk-client'
-require "yaml"
-require "uuidtools"
-require "redis"
-require "json"
+gem "beanstalk-client"
+gem "haml"
+gem "uuidtools"
+gem "redis"
+gem "json"
 

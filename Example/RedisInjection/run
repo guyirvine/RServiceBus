@@ -1,0 +1,8 @@
+APPNAME=HelloWorld \
+ERROR_QUEUE_NAME=error \
+MAX_RETRIES=2 \
+VERBOSE=true \
+MSGHANDLERPATH=./MessageHandler \
+RSB_Redis=redis://127.0.0.1:6379/ \
+ \
+rservicebus

@@ -5,6 +5,7 @@ class HandlerLoader
 	attr_reader :messageName, :handler
 
 	@host
+	@appResources
 
 	@baseDir
 	@filepath
@@ -15,11 +16,9 @@ class HandlerLoader
 	@messageName
 	@handler
 
-	def initialize( baseDir, filePath, host )
+	def initialize( host, appResources )
 		@host = host
-
-		@baseDir = baseDir
-		@filePath = filePath
+		@appResources = appResources
 	end
 
 	def getMessageName( baseDir, fileName )
@@ -40,53 +39,72 @@ class HandlerLoader
 	end
 
 	def getRequirePath( filePath )
+		if !filePath.start_with?( "/" ) then
+			filePath = "./" + filePath
+		end
+		
 		if File.exists?( filePath ) then
 			return filePath.sub( ".rb", "")
 		end		
-		
-		if File.exists?( "./" + filePath ) then
-			return "./" + filePath.sub( ".rb", "")
-		end
 
 		abort( "Filepath, " + filePath + ", given for MessageHandler require doesn't exist" );
 	end
 
-	def parseFilepath
-		@requirePath = self.getRequirePath( @filePath )
-		@messageName = self.getMessageName( @baseDir, @filePath )
-		@handlerName = @filePath.sub( ".rb", "").sub( @baseDir, "MessageHandler" ).gsub( "/", "_" )
-
-		puts @handlerName
-		puts @filePath + ":" + @messageName + ":" + @handlerName
+	def getHandlerName( baseDir, filePath )
+		handlerName = filePath.sub( ".rb", "").sub( baseDir, "MessageHandler" ).gsub( "/", "_" )
+		return handlerName
 	end
 
-	def loadHandlerFromFile
-		require @requirePath
+	def loadHandlerFromFile( requirePath, handlerName, filePath )
+		require requirePath
 		begin
-			@handler = Object.const_get(@handlerName).new();
+			handler = Object.const_get(handlerName).new();
 		rescue Exception => e
-			puts "Expected class name: " + @handlerName + ", not found after require: " +  @requirePath
-			puts "**** Check in " + @filePath + " that the class is named : " + @handlerName
+			puts "Expected class name: " + handlerName + ", not found after require: " +  requirePath
+			puts "**** Check in " + filePath + " that the class is named : " + handlerName
 			puts "( In case its not that )"
 			raise e
 		end
+		
+		return handler
 	end
 	
-	def setBusAttributeIfRequested
-		if defined?( @handler.Bus ) then
-			@handler.Bus = @host
-			puts "Bus attribute set for: " + @handlerName
+	def setBusAttributeIfRequested( handler, handlerName )
+		if defined?( handler.Bus ) then
+			handler.Bus = @host
+			@host.log "Bus attribute set for: " + handlerName
 		end
 	end
 
-	def loadHandler()
+	def setAppResources( handler, handlerName, appResources )
+		@host.log "Checking app resources for: #{handlerName}", true
+		appResources.each do |k,v|
+			if handler.class.method_defined?( k ) then 
+				handler.instance_variable_set( "@#{k}", v.getResource() )
+				@host.log "App resource attribute, #{k}, set for: " + handlerName
+			end
+		end
+	end
+
+	def loadHandler(baseDir, filePath)
 		begin
-			self.parseFilepath
-			self.loadHandlerFromFile
-			self.setBusAttributeIfRequested
-			puts "Loaded Handler: " + @handlerName + ", for, " + @messageName
+			requirePath = self.getRequirePath( filePath )
+			messageName = self.getMessageName( baseDir, filePath )
+			handlerName = self.getHandlerName( baseDir, filePath )
+
+			@host.log "filePath: " + filePath, true
+			@host.log "requirePath: " + requirePath, true
+			@host.log "messageName: " + messageName, true
+			@host.log "handlerName: " + handlerName, true
+
+			handler = self.loadHandlerFromFile( requirePath, handlerName, filePath )
+			self.setBusAttributeIfRequested( handler, handlerName )
+			self.setAppResources( handler, handlerName, @appResources )
+			@host.log "Loaded Handler: " + handlerName + ", for, " + messageName
+
+			return messageName, handler
 		rescue Exception => e
-			puts "Exception loading handler from file: " + @filePath
+			puts "Exception loading handler from file: " + filePath
 			puts e.message
 			puts e.backtrace[0]
 

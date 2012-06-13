@@ -11,7 +11,7 @@ class Host
 	@maxRetries
 
 	@localQueueName
-	
+
 	@forwardReceivedMessagesTo
 	@forwardReceivedMessagesToQueue
 	
@@ -22,6 +22,7 @@ class Host
 	@beanstalk
 
 	@verbose
+	@appResources
 
 	def log(string, ver=false)
 		type = ver ? "VERB" : "INFO"
@@ -81,8 +82,9 @@ class Host
 		if self.getValue( "CONTRACTS" ).nil? then
 			return self
 		end
-		
-		self.getValue( "CONTRACTS" ).split( ";" ) do |path|
+
+		self.getValue( "CONTRACTS" ).split( ";" ).each do |path|
+			self.log "Loading contracts from, #{path}"
 			require path
 		end
 		return self
@@ -96,16 +98,33 @@ class Host
 
 	def configureBeanstalk
 		beanstalkHost = self.getValue( "BEANSTALK", "localhost:11300" )
-		@beanstalk = Beanstalk::Pool.new([beanstalkHost])
+		begin
+			@beanstalk = Beanstalk::Pool.new([beanstalkHost])
+		rescue Exception => e
+			if e.message == "Beanstalk::NotConnected" then
+				puts "Error connecting to Beanstalk"
+				puts "***Most likely, beanstalk is not running. Start beanstalk, and try running this again."
+				puts "***If you still get this error, check beanstalk is running at, " + beanstalkHost
+				abort()
+			else
+				raise e
+			end
+		end
 
 		return self
 	end
 
+	def configureAppResource
+		@appResources = ConfigureAppResource.new.getResources( ENV )
+		return self;
+	end
+
 	def initialize()
 
-		self.loadHostSection()
-			.configureLogging()
+		self.configureLogging()
+			.loadHostSection()
 			.configureBeanstalk()
+			.configureAppResource()
 			.loadContracts()
 			.loadMessageEndpointMappings()
 			.loadHandlerPathList()
@@ -119,6 +138,7 @@ class Host
 	def loadHandlersFromPath(baseDir, subDir="")
 		log "Load Message Handlers from baseDir, " + baseDir + ", subDir, " + subDir
 		log "Checking, " + baseDir, true
+		handlerLoader = HandlerLoader.new( self, @appResources )
 
 		@handlerList = {};
 		Dir[baseDir + "/" + subDir + "*"].each do |filePath|
@@ -128,14 +148,13 @@ class Host
 				if File.directory?( filePath ) then
 					self.loadHandlersFromPath( filePath.sub( baseDir ) )
 				else
-					handlerLoader = HandlerLoader.new( baseDir, filePath, self )
-					handlerLoader.loadHandler
+					messageName, handler = handlerLoader.loadHandler( baseDir, filePath )
 
-					if !@handlerList.has_key?( handlerLoader.messageName ) then
-						@handlerList[handlerLoader.messageName] = Array.new
+					if !@handlerList.has_key?( messageName ) then
+						@handlerList[messageName] = Array.new
 					end
 
-					@handlerList[handlerLoader.messageName] << handlerLoader.handler;
+					@handlerList[messageName] << handler;
 				end
 			end
 		end
