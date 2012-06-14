@@ -2,104 +2,36 @@ module RServiceBus
 
 class Host
 
-	@appName
 
-	@handlerPathList
 	@handlerList
 
-	@errorQueueName
-	@maxRetries
-
-	@localQueueName
-
-	@forwardReceivedMessagesTo
 	@forwardReceivedMessagesToQueue
-	
-	@messageEndpointMappings
 
 	@subscriptions
 	
 	@beanstalk
 
-	@verbose
 	@appResources
+	
+	
+	@config
 
 	def log(string, ver=false)
 		type = ver ? "VERB" : "INFO"
-		if @verbose || !ver then
+		if @config.verbose || !ver then
 			timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
 			puts "[#{type}] #{timestamp} :: #{string}"
 		end
 	end
 
-	def getValue( name, default=nil )
-		value = ENV["#{name}"].nil? ? default : ENV["#{name}"];
-		self.log "Env value: #{name}: #{value}", true
-		return value
+	def configureAppResource
+		@appResources = ConfigureAppResource.new.getResources( ENV )
+		return self;
 	end
 
-	def loadMessageEndpointMappings()
-		mapping = self.getValue( "MESSAGE_ENDPOINT_MAPPINGS" )
-
-		messageEndpointMappings=Hash.new
-		if !mapping.nil? then
-			mapping.split( ";" ).each do |line|
-				match = line.match( /(.+):(.+)/ )
-				messageEndpointMappings[match[0]] = match[1]
-			end
-		end
-
-		@messageEndpointMappings=messageEndpointMappings
-
-		return self
-	end
-
-	def loadHandlerPathList()
-		path = self.getValue( "MSGHANDLERPATH", "MessageHandler" )
-		handlerPathList = Array.new
-		path.split( ";" ).each do |path|
-			path = path.strip.chomp( "/" )
-			handlerPathList << path
-		end
-
-		@handlerPathList = handlerPathList
-
-		return self
-	end
-
-
-	def loadHostSection()
-		@appName = self.getValue( "APPNAME", "RServiceBus" )
-		@localQueueName = @appName
-		@errorQueueName = self.getValue( "ERROR_QUEUE_NAME", "error" )
-		@maxRetries = self.getValue( "MAX_RETRIES", "5" ).to_i
-		@forwardReceivedMessagesTo = self.getValue( "FORWARD_RECEIVED_MESSAGES_TO" )
-
-		return self
-	end
-
-	def loadContracts()
-		if self.getValue( "CONTRACTS" ).nil? then
-			return self
-		end
-
-		self.getValue( "CONTRACTS" ).split( ";" ).each do |path|
-			self.log "Loading contracts from, #{path}"
-			require path
-		end
-		return self
-	end
-
-	def configureLogging()
-		@verbose = !self.getValue( "VERBOSE", nil ).nil?
-
-		return self
-	end
-
-	def configureBeanstalk
-		beanstalkHost = self.getValue( "BEANSTALK", "localhost:11300" )
+	def connectTpBeanstalk
 		begin
-			@beanstalk = Beanstalk::Pool.new([beanstalkHost])
+			@beanstalk = Beanstalk::Pool.new([@beanstalkHost])
 		rescue Exception => e
 			if e.message == "Beanstalk::NotConnected" then
 				puts "Error connecting to Beanstalk"
@@ -114,20 +46,18 @@ class Host
 		return self
 	end
 
-	def configureAppResource
-		@appResources = ConfigureAppResource.new.getResources( ENV )
-		return self;
-	end
-
 	def initialize()
 
-		self.configureLogging()
+		@config = ConfigFromEnv.new
+			.configureLogging()
 			.loadHostSection()
 			.configureBeanstalk()
-			.configureAppResource()
 			.loadContracts()
 			.loadMessageEndpointMappings()
-			.loadHandlerPathList()
+			.loadHandlerPathList();
+
+		self.configureAppResource()
+			.connectTpBeanstalk()
 			.loadHandlers()
 			.loadSubscriptions()
 			.sendSubscriptions()
@@ -165,7 +95,7 @@ class Host
 	def loadHandlers()
 		log "Load Message Handlers"
 
-		@handlerPathList.each do |path|
+		@config.handlerPathList.each do |path|
 			self.loadHandlersFromPath(path)
 		end
 
@@ -174,7 +104,7 @@ class Host
 
 	def sendSubscriptions
 		log "Send Subscriptions"
-		@messageEndpointMappings.each do |eventName,queueName|
+		@config.messageEndpointMappings.each do |eventName,queueName|
 			log "Checking, " + eventName + " for Event", true
 			if eventName.end_with?( "Event" ) then
 				log eventName + ", is an event. About to send subscription to, " + queueName, true
@@ -192,7 +122,7 @@ class Host
 		
 		redis = Redis.new
 
-		prefix = @appName + ".Subscriptions."
+		prefix = @config.appName + ".Subscriptions."
 		subscriptions = redis.keys prefix + "*Event"
 
 		subscriptions.each do |subscriptionName|
@@ -214,7 +144,7 @@ class Host
 	def addSubscrption( eventName, queueName )
 		log "Adding subscrption for, " + eventName + ", to, " + queueName
 		redis = Redis.new
-		key = @appName + ".Subscriptions." + eventName
+		key = @config.appName + ".Subscriptions." + eventName
 		redis.sadd key, queueName
 
 		if @subscriptions[eventName].nil? then
@@ -226,10 +156,10 @@ class Host
 	def run
 		log "Starting the Host"
 
-		log "Watching, " + @localQueueName
-		@beanstalk.watch( @localQueueName )
-		if !@forwardReceivedMessagesTo.nil? then
-			log "Forwarding all received messages to: " + @forwardReceivedMessagesTo.to_s
+		log "Watching, " + @config.localQueueName
+		@beanstalk.watch( @config.localQueueName )
+		if !@config.forwardReceivedMessagesTo.nil? then
+			log "Forwarding all received messages to: " + @config.forwardReceivedMessagesTo.to_s
 		end
 
 		self.StartListeningToEndpoints
@@ -242,15 +172,15 @@ class Host
 		loop do
 			job = @beanstalk.reserve
 			body = job.body
-			retries = @maxRetries
+			retries = @config.maxRetries
 			begin
 				@msg = YAML::load(body)
 				if @msg.msg.class.name == "RServiceBus::Subscription" then
 					self.addSubscrption( @msg.msg.eventName, @msg.returnAddress )
 				else
 					self.HandleMessage()
-					if !@forwardReceivedMessagesTo.nil? then
-						self._SendAlreadyWrappedAndSerialised(body,@forwardReceivedMessagesTo)
+					if !@config.forwardReceivedMessagesTo.nil? then
+						self._SendAlreadyWrappedAndSerialised(body,@config.forwardReceivedMessagesTo)
 					end
 				end
 				job.delete
@@ -260,9 +190,9 @@ class Host
 				errorString = e.message + ". " + e.backtrace[0]
 				log errorString
 
-				@msg.addErrorMsg( @localQueueName, errorString )
+				@msg.addErrorMsg( @config.localQueueName, errorString )
 				serialized_object = YAML::dump(@msg)
-				self._SendAlreadyWrappedAndSerialised(serialized_object, @errorQueueName)
+				self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
     		end
 		end
 	end
@@ -297,7 +227,7 @@ class Host
 	def _SendNeedsWrapping( msg, queueName )
 		log "Bus._SendNeedsWrapping", true
 
-		rMsg = RServiceBus::Message.new( msg, @localQueueName )
+		rMsg = RServiceBus::Message.new( msg, @config.localQueueName )
 		serialized_object = YAML::dump(rMsg)
 		log "Sending: " + msg.class.name + " to: " + queueName, true
 		self._SendAlreadyWrappedAndSerialised( serialized_object, queueName )
@@ -315,13 +245,13 @@ class Host
 
 
 		msgName = msg.class.name
-		if !@messageEndpointMappings.has_key?( msgName ) then
+		if !@config.messageEndpointMappings.has_key?( msgName ) then
 			log "No end point mapping found for: " + msgName
 			log "**** Check in RServiceBus.yml that the section MessageEndpointMappings contains an entry named : " + msgName
 			raise "No end point mapping found for: " + msgName
 		end
 
-		queueName = @messageEndpointMappings[msgName]
+		queueName = @config.messageEndpointMappings[msgName]
 		
 		self._SendNeedsWrapping( msg, queueName )
 	end
@@ -347,7 +277,7 @@ class Host
 		log "Bus.Subscribe: " + eventName, true
 
 
-		queueName = @messageEndpointMappings[eventName]
+		queueName = @config.messageEndpointMappings[eventName]
 		subscription = Subscription.new( eventName )
 
 

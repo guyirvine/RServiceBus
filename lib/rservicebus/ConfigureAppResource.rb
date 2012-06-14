@@ -1,32 +1,4 @@
 require "uri"
-require "redis"
-
-class AppResource
-	@uri
-
-	def initialize( uri )
-		@uri = uri
-	end
-
-	def getResource
-		raise "Method, getResource, needs to be implemented for resource"
-	end
-end
-
-class RedisAppResource<AppResource
-
-	@connection
-
-	def initialize( uri )
-		super(uri)
-		@connection = Redis.new
-	end
-
-	def getResource
-		return @connection
-	end
-
-end
 
 class ConfigureAppResource
 

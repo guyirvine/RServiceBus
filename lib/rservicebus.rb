@@ -12,7 +12,10 @@ require "rservicebus/Message"
 require "rservicebus/Subscription"
 require "rservicebus/HandlerLoader"
 require "rservicebus/ConfigureAppResource"
+require "rservicebus/AppResource"
+require "rservicebus/RedisAppResource"
 require "rservicebus/Host"
+require "rservicebus/Config"
 
 
 module RServiceBus
