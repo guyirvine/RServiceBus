@@ -79,7 +79,7 @@ class Config
 		end
 
 		self.getValue( "CONTRACTS" ).split( ";" ).each do |path|
-			self.log "Loading contracts from, #{path}"
+			puts "Loading contracts from, #{path}"
 			require path
 		end
 		return self
