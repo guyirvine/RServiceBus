@@ -29,18 +29,20 @@ class Host
 		return self;
 	end
 
-	def connectTpBeanstalk
+	def connectToBeanstalk
 		begin
-			@beanstalk = Beanstalk::Pool.new([@beanstalkHost])
+			@beanstalk = Beanstalk::Pool.new([@config.beanstalkHost])
 		rescue Exception => e
+			puts "Error connecting to Beanstalk"
+			puts "Host string, #{@config.beanstalkHost}"
 			if e.message == "Beanstalk::NotConnected" then
-				puts "Error connecting to Beanstalk"
 				puts "***Most likely, beanstalk is not running. Start beanstalk, and try running this again."
 				puts "***If you still get this error, check beanstalk is running at, " + beanstalkHost
-				abort()
 			else
-				raise e
+				puts e.message
+				puts e.backtrace
 			end
+			abort()
 		end
 
 		return self
@@ -57,7 +59,7 @@ class Host
 			.loadHandlerPathList();
 
 		self.configureAppResource()
-			.connectTpBeanstalk()
+			.connectToBeanstalk()
 			.loadHandlers()
 			.loadSubscriptions()
 			.sendSubscriptions()
