@@ -189,12 +189,13 @@ class Host
 	    	rescue Exception => e
 		    	retry if (retries -= 1) > 0		    	
 
-				errorString = e.message + ". " + e.backtrace[0]
+				errorString = e.message + ". " + e.backtrace[0] + "\n. " + e.backtrace.to_s
 				log errorString
 
 				@msg.addErrorMsg( @config.localQueueName, errorString )
 				serialized_object = YAML::dump(@msg)
 				self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
+				job.delete
     		end
 		end
 	end
@@ -261,7 +262,6 @@ class Host
 	def Publish( msg )
 		log "Bus.Publish", true
 
-
 		subscription = @subscriptions[msg.class.name]
 		if subscription.nil? then
 			log "No subscribers for event, " + msg.class.name
@@ -272,7 +272,6 @@ class Host
 			self._SendNeedsWrapping( msg, subscriber )
 		end
 
-		
 	end
 
 	def Subscribe( eventName )
