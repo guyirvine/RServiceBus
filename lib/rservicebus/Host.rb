@@ -189,7 +189,13 @@ class Host
 	    	rescue Exception => e
 		    	retry if (retries -= 1) > 0		    	
 
-				errorString = e.message + ". " + e.backtrace[0] + "\n. " + e.backtrace.to_s
+				errorString = e.message + ". " + e.backtrace[0]
+					if e.backtrace.length > 1 then
+						errorString = errorString + ". " + e.backtrace[1]
+					end
+					if e.backtrace.length > 2 then
+						errorString = errorString + ". " + e.backtrace[2]
+					end
 				log errorString
 
 				@msg.addErrorMsg( @config.localQueueName, errorString )
