@@ -2,7 +2,7 @@ module RServiceBus
 
 class Test_Redis
 
-	@keyHash = Hash.new
+	@keyHash
 
 	def initialize
 		@keyHash = Hash.new
@@ -24,6 +24,15 @@ class Test_Redis
 	end
 	
 	def smembers( key )
+		return @keyHash[key]
+	end
+
+	def incr( key )
+		if !@keyHash.has_key?( key ) then
+			@keyHash[key] = 0
+		end
+
+		@keyHash[key] = @keyHash[key] + 1
 		return @keyHash[key]
 	end
 end

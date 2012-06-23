@@ -1,5 +1,6 @@
 require "redis"
 
+#Implementation of an AppResource - Redis
 class RedisAppResource<AppResource
 
 	@connection

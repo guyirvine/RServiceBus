@@ -1,5 +1,6 @@
 require "uri"
 
+#Configure AppResources for an rservicebus host
 class ConfigureAppResource
 
 	def getResources( env )

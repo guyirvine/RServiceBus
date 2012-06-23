@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>
+  File: README
+  
+    &mdash; Documentation by YARD 0.8.2.1
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" media="screen" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  hasFrames = window.top.frames.main ? true : false;
+  relpath = '';
+  framesUrl = "frames.html#!" + escape(window.location.href);
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="header">
+      <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+      Class List
+    </a>
+  
+    <a class="full_list_link" id="method_list_link"
+        href="method_list.html">
+      Method List
+    </a>
+  
+    <a class="full_list_link" id="file_list_link"
+        href="file_list.html">
+      File List
+    </a>
+  
+</div>
+      <div class="clear"></div>
+    </div>
+
+    <iframe id="search_frame"></iframe>
+
+    <div id="content"><div id='filecontents'><h1>RServiceBus</h1>
+
+<p>A Ruby implementation of NServiceBus</p>
+
+<p>Where I started this project to increase my knowledge of NServiceBus, it is now
+proving to be a workable framework.</p>
+
+<h2>Principles</h2>
+
+<pre class="code ruby"><code>*Why are you doing it and what can go wrong
+*Dont solve infrastructure problems with software
+    *Infrastructure in this case refers to anything not specific to the application domain
+</code></pre>
+
+<h2>Points of view in the framework</h2>
+
+<pre class="code ruby"><code>* Bus
+* Handler
+* Client
+</code></pre>
+
+<h1>Platform</h1>
+
+<pre class="code ruby"><code>* Messages
+* MessageHandler
+* MessageHandling
+* Queues
+* Transport
+* Transactions
+</code></pre>
+
+<h2>Message</h2>
+
+<pre class="code ruby"><code>* Yaml
+* Unique Message ID's
+</code></pre>
+
+<h2>Queues</h2>
+
+<pre class="code ruby"><code>* Durable
+* Store &amp; Forward
+* Queues specified by config, determined by message type
+</code></pre>
+
+<h2>Transport</h2>
+
+<pre class="code ruby"><code>* RabbitMQ
+</code></pre>
+
+<h2>MessageHandler</h2>
+
+<pre class="code ruby"><code>* Name by convention - Handler name matchs filename
+* Handlers are dynamically loaded
+* If a handler fails to load, the service wont start - infrastructure problem
+</code></pre>
+
+<h2>MessageHandling</h2>
+
+<pre class="code ruby"><code>* Transactions are good, use them
+* Given transactions, the first to do on error is retry
+* Once we've used up retry, put the message on an error queue to process later - it's a logic problem   
+</code></pre>
+</div></div>
+
+    <div id="footer">
+  Generated on Sat Jun 23 10:39:33 2012 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.8.2.1 (ruby-1.9.3).
+</div>
+
+  </body>
+</html>

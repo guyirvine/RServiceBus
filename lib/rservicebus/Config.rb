@@ -1,10 +1,7 @@
 module RServiceBus
 
+#Collects and reports configuration information for an rservicebus host
 class Config
-#host:
-##	@appName: CreateUser
-##	errorQueueName: error
-#
 	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :beanstalkHost
 
 	@appName

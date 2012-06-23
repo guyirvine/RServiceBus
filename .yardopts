@@ -1,0 +1,4 @@
+--exclude /templates/
+--quiet
+lib/**/*.rb
+bin/**/*.rb
