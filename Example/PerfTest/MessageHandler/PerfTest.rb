@@ -1,13 +1,7 @@
-require "./Contract.rb"
 
 class MessageHandler_PerfTest
 
-	attr_writer :Bus
-	attr_reader :Bus
-	@Bus
-
-	@count
-	@start
+	attr_accessor :Bus
 
 	def initialize
 		@count = 0

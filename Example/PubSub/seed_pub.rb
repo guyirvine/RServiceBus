@@ -17,5 +17,3 @@ subscriptions.each do |subscriptionName|
 		puts subscriber
 	end
 end
-
-

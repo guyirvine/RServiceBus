@@ -1,4 +1,4 @@
-RSERVICEBUS_APPNAME=MySubscriber2 \
-RSERVICEBUS_VERBOSE=true \
-RSERVICEBUS_MESSAGEHANDLER_PATH=MySubscriber2/MessageHandler \
+APPNAME=MySubscriber2 \
+VERBOSE=true \
+MSGHANDLERPATH=MySubscriber2/MessageHandler \
 rservicebus
