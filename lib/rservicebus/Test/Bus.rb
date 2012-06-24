@@ -6,7 +6,7 @@ class Test_Bus
 	@sendList
 	@replyList
 	@logList
-	
+
 	def initialize
 		@publishList = Array.new
 		@sendList = Array.new
@@ -22,9 +22,9 @@ class Test_Bus
 		@sendList << msg
 	end
 
-        def Reply( msg )
-                @replyList << msg
-        end
+	def Reply( msg )
+		@replyList << msg
+	end
 
 	def log( string, verbose=false )
 		item = Hash.new

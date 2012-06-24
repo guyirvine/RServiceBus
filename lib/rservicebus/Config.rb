@@ -47,7 +47,7 @@ class Config
 	end
 
 	def loadHandlerPathList()
-		path = self.getValue( "MSGHANDLERPATH", "MessageHandler" )
+		path = self.getValue( "MSGHANDLERPATH", "./MessageHandler" )
 		handlerPathList = Array.new
 		path.split( ";" ).each do |path|
 			path = path.strip.chomp( "/" )
@@ -71,11 +71,11 @@ class Config
 	end
 
 	def loadContracts()
-		if self.getValue( "CONTRACTS" ).nil? then
+		if self.getValue( "CONTRACTS", "./Contract" ).nil? then
 			return self
 		end
 
-		self.getValue( "CONTRACTS" ).split( ";" ).each do |path|
+		self.getValue( "CONTRACTS", "./Contract" ).split( ";" ).each do |path|
 			puts "Loading contracts from, #{path}"
 			require path
 		end

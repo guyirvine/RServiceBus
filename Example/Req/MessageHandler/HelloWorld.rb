@@ -1,4 +1,3 @@
-require "./Contract.rb"
 
 class MessageHandler_HelloWorld
 

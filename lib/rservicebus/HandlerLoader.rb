@@ -1,8 +1,12 @@
 module RServiceBus
 
+#Given a directory, this class is responsible for finding
+#	msgnames,
+#	handlernames, and
+#	loading handlers
 class HandlerLoader
 
-	attr_reader :messageName, :handler
+	attr_reader :handlerList
 
 	@host
 	@appResources
@@ -16,28 +20,22 @@ class HandlerLoader
 	@messageName
 	@handler
 
+	@handlerList
+
+# Constructor
+#
+# @param [RServiceBus::Host] host instance
+# @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
 	def initialize( host, appResources )
 		@host = host
 		@appResources = appResources
+		
+		@handlerList = Hash.new
 	end
 
-	def getMessageName( baseDir, fileName )
-		name = fileName.sub( baseDir + "/", "" )
-		if name.count( "/" ) == 0 then
-			return name.match( /(.+)\./ )[1]
-		end
-
-		if name.count( "/" ) == 1 then
-			return name.match( /\/(.+)\./ )[1]
-		end
-
-		puts "Filepath, " + fileName + ", not in the expected format."
-		puts "Expected format either,"
-		puts "MessageHandler/Hello.rb, or"
-		puts "MessageHandler/Hello/One.rb, or"
-		abort();
-	end
-
+# Cleans the given path to ensure it can be used for as a parameter for the require statement.
+#
+# @param [String] filePath the path to be cleaned
 	def getRequirePath( filePath )
 		if !filePath.start_with?( "/" ) then
 			filePath = "./" + filePath
@@ -50,12 +48,17 @@ class HandlerLoader
 		abort( "Filepath, " + filePath + ", given for MessageHandler require doesn't exist" );
 	end
 
-	def getHandlerName( baseDir, filePath )
-		handlerName = filePath.sub( ".rb", "").sub( baseDir, "MessageHandler" ).gsub( "/", "_" )
-		return handlerName
-	end
+# Instantiate the handler named in handlerName from the file name in filePath
+# Exceptions will be raised if encountered when loading handlers. This is a load time activity, 
+# so handlers should load correctly. As much information as possible is returned
+# to enable the handler to be fixed, or configuration corrected.
+#
+# @param [String] handlerName name of the handler to instantiate
+# @param [String] filePath the path to the file to be loaded
+# @return [RServiceBus::Handler] the loader
+	def loadHandlerFromFile( handlerName, filePath )
+		requirePath = self.getRequirePath( filePath )
 
-	def loadHandlerFromFile( requirePath, handlerName, filePath )
 		require requirePath
 		begin
 			handler = Object.const_get(handlerName).new();
@@ -69,40 +72,50 @@ class HandlerLoader
 		return handler
 	end
 	
-	def setBusAttributeIfRequested( handler, handlerName )
+# setBusAttributeIfRequested
+#
+# @param [RServiceBus::Handler] handler
+	def setBusAttributeIfRequested( handler )
 		if defined?( handler.Bus ) then
 			handler.Bus = @host
-			@host.log "Bus attribute set for: " + handlerName
+			@host.log "Bus attribute set for: " + handler.class.name
 		end
+		
+		return self
 	end
 
-	def setAppResources( handler, handlerName, appResources )
-		@host.log "Checking app resources for: #{handlerName}", true
+# Assigns appropriate resources to writable attributes in the handler that match keys in the resource hash
+#
+# @param [RServiceBus::Handler] handler
+# @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
+	def setAppResources( handler, appResources )
+		@host.log "Checking app resources for: #{handler.class.name}", true
 		appResources.each do |k,v|
 			if handler.class.method_defined?( k ) then 
 				handler.instance_variable_set( "@#{k}", v.getResource() )
-				@host.log "App resource attribute, #{k}, set for: " + handlerName
+				@host.log "App resource attribute, #{k}, set for: " + handler.class.name
 			end
 		end
+		
+		return self
 	end
 
-	def loadHandler(baseDir, filePath)
+# Wrapper function
+#
+# @param [String] filePath
+# @param [String] handlerName
+# @returns [RServiceBus::Handler] handler
+	def loadAndConfigureHandler(filePath, handlerName)
 		begin
-			requirePath = self.getRequirePath( filePath )
-			messageName = self.getMessageName( baseDir, filePath )
-			handlerName = self.getHandlerName( baseDir, filePath )
-
 			@host.log "filePath: " + filePath, true
-			@host.log "requirePath: " + requirePath, true
-			@host.log "messageName: " + messageName, true
 			@host.log "handlerName: " + handlerName, true
 
-			handler = self.loadHandlerFromFile( requirePath, handlerName, filePath )
-			self.setBusAttributeIfRequested( handler, handlerName )
-			self.setAppResources( handler, handlerName, @appResources )
-			@host.log "Loaded Handler: " + handlerName + ", for, " + messageName
+			handler = self.loadHandlerFromFile( handlerName, filePath )
+			self.setBusAttributeIfRequested( handler )
+			self.setAppResources( handler, @appResources )
+			@host.log "Loaded Handler: " + handlerName
 
-			return messageName, handler
+			return handler
 		rescue Exception => e
 			puts "Exception loading handler from file: " + filePath
 			puts e.message
@@ -111,6 +124,92 @@ class HandlerLoader
 			abort()
 		end
 
+	end
+
+#This method is overloaded for unit tests
+#
+# @param [String] path directory to check
+# @return [Array] a list of paths to files found in the given path
+	def getListOfFilesForDir( path )
+		return Dir[path + "/*"];
+	end
+
+#Multiple handlers for the same msg can be placed inside a top level directory.
+#The msg name is than taken from the directory, and the handlers from the files inside that
+#directory
+#
+# @param [String] msgName name of message
+# @param [String] baseDir directory to check for handlers of the given msgName
+	def loadHandlersFromSecondLevelPath(msgName, baseDir)
+		self.getListOfFilesForDir(baseDir).each do |filePath|
+			if !filePath.end_with?( "." ) then
+				extName = File.extname( filePath )
+				if !File.directory?( filePath ) &&
+						extName == ".rb" then
+
+					fileName = File.basename( filePath ).sub( ".rb", "" )
+					handlerName = "MessageHandler_#{msgName}_#{fileName}"
+
+					handler = self.loadAndConfigureHandler( filePath, handlerName )
+					if !@handlerList.has_key?( msgName ) then
+						@handlerList[msgName] = Array.new
+					end
+
+					@handlerList[msgName] << handler;
+				end
+			end
+		end
+
+		return self
+	end
+
+
+#Extract the top level dir or file name as it is the msg name
+#
+# @param [String] filePath path to check - this can be a directory or file
+	def getMsgName( filePath )
+		baseName = File.basename( filePath )
+		extName = File.extname( baseName )
+		fileName = baseName.sub( extName, "" )
+
+		msgName = fileName
+		
+		return msgName
+	end
+
+#Load top level handlers from the given directory
+#
+# @param [String] baseDir directory to check - should not have trailing slash
+	def loadHandlersFromTopLevelPath(baseDir)
+		self.getListOfFilesForDir(baseDir).each do |filePath|
+			if !filePath.end_with?( "." ) then
+
+				msgName = self.getMsgName( filePath )
+				if File.directory?( filePath ) then
+					self.loadHandlersFromSecondLevelPath( msgName, filePath )
+				else
+					handlerName = "MessageHandler_#{msgName}"
+					handler = self.loadAndConfigureHandler( filePath, handlerName )
+
+					if !@handlerList.has_key?( msgName ) then
+						@handlerList[msgName] = Array.new
+					end
+
+					@handlerList[msgName] << handler;
+				end
+			end
+		end
+
+		return self
+	end
+
+#Entry point for loading handlers
+#
+# @param [String] baseDir directory to check - should not have trailing slash
+	def loadHandlersFromPath(baseDir)
+		self.loadHandlersFromTopLevelPath(baseDir)
+
+		return self
 	end
 
 end

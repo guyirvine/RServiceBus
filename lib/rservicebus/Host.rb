@@ -67,39 +67,15 @@ class Host
 		return self
 	end
 
-	def loadHandlersFromPath(baseDir, subDir="")
-		log "Load Message Handlers from baseDir, " + baseDir + ", subDir, " + subDir
-		log "Checking, " + baseDir, true
-		handlerLoader = HandlerLoader.new( self, @appResources )
-
-		@handlerList = {};
-		Dir[baseDir + "/" + subDir + "*"].each do |filePath|
-			if !filePath.end_with?( "." ) then
-				log "Filepath, " + filePath, true
-
-				if File.directory?( filePath ) then
-					self.loadHandlersFromPath( filePath.sub( baseDir ) )
-				else
-					messageName, handler = handlerLoader.loadHandler( baseDir, filePath )
-
-					if !@handlerList.has_key?( messageName ) then
-						@handlerList[messageName] = Array.new
-					end
-
-					@handlerList[messageName] << handler;
-				end
-			end
-		end
-
-		return self
-	end
-
 	def loadHandlers()
 		log "Load Message Handlers"
+		handlerLoader = HandlerLoader.new( self, @appResources )
 
 		@config.handlerPathList.each do |path|
-			self.loadHandlersFromPath(path)
+			handlerLoader.loadHandlersFromPath(path)
 		end
+
+		@handlerList = handlerLoader.handlerList
 
 		return self
 	end
