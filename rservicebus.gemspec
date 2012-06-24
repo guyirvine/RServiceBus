@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'rservicebus'
-  s.version     = '0.0.7'
-  s.date        = '2012-06-20'
+  s.version     = '0.0.8'
+  s.date        = '2012-06-25'
   s.summary     = "RServiceBus"
   s.description = "A ruby implementation of NServiceBus"
   s.authors     = ["Guy Irvine"]

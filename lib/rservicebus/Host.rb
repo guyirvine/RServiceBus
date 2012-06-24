@@ -98,10 +98,24 @@ class Host
 		log "Load subscriptions"
 		@subscriptions = Hash.new
 		
-		redis = Redis.new
+		begin
+			redis = Redis.new
 
-		prefix = @config.appName + ".Subscriptions."
-		subscriptions = redis.keys prefix + "*Event"
+			prefix = @config.appName + ".Subscriptions."
+			subscriptions = redis.keys prefix + "*Event"
+		rescue Exception => e
+			puts "Error connecting to redis"
+#			puts "Host string, #{@config.beanstalkHost}"
+			if e.message == "Redis::CannotConnectError" ||
+					e.message == "Redis::ECONNREFUSED" then
+				puts "***Most likely, redis is not running. Start redis, and try running this again."
+#				puts "***If you still get this error, check redis is running at, " + beanstalkHost
+			else
+				puts e.message
+				puts e.backtrace
+			end
+			abort()
+		end
 
 		subscriptions.each do |subscriptionName|
 			log "Loading subscription: " + subscriptionName, true
