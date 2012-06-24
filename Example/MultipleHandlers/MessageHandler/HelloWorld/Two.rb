@@ -1,14 +1,11 @@
-require "./Contract.rb"
 
 class MessageHandler_HelloWorld_Two
 
-	attr_writer :Bus
-	attr_reader :Bus
+	attr_accessor :Bus
 	@Bus
 
 	def Handle( msg )
-#raise "Manually generated error for testng"
-		puts "Two. Handling Hello World: " + msg.name
-		@Bus.Reply( "Hey" )
+		puts "MessageHandler_HelloWorld_Two: HelloWorld"
+		@Bus.Reply( "Reply from MessageHandler_HelloWorld_Two" )
 	end
 end
