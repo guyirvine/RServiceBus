@@ -1,5 +1,6 @@
 module RServiceBus
 
+#Host process for rservicebus
 class Host
 
 
@@ -11,8 +12,7 @@ class Host
 	
 	@beanstalk
 
-	@appResources
-	
+	@appResources	
 	
 	@config
 
@@ -48,21 +48,18 @@ class Host
 		return self
 	end
 
-	def initialize()
-
-		@config = ConfigFromEnv.new
-			.configureLogging()
-			.loadHostSection()
-			.configureBeanstalk()
-			.loadContracts()
-			.loadMessageEndpointMappings()
-			.loadHandlerPathList();
-
-		self.configureAppResource()
-			.connectToBeanstalk()
-			.loadHandlers()
-			.loadSubscriptions()
-			.sendSubscriptions()
+#Subscriptions are specified by adding events to the
+#msg endpoint mapping
+	def sendSubscriptions
+		log "Send Subscriptions"
+		@config.messageEndpointMappings.each do |eventName,queueName|
+			log "Checking, " + eventName + " for Event", true
+			if eventName.end_with?( "Event" ) then
+				log eventName + ", is an event. About to send subscription to, " + queueName, true
+				self.Subscribe( eventName )
+				log "Subscribed to, " + eventName + " at, " + queueName
+			end
+		end
 
 		return self
 	end
@@ -80,20 +77,7 @@ class Host
 		return self
 	end
 
-	def sendSubscriptions
-		log "Send Subscriptions"
-		@config.messageEndpointMappings.each do |eventName,queueName|
-			log "Checking, " + eventName + " for Event", true
-			if eventName.end_with?( "Event" ) then
-				log eventName + ", is an event. About to send subscription to, " + queueName, true
-				self.Subscribe( eventName )
-				log "Subscribed to, " + eventName + " at, " + queueName
-			end
-		end
-
-		return self
-	end
-
+#Load an existing subscription - startup function
 	def loadSubscriptions
 		log "Load subscriptions"
 		@subscriptions = Hash.new
@@ -133,6 +117,26 @@ class Host
 		return self
 	end
 
+	def initialize()
+
+		@config = ConfigFromEnv.new
+			.configureLogging()
+			.loadHostSection()
+			.configureBeanstalk()
+			.loadContracts()
+			.loadMessageEndpointMappings()
+			.loadHandlerPathList();
+
+		self.configureAppResource()
+			.connectToBeanstalk()
+			.loadHandlers()
+			.loadSubscriptions()
+			.sendSubscriptions()
+
+		return self
+	end
+
+#Process a subscription request from a subscriber
 	def addSubscrption( eventName, queueName )
 		log "Adding subscrption for, " + eventName + ", to, " + queueName
 		redis = Redis.new
@@ -216,6 +220,10 @@ class Host
     	end
 	end
 
+#Sends a msg across the bus
+#
+# @param [String] serialized_object serialized RServiceBus::Message
+# @param [String] queueName endpoint to which the msg will be sent
 	def _SendAlreadyWrappedAndSerialised( serialized_object, queueName )
 		log "Bus._SendAlreadyWrappedAndSerialised", true
 
@@ -223,6 +231,10 @@ class Host
 		@beanstalk.put( serialized_object )
 	end
 
+#Sends a msg across the bus
+#
+# @param [RServiceBus::Message] msg msg to be sent
+# @param [String] queueName endpoint to which the msg will be sent
 	def _SendNeedsWrapping( msg, queueName )
 		log "Bus._SendNeedsWrapping", true
 
@@ -232,6 +244,11 @@ class Host
 		self._SendAlreadyWrappedAndSerialised( serialized_object, queueName )
 	end
 
+#Sends a msg back across the bus
+#Reply queues are specified in each msg. It works like
+#email, where the reply address can actually be anywhere
+#
+# @param [RServiceBus::Message] msg msg to be sent
 	def Reply( msg )
 		log "Reply with: " + msg.class.name + " To: " + @msg.returnAddress, true
 
@@ -239,9 +256,12 @@ class Host
 	end
 
 
+#Send a msg across the bus
+#msg destination is specified at the infrastructure level
+#
+# @param [RServiceBus::Message] msg msg to be sent
 	def Send( msg )
 		log "Bus.Send", true
-
 
 		msgName = msg.class.name
 		if !@config.messageEndpointMappings.has_key?( msgName ) then
@@ -255,6 +275,9 @@ class Host
 		self._SendNeedsWrapping( msg, queueName )
 	end
 
+#Sends an event to all subscribers across the bus
+#
+# @param [RServiceBus::Message] msg msg to be sent
 	def Publish( msg )
 		log "Bus.Publish", true
 
@@ -270,6 +293,9 @@ class Host
 
 	end
 
+#Sends a subscription request across the Bus
+#
+# @param [String] eventName event to be subscribes to
 	def Subscribe( eventName )
 		log "Bus.Subscribe: " + eventName, true
 

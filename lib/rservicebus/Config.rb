@@ -108,6 +108,12 @@ class Config
 		end
 	end
 
+#Marshals paths for contracts
+#
+#Note. .rb extension is optional
+#
+#Expected format;
+#	/one/two/Contracts
 	def loadContracts()
 		if self.getValue( "CONTRACTS", "./Contract" ).nil? then
 			return self
