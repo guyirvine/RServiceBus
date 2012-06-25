@@ -182,6 +182,7 @@ class Host
 				end
 				job.delete
 	    	rescue Exception => e
+			sleep 0.5
 		    	retry if (retries -= 1) > 0		    	
 
 				if e.class.name == "Beanstalk::NotConnected" then

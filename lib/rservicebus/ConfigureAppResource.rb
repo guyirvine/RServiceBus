@@ -12,7 +12,7 @@ class ConfigureAppResource
 				uri = URI.parse( v )
 				case uri.scheme
 					when "redis"
-						resources[k.sub( "RSB_", "" )] = RedisAppResource.new( uri )
+						resources[k.sub( "RSB_", "" )] = AppResource_Redis.new( uri )
 					else
 						abort("Scheme, #{uri.scheme}, not recognised when configuring app resource, #{k}=#{v}");
 				end

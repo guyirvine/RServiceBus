@@ -11,10 +11,11 @@ require "rservicebus/ErrorMessage"
 require "rservicebus/Message"
 require "rservicebus/HandlerLoader"
 require "rservicebus/ConfigureAppResource"
-require "rservicebus/AppResource"
-require "rservicebus/RedisAppResource"
 require "rservicebus/Host"
 require "rservicebus/Config"
+
+require "rservicebus/AppResource"
+require "rservicebus/AppResource/Redis"
 
 
 module RServiceBus
