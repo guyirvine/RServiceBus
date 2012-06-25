@@ -14,7 +14,7 @@ require "rservicebus/Host"
 require "rservicebus/Config"
 
 require "rservicebus/Message"
-require "rservicebus/Message_Subscription"
+require "rservicebus/Message/Subscription"
 
 require "rservicebus/AppResource"
 require "rservicebus/AppResource/Redis"
