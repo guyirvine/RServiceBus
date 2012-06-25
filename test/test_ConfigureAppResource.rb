@@ -1,6 +1,6 @@
 require 'test/unit'
 require './lib/rservicebus/AppResource.rb'
-require './lib/rservicebus/RedisAppResource.rb'
+require './lib/rservicebus/AppResource/Redis.rb'
 require './lib/rservicebus/ConfigureAppResource.rb'
 
 
