@@ -166,10 +166,11 @@ class Host
 		log "Waiting for messages. To exit press CTRL+C"
 
 		loop do
-			job = @beanstalk.reserve
-			body = job.body
 			retries = @config.maxRetries
 			begin
+				job = @beanstalk.reserve
+				body = job.body
+
 				@msg = YAML::load(body)
 				if @msg.msg.class.name == "RServiceBus::Subscription" then
 					self.addSubscrption( @msg.msg.eventName, @msg.returnAddress )
@@ -182,6 +183,18 @@ class Host
 				job.delete
 	    	rescue Exception => e
 		    	retry if (retries -= 1) > 0		    	
+
+				if e.class.name == "Beanstalk::NotConnected" then
+					puts "Lost connection to beanstalkd."
+					puts "*** Start or Restart beanstalkd and try again."
+					abort();
+				end
+				
+				if e.class.name == "Redis::CannotConnectError" then
+					puts "Lost connection to redis."
+					puts "*** Start or Restart redis and try again."
+					abort();
+				end
 
 				errorString = e.message + ". " + e.backtrace[0]
 					if e.backtrace.length > 1 then
