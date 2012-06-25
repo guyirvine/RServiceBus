@@ -315,7 +315,7 @@ class Host
 
 
 		queueName = @config.messageEndpointMappings[eventName]
-		subscription = Message::Subscription.new( eventName )
+		subscription = Message_Subscription.new( eventName )
 
 
 		self._SendNeedsWrapping( subscription, queueName )
