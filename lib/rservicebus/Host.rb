@@ -172,7 +172,7 @@ class Host
 				body = job.body
 
 				@msg = YAML::load(body)
-				if @msg.msg.class.name == "RServiceBus::Subscription" then
+				if @msg.msg.class.name == "RServiceBus::Message_Subscription" then
 					self.addSubscrption( @msg.msg.eventName, @msg.returnAddress )
 				else
 					self.HandleMessage()
@@ -315,7 +315,7 @@ class Host
 
 
 		queueName = @config.messageEndpointMappings[eventName]
-		subscription = Subscription.new( eventName )
+		subscription = Message::Subscription.new( eventName )
 
 
 		self._SendNeedsWrapping( subscription, queueName )
