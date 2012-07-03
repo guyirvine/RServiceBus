@@ -130,12 +130,19 @@ class Host
 # - Most of this should be queue independant
 	def StartListeningToEndpoints
 		log "Waiting for messages. To exit press CTRL+C"
+		statOutputCountdown = 0
+		messageLoop = true
 
-		loop do
+		while messageLoop do
 			retries = @config.maxRetries
 			#Popping a msg off the queue should not be in the message handler, as it affects retry
 			begin
-    			log @stats.getForReporting
+				if statOutputCountdown == 0 then
+	    			log @stats.getForReporting
+					statOutputCountdown = @config.statOutputCountdown-1
+	    		else
+	    			statOutputCountdown = statOutputCountdown - 1
+	    		end
 				job = @beanstalk.reserve @config.queueTimeout
 				begin
 					body = job.body
@@ -182,13 +189,21 @@ class Host
 					self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
 					job.delete
 	    		end
+	    	rescue SystemExit, Interrupt
+	    		puts "Exiting on request ..."
+				messageLoop = false
 	    	rescue Exception => e
 	    		if e.message == "TIMED_OUT" then
+	    			#This exception is just saying there are no messages to process
+					statOutputCountdown = 0
+				elsif e.message == "SIGTERM" then
+		    		puts "Exiting on request ..."
+					messageLoop = false
 	    		else
 					puts "*** This is really unexpected."
-			    	puts e.message
+					messageLoop = false
+			    	puts "Message: " + e.message
 			    	puts e.backtrace
-			    	abort()
 		    	end
 		    end
 		end

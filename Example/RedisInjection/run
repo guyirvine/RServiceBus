@@ -1,5 +1,3 @@
-APPNAME=HelloWorld \
-VERBOSE=true \
-RSB_Redis=redis://127.0.0.1:6379/ \
+APPNAME=HelloWorld VERBOSE=true RSB_Redis=redis://127.0.0.1:6379/ \
  \
 rservicebus

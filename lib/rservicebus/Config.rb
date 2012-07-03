@@ -2,7 +2,7 @@ module RServiceBus
 
 #Marshals configuration information for an rservicebus host
 class Config
-	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :beanstalkHost, :queueTimeout
+	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :beanstalkHost, :queueTimeout, :statOutputCountdown
 
 	@appName
 	@messageEndpointMappings
@@ -88,6 +88,7 @@ class Config
 		@maxRetries = self.getValue( "MAX_RETRIES", "5" ).to_i
 		@forwardReceivedMessagesTo = self.getValue( "FORWARD_RECEIVED_MESSAGES_TO" )
 		@queueTimeout = self.getValue( "QUEUE_TIMEOUT", "5" ).to_i
+		@statOutputCountdown = self.getValue( "STAT_OUTPUT_COUNTDOWN", "100" ).to_i
 
 		return self
 	end
