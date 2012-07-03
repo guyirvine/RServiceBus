@@ -1,3 +1,5 @@
+module RServiceBus
+
 require 'test/unit'
 require './lib/rservicebus/AppResource.rb'
 require './lib/rservicebus/AppResource/Redis.rb'
@@ -17,5 +19,7 @@ class ConfigureAppResourceTest < Test::Unit::TestCase
 		appResources = ConfigureAppResource.new.getResources( ENV )
 		assert_equal appResources.length, 1
 	end
+
+end
 
 end

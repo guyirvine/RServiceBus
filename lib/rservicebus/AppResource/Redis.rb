@@ -1,3 +1,5 @@
+module RServiceBus
+
 require "redis"
 
 #Implementation of an AppResource - Redis
@@ -13,5 +15,7 @@ class AppResource_Redis<AppResource
 	def getResource
 		return @connection
 	end
+
+end
 
 end

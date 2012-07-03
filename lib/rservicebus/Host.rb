@@ -3,7 +3,6 @@ module RServiceBus
 #Host process for rservicebus
 class Host
 
-
 	@handlerList
 
 	@forwardReceivedMessagesToQueue
@@ -15,6 +14,10 @@ class Host
 	@appResources	
 	
 	@config
+	
+	@subscriptionManager
+	
+	@stats
 
 	def log(string, ver=false)
 		type = ver ? "VERB" : "INFO"
@@ -77,45 +80,19 @@ class Host
 		return self
 	end
 
-#Load an existing subscription - startup function
-	def loadSubscriptions
-		log "Load subscriptions"
-		@subscriptions = Hash.new
-		
-		begin
-			redis = Redis.new
-
-			prefix = @config.appName + ".Subscriptions."
-			subscriptions = redis.keys prefix + "*Event"
-		rescue Exception => e
-			puts "Error connecting to redis"
-#			puts "Host string, #{@config.beanstalkHost}"
-			if e.message == "Redis::CannotConnectError" ||
-					e.message == "Redis::ECONNREFUSED" then
-				puts "***Most likely, redis is not running. Start redis, and try running this again."
-#				puts "***If you still get this error, check redis is running at, " + beanstalkHost
-			else
-				puts e.message
-				puts e.backtrace
-			end
-			abort()
-		end
-
-		subscriptions.each do |subscriptionName|
-			log "Loading subscription: " + subscriptionName, true
-			eventName = subscriptionName.sub( prefix, "" )
-			@subscriptions[eventName] = Array.new			
-
-			log "Loading for event: " + eventName, true
-			subscription = redis.smembers subscriptionName
-			subscription.each do |subscriber|
-				log "Loading subscriber, " + subscriber + " for event, " + eventName, true
-				@subscriptions[eventName] << subscriber
-			end
-		end
+	def configureSubscriptions
+		subscriptionStorage = SubscriptionStorage_Redis.new( @config.appName, "uri" )
+		@subscriptionManager = SubscriptionManager.new( subscriptionStorage )
 		
 		return self
 	end
+
+	def configureStatistics
+		@stats = Stats.new
+		
+		return self
+	end
+
 
 	def initialize()
 
@@ -127,26 +104,14 @@ class Host
 			.loadMessageEndpointMappings()
 			.loadHandlerPathList();
 
-		self.configureAppResource()
+		self.configureStatistics()
+			.configureAppResource()
 			.connectToBeanstalk()
 			.loadHandlers()
-			.loadSubscriptions()
+			.configureSubscriptions()
 			.sendSubscriptions()
 
 		return self
-	end
-
-#Process a subscription request from a subscriber
-	def addSubscrption( eventName, queueName )
-		log "Adding subscrption for, " + eventName + ", to, " + queueName
-		redis = Redis.new
-		key = @config.appName + ".Subscriptions." + eventName
-		redis.sadd key, queueName
-
-		if @subscriptions[eventName].nil? then
-			@subscriptions[eventName] = Array.new
-		end
-		@subscriptions[eventName] << queueName
 	end
 
 	def run
@@ -161,59 +126,75 @@ class Host
 		self.StartListeningToEndpoints
 	end
 
-
+#Receive a msg, prep it, and handle any errors that may occur
+# - Most of this should be queue independant
 	def StartListeningToEndpoints
 		log "Waiting for messages. To exit press CTRL+C"
 
 		loop do
 			retries = @config.maxRetries
+			#Popping a msg off the queue should not be in the message handler, as it affects retry
 			begin
-				job = @beanstalk.reserve
-				body = job.body
+    			log @stats.getForReporting
+				job = @beanstalk.reserve @config.queueTimeout
+				begin
+					body = job.body
+					@stats.incTotalProcessed
+					@msg = YAML::load(body)
+					if @msg.msg.class.name == "RServiceBus::Message_Subscription" then
+						@subscriptionManager.add( @msg.msg.eventName, @msg.returnAddress )
 
-				@msg = YAML::load(body)
-				if @msg.msg.class.name == "RServiceBus::Message_Subscription" then
-					self.addSubscrption( @msg.msg.eventName, @msg.returnAddress )
-				else
-					self.HandleMessage()
-					if !@config.forwardReceivedMessagesTo.nil? then
-						self._SendAlreadyWrappedAndSerialised(body,@config.forwardReceivedMessagesTo)
+					else
+						self.HandleMessage()
+						if !@config.forwardReceivedMessagesTo.nil? then
+							self._SendAlreadyWrappedAndSerialised(body,@config.forwardReceivedMessagesTo)
+						end
 					end
-				end
-				job.delete
-	    	rescue Exception => e
-				sleep 0.5
-		    	retry if (retries -= 1) > 0		    	
+					job.delete
+		    	rescue Exception => e
+					sleep 0.5
+			    	retry if (retries -= 1) > 0		    	
 
-				if e.class.name == "Beanstalk::NotConnected" then
-					puts "Lost connection to beanstalkd."
-					puts "*** Start or Restart beanstalkd and try again."
-					abort();
-				end
+					@stats.incTotalErrored
+					if e.class.name == "Beanstalk::NotConnected" then
+						puts "Lost connection to beanstalkd."
+						puts "*** Start or Restart beanstalkd and try again."
+						abort();
+					end
 				
-				if e.class.name == "Redis::CannotConnectError" then
-					puts "Lost connection to redis."
-					puts "*** Start or Restart redis and try again."
-					abort();
-				end
+					if e.class.name == "Redis::CannotConnectError" then
+						puts "Lost connection to redis."
+						puts "*** Start or Restart redis and try again."
+						abort();
+					end
 
-				errorString = e.message + ". " + e.backtrace[0]
+					errorString = e.message + ". " + e.backtrace[0]
 					if e.backtrace.length > 1 then
 						errorString = errorString + ". " + e.backtrace[1]
 					end
 					if e.backtrace.length > 2 then
 						errorString = errorString + ". " + e.backtrace[2]
 					end
-				log errorString
+					log errorString
 
-				@msg.addErrorMsg( @config.localQueueName, errorString )
-				serialized_object = YAML::dump(@msg)
-				self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
-				job.delete
-    		end
+					@msg.addErrorMsg( @config.localQueueName, errorString )
+					serialized_object = YAML::dump(@msg)
+					self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
+					job.delete
+	    		end
+	    	rescue Exception => e
+	    		if e.message == "TIMED_OUT" then
+	    		else
+					puts "*** This is really unexpected."
+			    	puts e.message
+			    	puts e.backtrace
+			    	abort()
+		    	end
+		    end
 		end
 	end
 
+#Send the current msg to the appropriate handlers
 	def HandleMessage()
 		msgName = @msg.msg.class.name
 		handlerList = @handlerList[msgName]
@@ -228,6 +209,7 @@ class Host
 			   			handler.Handle( @msg.msg )
 	   				rescue Exception => e
 						log "An error occured in Handler: " + handler.class.name
+						log e.message + ". " + e.backtrace[0]
 						raise e
 			   		end
 		   		end
@@ -265,6 +247,7 @@ class Host
 # @param [RServiceBus::Message] msg msg to be sent
 	def Reply( msg )
 		log "Reply with: " + msg.class.name + " To: " + @msg.returnAddress, true
+		@stats.incTotalReply
 
 		self._SendNeedsWrapping( msg, @msg.returnAddress )
 	end
@@ -276,6 +259,7 @@ class Host
 # @param [RServiceBus::Message] msg msg to be sent
 	def Send( msg )
 		log "Bus.Send", true
+		@stats.incTotalSent
 
 		msgName = msg.class.name
 		if !@config.messageEndpointMappings.has_key?( msgName ) then
@@ -294,14 +278,10 @@ class Host
 # @param [RServiceBus::Message] msg msg to be sent
 	def Publish( msg )
 		log "Bus.Publish", true
+		@stats.incTotalPublished
 
-		subscription = @subscriptions[msg.class.name]
-		if subscription.nil? then
-			log "No subscribers for event, " + msg.class.name
-			return
-		end
-
-		subscription.each do |subscriber|
+		subscriptions = @subscriptionManager.get(msg.class.name)
+		subscriptions.each do |subscriber|
 			self._SendNeedsWrapping( msg, subscriber )
 		end
 

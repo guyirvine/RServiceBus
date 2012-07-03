@@ -1,3 +1,5 @@
+module RServiceBus
+
 require "uri"
 
 # Wrapper base class for resources used by applications, allowing rservicebus to configure the resource
@@ -19,4 +21,6 @@ class AppResource
 	def getResource
 		raise "Method, getResource, needs to be implemented for resource"
 	end
+end
+
 end

@@ -2,7 +2,7 @@ module RServiceBus
 
 #Marshals configuration information for an rservicebus host
 class Config
-	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :beanstalkHost
+	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :beanstalkHost, :queueTimeout
 
 	@appName
 	@messageEndpointMappings
@@ -16,6 +16,8 @@ class Config
 	@verbose
 	
 	@beanstalkHost
+
+	@queueTimeout
 
 	def initialize()
 		puts "Cannot instantiate config directly."
@@ -85,6 +87,7 @@ class Config
 		@errorQueueName = self.getValue( "ERROR_QUEUE_NAME", "error" )
 		@maxRetries = self.getValue( "MAX_RETRIES", "5" ).to_i
 		@forwardReceivedMessagesTo = self.getValue( "FORWARD_RECEIVED_MESSAGES_TO" )
+		@queueTimeout = self.getValue( "QUEUE_TIMEOUT", "5" ).to_i
 
 		return self
 	end

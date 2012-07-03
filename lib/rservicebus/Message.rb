@@ -13,6 +13,8 @@ class Message
 		@_msg=YAML::dump(msg)
 		@returnAddress=returnAddress
 		
+		@createdAt = DateTime.now
+		
 		@msgId=UUIDTools::UUID.random_create
 		@errorList = Array.new
 	end

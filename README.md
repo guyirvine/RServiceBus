@@ -1,10 +1,6 @@
 #RServiceBus
 
-A Ruby implementation of NServiceBus
-
-Where I started this project to increase my knowledge of NServiceBus, it is now
-proving to be a workable framework.
-
+A Ruby interpretation of NServiceBus
 
 ##Principles
 	*Why are you doing it and what can go wrong

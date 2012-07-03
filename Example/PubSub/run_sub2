@@ -1,4 +1,5 @@
 APPNAME=MySubscriber2 \
 VERBOSE=true \
 MSGHANDLERPATH=MySubscriber2/MessageHandler \
+MESSAGE_ENDPOINT_MAPPINGS=HelloWorldEvent:MyPublisher \
 rservicebus

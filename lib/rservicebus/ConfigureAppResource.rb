@@ -1,3 +1,5 @@
+module RServiceBus
+
 require "uri"
 
 #Configure AppResources for an rservicebus host
@@ -22,5 +24,7 @@ class ConfigureAppResource
 
 		return resources
 	end
+
+end
 
 end

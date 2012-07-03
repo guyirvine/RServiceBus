@@ -13,4 +13,12 @@ module RServiceBus
 		return hash.to_json
 	end
 
+	def RServiceBus.log(string, ver=false)
+		type = ver ? "VERB" : "INFO"
+#		if @config.verbose || !ver then
+			timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
+			puts "[#{type}] #{timestamp} :: #{string}"
+#		end
+	end
+
 end
