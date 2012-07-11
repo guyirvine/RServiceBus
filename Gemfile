@@ -5,4 +5,5 @@ gem "haml"
 gem "uuidtools"
 gem "redis"
 gem "json"
+gem "rake"
 
