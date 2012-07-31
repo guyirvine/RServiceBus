@@ -35,6 +35,11 @@ class Test_Redis
 		@keyHash[key] = @keyHash[key] + 1
 		return @keyHash[key]
 	end
+
+	def del( key )
+        @keyHash.delete( key )
+	end
+
 end
 
 end

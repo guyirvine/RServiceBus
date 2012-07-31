@@ -5,3 +5,4 @@ err
 *DS_Store*
 rservicebus-*.gem
 build
+*.xcworkspace
