@@ -19,6 +19,7 @@ require "rservicebus/Message/Subscription"
 
 require "rservicebus/AppResource"
 require "rservicebus/AppResource/Redis"
+require "rservicebus/AppResource/Mysql"
 
 require "rservicebus/SubscriptionManager"
 require "rservicebus/SubscriptionStorage"
