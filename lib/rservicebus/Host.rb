@@ -40,7 +40,7 @@ class Host
 			puts "Host string, #{@config.beanstalkHost}"
 			if e.message == "Beanstalk::NotConnected" then
 				puts "***Most likely, beanstalk is not running. Start beanstalk, and try running this again."
-				puts "***If you still get this error, check beanstalk is running at, " + beanstalkHost
+				puts "***If you still get this error, check beanstalk is running at, " + @config.beanstalkHost
 			else
 				puts e.message
 				puts e.backtrace
