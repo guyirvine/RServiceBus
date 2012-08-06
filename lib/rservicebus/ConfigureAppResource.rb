@@ -4,7 +4,7 @@ module RServiceBus
     
     #Configure AppResources for an rservicebus host
     class ConfigureAppResource
-        
+
         def getResources( env )
             resources = Hash.new
             
@@ -17,7 +17,18 @@ module RServiceBus
 						resources[k.sub( "RSB_", "" )] = AppResource_Redis.new( uri )
                         
                         when "mysql"
+                        require "rservicebus/AppResource/Mysql"
                         resources[k.sub( "RSB_", "" )] = AppResource_Mysql.new( uri )
+                        
+                        when "fluiddbmysql"
+                        require "rservicebus/AppResource/FluidDbMysql"
+                        resources[k.sub( "RSB_", "" )] = AppResource_FluidDbMysql.new( uri )
+                        when "fluiddbmysql2"
+                        require "rservicebus/AppResource/FluidDbMysql2"
+                        resources[k.sub( "RSB_", "" )] = AppResource_FluidDbMysql2.new( uri )
+                        when "fluiddbpgsql"
+                        require "rservicebus/AppResource/FluidDbPgsql"
+                        resources[k.sub( "RSB_", "" )] = AppResource_FluidDbPgsql.new( uri )
                         else
 						abort("Scheme, #{uri.scheme}, not recognised when configuring app resource, #{k}=#{v}");
                     end

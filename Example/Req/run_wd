@@ -1,0 +1,6 @@
+APPNAME=HelloWorld \
+ERROR_QUEUE_NAME=error \
+MAX_RETRIES=2 \
+VERBOSE=true \
+WORKING_DIR=./ \
+rservicebus

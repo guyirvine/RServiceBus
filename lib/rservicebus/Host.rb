@@ -80,6 +80,33 @@ class Host
 		return self
 	end
 
+    
+	def loadContracts()
+		log "Load Contracts"
+        
+		@config.contractList.each do |path|
+            require path
+		end
+        
+		return self
+	end
+
+    def loadLibs()
+		log "Load Libs"
+        
+		@config.libList.each do |path|
+            if Dir.exists?( path ) then
+                path = path.strip.chomp( "/" )
+                path = path + "/**/*.rb"
+            end
+            Dir.glob( path ).each do |path|
+                require path
+            end
+		end
+        
+		return self
+	end
+
 	def configureSubscriptions
 		subscriptionStorage = SubscriptionStorage_Redis.new( @config.appName, "uri" )
 		@subscriptionManager = SubscriptionManager.new( subscriptionStorage )
@@ -102,12 +129,16 @@ class Host
 			.configureBeanstalk()
 			.loadContracts()
 			.loadMessageEndpointMappings()
-			.loadHandlerPathList();
+			.loadHandlerPathList()
+            .loadLibs()
+            .loadWorkingDirList();
 
 		self.configureStatistics()
 			.configureAppResource()
 			.connectToBeanstalk()
 			.loadHandlers()
+            .loadContracts()
+            .loadLibs()
 			.configureSubscriptions()
 			.sendSubscriptions()
 

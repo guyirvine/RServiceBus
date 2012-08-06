@@ -2,11 +2,12 @@ module RServiceBus
 
 #Marshals configuration information for an rservicebus host
 class Config
-	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :beanstalkHost, :queueTimeout, :statOutputCountdown
+	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :beanstalkHost, :queueTimeout, :statOutputCountdown, :contractList, :libList
 
 	@appName
 	@messageEndpointMappings
 	@handlerPathList
+	@contractList
 
 	@localQueueName
 	@errorQueueName
@@ -70,13 +71,11 @@ class Config
 #	<path 1>;<path 2>
 	def loadHandlerPathList()
 		path = self.getValue( "MSGHANDLERPATH", "./MessageHandler" )
-		handlerPathList = Array.new
+		@handlerPathList = Array.new
 		path.split( ";" ).each do |path|
 			path = path.strip.chomp( "/" )
-			handlerPathList << path
+			@handlerPathList << path
 		end
-
-		@handlerPathList = handlerPathList
 
 		return self
 	end
@@ -91,10 +90,6 @@ class Config
 		@statOutputCountdown = self.getValue( "STAT_OUTPUT_COUNTDOWN", "100" ).to_i
 
 		return self
-	end
-
-	def performRequire( path )
-		require path
 	end
 
 	def ensureContractFileExists( path )
@@ -122,15 +117,44 @@ class Config
 		if self.getValue( "CONTRACTS", "./Contract" ).nil? then
 			return self
 		end
+        @contractList = Array.new
 
 		self.getValue( "CONTRACTS", "./Contract" ).split( ";" ).each do |path|
 			log "Loading contracts from, #{path}"
 			self.ensureContractFileExists( path )
-			self.performRequire( path )
+			@contractList << path
 		end
 		return self
 	end
 
+    #Marshals paths for lib
+    #
+    #Note. .rb extension is optional
+    #
+    #Expected format;
+    #	/one/two/Contracts
+	def loadLibs()
+        @libList = Array.new
+
+        path = self.getValue( "LIB" )
+        path = "./lib" if path.nil? and File.exists?( "./lib" )
+		if path.nil? then
+			return self
+		end
+
+		path.split( ";" ).each do |path|
+			log "Loading libs from, #{path}"
+			if !File.exists?( path ) then
+                puts "Error while processing libs"
+                puts "*** path, #{path}, should point to a ruby file, with extention .rb, or"
+                puts "*** path, #{path}, should point to a directory than conatins ruby files, that have extention .rb"
+                abort()
+                end
+			@libList << path
+		end
+		return self
+	end
+    
 	def configureLogging()
 		@verbose = !self.getValue( "VERBOSE", nil ).nil?
 
@@ -143,6 +167,34 @@ class Config
 		return self
 	end
 
+    #Marshals paths for working_dirs
+    #
+    #Note. trailing slashs will be stripped
+    #
+    #Expected format;
+    #	<path 1>;<path 2>
+	def loadWorkingDirList()
+		pathList = self.getValue( "WORKING_DIR" )
+        return self if pathList.nil?
+
+		pathList.split( ";" ).each do |path|
+            
+			path = path.strip.chomp( "/" )
+            if Dir.exists?( "#{path}/MessageHandler" ) then
+                @handlerPathList << "#{path}/MessageHandler"
+            end
+
+            if File.exists?( "#{path}/Contract.rb" ) then
+                @contractList << "#{path}/Contract.rb"
+            end
+
+            if File.exists?( "#{path}/lib" ) then
+                @libList << "#{path}/lib"
+            end
+		end
+
+		return self
+	end
 
 end
 

@@ -8,8 +8,7 @@ require 'rubygems'
 require 'rservicebus'
 
 def run_rservicebus()
-	RServiceBus::Host.new()
-		.run()
+	RServiceBus::Host.new().run()
 end
 
 run_rservicebus

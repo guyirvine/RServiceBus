@@ -147,8 +147,8 @@ class ConfigTest < Test::Unit::TestCase
 
 		config.loadContracts
 
-		assert_equal 1, config.requireList.length
-		assert_equal "./Contract", config.requireList[0]
+		assert_equal 1, config.contractList.length
+		assert_equal "./Contract", config.contractList[0]
 	end
 
 	def test_loadContracts_empty
@@ -157,8 +157,8 @@ class ConfigTest < Test::Unit::TestCase
 		config.setValue( "CONTRACTS", "" )
 		config.loadContracts
 
-		assert_equal 1, config.requireList.length
-		assert_equal "./Contract", config.requireList[0]
+		assert_equal 1, config.contractList.length
+		assert_equal "./Contract", config.contractList[0]
 	end
 
 	def test_loadContracts_single
@@ -167,8 +167,8 @@ class ConfigTest < Test::Unit::TestCase
 		config.setValue( "CONTRACTS", "/path" )
 		config.loadContracts
 
-		assert_equal 1, config.requireList.length
-		assert_equal "/path", config.requireList[0]
+		assert_equal 1, config.contractList.length
+		assert_equal "/path", config.contractList[0]
 		
 	end
 
@@ -178,8 +178,8 @@ class ConfigTest < Test::Unit::TestCase
 		config.setValue( "CONTRACTS", "/path;" )
 		config.loadContracts
 
-		assert_equal 1, config.requireList.length
-		assert_equal "/path", config.requireList[0]
+		assert_equal 1, config.contractList.length
+		assert_equal "/path", config.contractList[0]
 
 	end
 
@@ -189,9 +189,9 @@ class ConfigTest < Test::Unit::TestCase
 		config.setValue( "CONTRACTS", "/path1;/path2" )
 		config.loadContracts
 
-		assert_equal 2, config.requireList.length
-		assert_equal "/path1", config.requireList[0]
-		assert_equal "/path2", config.requireList[1]
+		assert_equal 2, config.contractList.length
+		assert_equal "/path1", config.contractList[0]
+		assert_equal "/path2", config.contractList[1]
 		
 	end
 
