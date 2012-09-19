@@ -21,6 +21,7 @@ class HandlerLoader
 	@handler
 
 	@handlerList
+    @resourceList
 
 # Constructor
 #
@@ -31,6 +32,7 @@ class HandlerLoader
 		@appResources = appResources
 		
 		@handlerList = Hash.new
+        @resourceList = Hash.new
 	end
 
 # Cleans the given path to ensure it can be used for as a parameter for the require statement.
@@ -93,6 +95,8 @@ class HandlerLoader
 		appResources.each do |k,v|
 			if handler.class.method_defined?( k ) then 
 				handler.instance_variable_set( "@#{k}", v.getResource() )
+                @resourceList[handler.class.name] = Array.new if @resourceList[handler.class.name].nil?
+                @resourceList[handler.class.name] << v.getResource()
 				@host.log "App resource attribute, #{k}, set for: " + handler.class.name
 			end
 		end
