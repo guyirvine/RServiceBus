@@ -77,6 +77,7 @@ module RServiceBus
             end
             
             @handlerList = handlerLoader.handlerList
+            @resourceByHandlerNameList = handlerLoader.resourceList
             
             return self
         end
