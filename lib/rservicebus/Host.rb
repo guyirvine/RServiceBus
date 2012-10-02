@@ -195,7 +195,7 @@ module RServiceBus
                         
                         
                         @handlerList[@msg.msg.class.name].each do |handler|
-                            resourceByHandlerNameList[handler.class.name].each do |resource|
+                            @resourceByHandlerNameList[handler.class.name].each do |resource|
                                 resource.reconnect
                             end
                         end
