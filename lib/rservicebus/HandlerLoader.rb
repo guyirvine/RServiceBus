@@ -6,7 +6,7 @@ module RServiceBus
 #	loading handlers
 class HandlerLoader
 
-	attr_reader :handlerList
+	attr_reader :handlerList, :resourceList
 
 	@host
 	@appResources

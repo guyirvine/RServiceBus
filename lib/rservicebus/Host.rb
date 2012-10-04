@@ -217,13 +217,7 @@ module RServiceBus
                             abort();
                         end
                         
-                        errorString = e.message + ". " + e.backtrace[0]
-                        if e.backtrace.length > 1 then
-                            errorString = errorString + ". " + e.backtrace[1]
-                        end
-                        if e.backtrace.length > 2 then
-                            errorString = errorString + ". " + e.backtrace[2]
-                        end
+                        errorString = e.message + ". " + e.backtrace.join( ". " )
                         log errorString
                         
                         @msg.addErrorMsg( @config.localQueueName, errorString )
@@ -279,6 +273,11 @@ module RServiceBus
             # @param [String] queueName endpoint to which the msg will be sent
             def _SendAlreadyWrappedAndSerialised( serialized_object, queueName )
                 log "Bus._SendAlreadyWrappedAndSerialised", true
+                
+                if !@config.auditQueueName.nil? then
+                    @beanstalk.use( @config.auditQueueName )
+                    @beanstalk.put( serialized_object )
+                end
                 
                 @beanstalk.use( queueName )
                 @beanstalk.put( serialized_object )
