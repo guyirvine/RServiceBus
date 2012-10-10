@@ -2,7 +2,7 @@ module RServiceBus
 
 #Marshals configuration information for an rservicebus host
 class Config
-	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :beanstalkHost, :queueTimeout, :statOutputCountdown, :contractList, :libList, :auditQueueName
+	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :queueTimeout, :statOutputCountdown, :contractList, :libList, :auditQueueName, :mqHost
 
 	@appName
 	@messageEndpointMappings
@@ -17,7 +17,7 @@ class Config
 
 	@verbose
 	
-	@beanstalkHost
+	@mq
 
 	@queueTimeout
 
@@ -163,9 +163,8 @@ class Config
 		return self
 	end
 
-	def configureBeanstalk
-		@beanstalkHost = self.getValue( "BEANSTALK", "localhost:11300" )
-
+	def configureMq
+		@mqHost = self.getValue( "MQ", "beanstalk://localhost" )
 		return self
 	end
 

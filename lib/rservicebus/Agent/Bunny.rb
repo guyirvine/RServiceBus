@@ -1,13 +1,15 @@
 module RServiceBus
-require 'beanstalk-client'
+require 'bunny'
 
 #A means for a stand-alone process to interact with the bus, without being a full
 #rservicebus application
-class Agent
-	@beanstalk
+class Agent_Bunny
+	@bunny
 	
-	def initialize(url=['localhost:11300'])
-		@beanstalk = Beanstalk::Pool.new(url)
+	def initialize(host='localhost')
+		@bunny = Bunny.new(:host=>host)
+        @bunny.start
+        @direct_exchange = @bunny.exchange('rservicebus.agent')
 	end
 
 # Put a msg on the bus
@@ -18,21 +20,28 @@ class Agent
 	def sendMsg(messageObj, queueName, returnAddress=nil)
 		msg = RServiceBus::Message.new( messageObj, returnAddress )
 		serialized_object = YAML::dump(msg)
+        
 
-		@beanstalk.use( queueName )
-		@beanstalk.put( serialized_object )
+        q = @bunny.queue(queueName)
+        q.bind(@direct_exchange)
+        #q.publish( serialized_object )
+
+        @direct_exchange.publish(serialized_object)
 	end
 
 # Gives an agent a mean to receive replies
 #
 # @param [String] queueName the name of the queue to monitor for messages
 	def checkForReply( queueName )
-		@beanstalk.watch queueName
-		job = @beanstalk.reserve
-		body = job.body
-		job.delete
+        q = @bunny.queue(queueName)
 
-		@msg = YAML::load(body)
+        loop = true
+        while loop do
+            msg = q.pop[:payload]
+            loop = ( msg == :queue_empty )
+        end
+
+		@msg = YAML::load(msg)
 		return @msg.msg
 	end
 end

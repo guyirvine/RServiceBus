@@ -1,1 +1,1 @@
-env APPNAME=HelloWorldMultiple VERBOSE=true rservicebus
+env APPNAME=HelloWorldMultiple VERBOSE=true ../rservicebus_examples

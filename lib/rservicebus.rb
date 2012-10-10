@@ -1,15 +1,19 @@
+#Add the currently running directory to the start of the load path
+#$:.unshift File.dirname(__FILE__) + '/../../lib'
+
 require "rubygems"
-require 'beanstalk-client'
 require "yaml"
 require "uuidtools"
 require "redis"
 require "json"
 
 require "rservicebus/helper_functions"
-require "rservicebus/Agent"
+require "rservicebus/Agent/Beanstalk"
+require "rservicebus/Agent/Bunny"
 require "rservicebus/ErrorMessage"
 require "rservicebus/HandlerLoader"
 require "rservicebus/ConfigureAppResource"
+require "rservicebus/ConfigureMQ"
 require "rservicebus/Host"
 require "rservicebus/Config"
 require "rservicebus/Stats"

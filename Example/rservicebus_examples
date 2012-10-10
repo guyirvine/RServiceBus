@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+#
+# This file is here to facilitate running the example code for rservicebus.
+#
+
+#Add the currently running directory to the start of the load path
+$:.unshift './../../lib'
+
+require 'rubygems'
+require 'rservicebus'
+
+def run_rservicebus()
+        RServiceBus::Host.new().run()
+end
+
+run_rservicebus
+

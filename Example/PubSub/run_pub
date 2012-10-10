@@ -1,4 +1,4 @@
 APPNAME=MyPublisher \
 VERBOSE=true \
 MSGHANDLERPATH=MyPublisher/MessageHandler \
-rservicebus
+../rservicebus_examples
