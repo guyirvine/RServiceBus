@@ -8,8 +8,6 @@ require "redis"
 require "json"
 
 require "rservicebus/helper_functions"
-#require "rservicebus/Agent/Beanstalk"
-#require "rservicebus/Agent/Bunny"
 require "rservicebus/ErrorMessage"
 require "rservicebus/HandlerLoader"
 require "rservicebus/ConfigureAppResource"
