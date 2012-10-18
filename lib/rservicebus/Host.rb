@@ -10,8 +10,6 @@ module RServiceBus
         @handlerList
         @resourceByHandlerNameList
         
-        @forwardReceivedMessagesToQueue
-        
         @subscriptions
         
         @mq
@@ -266,8 +264,8 @@ module RServiceBus
         def _SendAlreadyWrappedAndSerialised( serialized_object, queueName )
             log "Bus._SendAlreadyWrappedAndSerialised", true
             
-            if !@config.auditQueueName.nil? then
-                @mq.send( @config.auditQueueName, serialized_object )
+            if !@config.forwardSentMessagesTo.nil? then
+                @mq.send( @config.forwardSentMessagesTo, serialized_object )
             end
             
             @mq.send( queueName, serialized_object )

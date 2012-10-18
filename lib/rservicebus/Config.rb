@@ -2,7 +2,7 @@ module RServiceBus
 
 #Marshals configuration information for an rservicebus host
 class Config
-	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :queueTimeout, :statOutputCountdown, :contractList, :libList, :auditQueueName, :mqHost
+	attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :verbose, :queueTimeout, :statOutputCountdown, :contractList, :libList, :forwardSentMessagesTo, :mqHost
 
 	@appName
 	@messageEndpointMappings
@@ -11,7 +11,7 @@ class Config
 
 	@localQueueName
 	@errorQueueName
-	@auditQueueName
+	@forwardSentMessagesTo
 	@maxRetries
 	@forwardReceivedMessagesTo
 
@@ -85,7 +85,7 @@ class Config
 		@appName = self.getValue( "APPNAME", "RServiceBus" )
 		@localQueueName = self.getValue( "LOCAL_QUEUE_NAME", @appName )
 		@errorQueueName = self.getValue( "ERROR_QUEUE_NAME", "error" )
-        @auditQueueName = self.getValue( "AUDIT_QUEUE_NAME" )
+        @forwardSentMessagesTo = self.getValue( "AUDIT_QUEUE_NAME" )
 		@maxRetries = self.getValue( "MAX_RETRIES", "5" ).to_i
 		@forwardReceivedMessagesTo = self.getValue( "FORWARD_RECEIVED_MESSAGES_TO" )
 		@queueTimeout = self.getValue( "QUEUE_TIMEOUT", "5" ).to_i

@@ -39,12 +39,15 @@ module RServiceBus
         
         # Connect to the broker
         #
+        # @param [String] host machine runnig the mq
+        # @param [String] port port the mq is running on
         def connect( host, port )
             raise "Method, connect, needs to be implemented"
         end
         
-        # Connect to the queue
+        # Connect to the receiving queue
         #
+        # @param [String] queuename name of the receiving queue
         def subscribe( queuename )
             raise "Method, subscribe, needs to be implemented"
         end
@@ -54,12 +57,15 @@ module RServiceBus
             raise "Method, pop, needs to be implemented"
         end
         
-        # "Commit" queue
+        # "Commit" the pop
         def ack
             raise "Method, ack, needs to be implemented"
         end
         
         # At least called in the Host rescue block, to ensure all network links are healthy
+        #
+        # @param [String] queueName name of the queue to which the m sg should be sent
+        # @param [String] msg msg to be sent
         def send( queueName, msg )
             begin
                 @connection.close
