@@ -5,7 +5,7 @@ require 'bunny'
 #rservicebus application
 class Agent_Bunny
 	@bunny
-	
+
 	def initialize(host='localhost')
 		@bunny = Bunny.new(:host=>host)
         @bunny.start
@@ -20,7 +20,6 @@ class Agent_Bunny
 	def sendMsg(messageObj, queueName, returnAddress=nil)
 		msg = RServiceBus::Message.new( messageObj, returnAddress )
 		serialized_object = YAML::dump(msg)
-        
 
         q = @bunny.queue(queueName)
         q.bind(@direct_exchange)
