@@ -6,6 +6,7 @@ require "beanstalk-client"
 
 require "rservicebus"
 
+begin
 host = 'localhost:11300'
 errorQueueName = "error"
 beanstalk = Beanstalk::Pool.new([host])
@@ -41,4 +42,8 @@ rescue Exception => e
 	else
 		raise
 	end
+end
+
+rescue Beanstalk::NotConnected=>e
+  puts "Beanstalk not running"
 end
