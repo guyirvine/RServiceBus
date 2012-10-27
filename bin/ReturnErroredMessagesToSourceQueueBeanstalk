@@ -12,7 +12,7 @@ beanstalk = Beanstalk::Pool.new([host])
 
 tubes = beanstalk.list_tubes[host]
 if !tubes.include?(errorQueueName) then
-	abort( "Nothing waiting on the error queue" )
+	abort( "Nothing waiting on the Beanstalk error queue" )
 end
 
 tubeStats = beanstalk.stats_tube(errorQueueName)
