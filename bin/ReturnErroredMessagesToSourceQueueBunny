@@ -6,47 +6,46 @@ require "bunny"
 
 require "rservicebus"
 
-#host = 'localhost:11300'
 host = 'localhost'
 port = '5672'
 errorQueueName = "error"
 
 begin
-  bunny = Bunny.new(:host=>host, :port=>port)
-  bunny.start
-rescue Bunny::ConnectionError, Bunny::ServerDownError => e
-  abort( "RabbitMq not running" )
-end
-direct_exchange = bunny.exchange('rservicebus.agent')
-
-q = bunny.queue(errorQueueName)
-
-number_of_messages = 0
-loop = true
-while loop do
-    msg = q.pop[:payload]
-    if msg == :queue_empty then
-        loop = false
-        else
-        number_of_messages++
-        
-        msg = YAML::load(msg)
-        
-		queueName = msg.getLastErrorMsg.sourceQueue
-        sq = bunny.queue(queueName)
-        sq.bind(@direct_exchange)
-        #q.publish( serialized_object )
-        
-        @direct_exchange.publish(msg)
+    bunny = Bunny.new(:host=>host, :port=>port)
+    bunny.start
+    direct_exchange = bunny.exchange('rservicebus.agent')
+    
+    q = bunny.queue(errorQueueName)
+    
+    number_of_messages = 0
+    loop = true
+    while loop do
+        msg = q.pop[:payload]
+        if msg == :queue_empty then
+            loop = false
+            else
+            number_of_messages++
+            
+            msg = YAML::load(msg)
+            
+            queueName = msg.getLastErrorMsg.sourceQueue
+            sq = bunny.queue(queueName)
+            sq.bind(@direct_exchange)
+            #q.publish( serialized_object )
+            
+            @direct_exchange.publish(msg)
+        end
     end
-end
-    
-    
-    if number_of_messages == 0 then
-        puts "Nothing waiting on RabbitMq error queue"
-        else
         
-        puts "Returned #{number_of_messages} to their source queue"
         
+        if number_of_messages == 0 then
+            puts "Nothing waiting on RabbitMq error queue"
+            else
+            
+            puts "Returned #{number_of_messages} to their source queue"
+            
+        end
+        
+        rescue Bunny::ConnectionError, Bunny::ServerDownError => e
+        abort( "RabbitMq not running" )
     end
-    

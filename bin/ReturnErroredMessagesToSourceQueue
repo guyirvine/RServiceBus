@@ -1,2 +1,4 @@
-ReturnErroredMessagesToSourceQueueBeanstalk
-ReturnErroredMessagesToSourceQueueBunny
+#!/usr/bin/env ruby
+
+puts `ReturnErroredMessagesToSourceQueueBeanstalk`
+puts `ReturnErroredMessagesToSourceQueueBunny`

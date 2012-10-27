@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.files       = Dir["{lib}/**/*.rb", "bin/*", "LICENSE", "*.md"]
   s.homepage    = 'http://rubygems.org/gems/rservicebus'
   s.executables << 'rservicebus'
+  s.executables << 'ReturnErroredMessagesToSourceQueue'
   s.executables << 'ReturnErroredMessagesToSourceQueueBeanstalk'
   s.executables << 'ReturnErroredMessagesToSourceQueueBunny'
 end
