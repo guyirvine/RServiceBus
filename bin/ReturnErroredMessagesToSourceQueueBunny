@@ -11,8 +11,12 @@ host = 'localhost'
 port = '5672'
 errorQueueName = "error"
 
-bunny = Bunny.new(:host=>host, :port=>port)
-bunny.start
+begin
+  bunny = Bunny.new(:host=>host, :port=>port)
+  bunny.start
+rescue Bunny::ConnectionError, Bunny::ServerDownError => e
+  abort( "RabbitMq not running" )
+end
 direct_exchange = bunny.exchange('rservicebus.agent')
 
 q = bunny.queue(errorQueueName)
