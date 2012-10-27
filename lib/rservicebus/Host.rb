@@ -121,7 +121,7 @@ module RServiceBus
 			.loadHandlerPathList()
             .loadLibs()
             .loadWorkingDirList();
-            
+
             self.configureStatistics()
 			.configureAppResource()
 			.connectToMq()

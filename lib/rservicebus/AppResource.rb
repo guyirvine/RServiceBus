@@ -14,7 +14,7 @@ module RServiceBus
         def initialize( uri )
             @uri = uri
         end
-        
+
         # The method which actually configures the resource.
         #
         # @return [Object] the configured object.

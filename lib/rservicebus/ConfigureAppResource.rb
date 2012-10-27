@@ -29,6 +29,12 @@ module RServiceBus
                         when "fluiddbpgsql"
                         require "rservicebus/AppResource/FluidDbPgsql"
                         resources[k.sub( "RSB_", "" )] = AppResource_FluidDbPgsql.new( uri )
+                        when "dir"
+                        require "rservicebus/AppResource/Dir"
+                        resources[k.sub( "RSB_", "" )] = AppResource_Dir.new( uri )
+                        when "file"
+                        require "rservicebus/AppResource/File"
+                        resources[k.sub( "RSB_", "" )] = AppResource_File.new( uri )
                         else
 						abort("Scheme, #{uri.scheme}, not recognised when configuring app resource, #{k}=#{v}");
                     end
