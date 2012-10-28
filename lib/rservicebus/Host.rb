@@ -98,9 +98,9 @@ module RServiceBus
         end
         
         def configureSubscriptions
-            subscriptionStorage = SubscriptionStorage_Redis.new( @config.appName, "uri" )
+            subscriptionStorage = ConfigureSubscriptionStorage.new.get( @config.appName, @config.subscriptionUri )
             @subscriptionManager = SubscriptionManager.new( subscriptionStorage )
-            
+
             return self
         end
         

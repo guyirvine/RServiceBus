@@ -2,4 +2,5 @@ APPNAME=MySubscriber1 \
 VERBOSE=true \
 MSGHANDLERPATH=MySubscriber1/MessageHandler \
 MESSAGE_ENDPOINT_MAPPINGS=HelloWorldEvent:MyPublisher \
+SUBSCRIPTION_URI=redis://127.0.0.1/ \
 ../rservicebus_examples

@@ -9,7 +9,8 @@ class SubscriptionStorage_Redis<SubscriptionStorage
 
 	def initialize( appName, uri )
 		super(appName, uri)
-		@redis = Redis.new
+        port = uri.port.nil? ? 6379 : uri.port
+		@redis = Redis.new( :host=>uri.host, :port=>port )
 	end
 
 	def getAll
@@ -43,7 +44,7 @@ class SubscriptionStorage_Redis<SubscriptionStorage
 		else
 			subscriptions = YAML::load(content)
 		end
-		
+
 		if subscriptions[eventName].nil? then
 			subscriptions[eventName] = Array.new
 		end

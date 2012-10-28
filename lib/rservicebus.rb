@@ -24,7 +24,7 @@ require "rservicebus/AppResource/Redis"
 
 require "rservicebus/SubscriptionManager"
 require "rservicebus/SubscriptionStorage"
-require "rservicebus/SubscriptionStorage/Redis"
+require "rservicebus/ConfigureSubscriptionStorage"
 
 
 module RServiceBus
