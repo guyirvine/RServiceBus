@@ -27,6 +27,16 @@ class Test_Redis
 		return @keyHash[key]
 	end
 
+	def sismember( key, value )
+		return false if @keyHash[key].nil?
+
+		@keyHash[key].each do |v|
+			return true if v == value
+		end
+
+		return false
+	end
+
 	def incr( key )
 		if !@keyHash.has_key?( key ) then
 			@keyHash[key] = 0
