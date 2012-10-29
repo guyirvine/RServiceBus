@@ -16,6 +16,7 @@ class ConfigureAppResourceTest < Test::Unit::TestCase
 
 	def test_Redis
 		ENV['RSB_REDIS'] = "redis://localhost:8000/jim"
+        ENV['QUIET'] = "1"
 		appResources = ConfigureAppResource.new.getResources( ENV )
 		assert_equal appResources.length, 1
 	end

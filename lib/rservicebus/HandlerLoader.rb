@@ -96,7 +96,7 @@ class HandlerLoader
 			if handler.class.method_defined?( k ) then 
 				handler.instance_variable_set( "@#{k}", v.getResource() )
                 @resourceList[handler.class.name] = Array.new if @resourceList[handler.class.name].nil?
-                @resourceList[handler.class.name] << v.getResource()
+                @resourceList[handler.class.name] << v
 				@host.log "App resource attribute, #{k}, set for: " + handler.class.name
 			end
 		end

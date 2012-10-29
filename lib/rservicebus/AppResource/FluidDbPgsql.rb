@@ -5,22 +5,8 @@ module RServiceBus
     #Implementation of an AppResource - Redis
     class AppResource_FluidDbPgsql<AppResource
         
-        @connection
-
-        def initialize( uri )
-            super(uri)
-            host = uri.host
-            database = uri.path.sub( "/", "" )
-            
-            
-            @connection = FluidDb::Pgsql.new( uri )
-            puts "AppResource_Mysql. Connected to, " + uri.to_s
+        def connect(uri)
+            return FluidDb::Pgsql.new( uri )
         end
-
-        def getResource
-            return @connection
-        end
-        
     end
-    
 end

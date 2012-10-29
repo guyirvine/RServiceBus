@@ -1,21 +1,16 @@
 module RServiceBus
+    
+    require "redis"
+    
+    #Implementation of an AppResource - Redis
+    class AppResource_Redis<AppResource
+        
+        def connect(uri)
+            port = uri.port || 6379
 
-require "redis"
+            return Redis.new( :host=>uri.host, :port=>port )
+        end
 
-#Implementation of an AppResource - Redis
-class AppResource_Redis<AppResource
-
-	@connection
-
-	def initialize( uri )
-		super(uri)
-		@connection = Redis.new
-	end
-
-	def getResource
-		return @connection
-	end
-
-end
-
+    end
+    
 end
