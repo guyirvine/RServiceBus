@@ -7,7 +7,8 @@ module RServiceBus
     #
     class AppResource
         @uri
-        
+        @connection
+
         # The method which actually connects to the resource.
         #
         def connect(uri)
@@ -15,7 +16,7 @@ module RServiceBus
         end
 
         def _connect
-            self.connect(@uri)
+            @connection = self.connect(@uri)
             puts "#{self.class.name}. Connected to, #{@uri.to_s}" unless !ENV["QUIET"].nil?
         end
 
@@ -43,8 +44,10 @@ module RServiceBus
         def reconnect
             begin
                 self.finished
-                rescue
-                puts "AppResource. An error was raised while closing connection to, " + @uri.to_s
+                rescue Exception => e
+                puts "** AppResource. An error was raised while closing connection to, " + @uri.to_s
+                puts "Message: " + e.message
+                puts e.backtrace
             end
 
             self._connect

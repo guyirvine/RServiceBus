@@ -92,8 +92,9 @@ class HandlerLoader
 # @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
 	def setAppResources( handler, appResources )
 		@host.log "Checking app resources for: #{handler.class.name}", true
+		@host.log "If your attribute is not getting set, check that it is in the 'attr_accessor' list", true
 		appResources.each do |k,v|
-			if handler.class.method_defined?( k ) then 
+			if handler.class.method_defined?( k ) then
 				handler.instance_variable_set( "@#{k}", v.getResource() )
                 @resourceList[handler.class.name] = Array.new if @resourceList[handler.class.name].nil?
                 @resourceList[handler.class.name] << v

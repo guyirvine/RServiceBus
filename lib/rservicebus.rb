@@ -26,6 +26,8 @@ require "rservicebus/SubscriptionManager"
 require "rservicebus/SubscriptionStorage"
 require "rservicebus/ConfigureSubscriptionStorage"
 
+require 'rservicebus/Agent'
+
 
 module RServiceBus
 

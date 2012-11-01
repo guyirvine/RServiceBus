@@ -11,6 +11,9 @@ module RServiceBus
             return Redis.new( :host=>uri.host, :port=>port )
         end
 
+        def finished
+            @connection.quit
+        end
     end
     
 end
