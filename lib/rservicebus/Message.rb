@@ -7,8 +7,8 @@ class Message
 
 # Constructor
 #
-# @param [Object] msg The calling function msg to be sent
-# @param [Object] returnAddress A queue that the receiving message handler can send replies to
+# @param [Object] msg The msg to be sent
+# @param [Object] returnAddress A queue to which the destination message handler can send replies
 	def initialize( msg, returnAddress )
 		@_msg=YAML::dump(msg)
 		@returnAddress=returnAddress
@@ -19,11 +19,14 @@ class Message
 		@errorList = Array.new
 	end
 
-# Capture information when an exception has occurred, to help with diagnosing the error.
-# Once the error has been diagnosed, the msg may be able to be returned to the sourceQueue
+# If an error occurs while processing the message, this method allows details of the error to held
+# next to the msg.
 #
-# @param [Object] sourceQueue The name of the queue to return the msg to
-# @param [Object] errorString A queue that the receiving message handler can send replies to
+# Error(s) are held in an array, which allows current error information to be held, while still
+# retaining historical error messages.
+#
+# @param [Object] sourceQueue The name of the queue to which the msg should be returned
+# @param [Object] errorString A readible version of what occured
 	def addErrorMsg( sourceQueue, errorString )
 		@errorList << RServiceBus::ErrorMessage.new( sourceQueue, errorString )
 	end
@@ -35,6 +38,7 @@ class Message
 		return @errorList.last
 	end
 
+# @return [Object] The msg to be sent
 	def msg
 		return YAML::load( @_msg )
 	end

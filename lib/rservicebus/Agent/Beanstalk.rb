@@ -23,7 +23,7 @@ class Agent_Beanstalk
 		@beanstalk.put( serialized_object )
 	end
 
-# Gives an agent a mean to receive replies
+# Gives an agent the means to receive a reply
 #
 # @param [String] queueName the name of the queue to monitor for messages
 	def checkForReply( queueName )

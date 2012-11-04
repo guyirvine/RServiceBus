@@ -6,16 +6,16 @@ module RServiceBus
     
     #Host process for rservicebus
     class Host
-        
+
         @handlerList
         @resourceByHandlerNameList
-        
+
         @subscriptions
-        
+
         @mq
-        
+
         @appResources
-        
+
         @config
         
         @subscriptionManager
@@ -34,13 +34,13 @@ module RServiceBus
             @appResources = ConfigureAppResource.new.getResources( ENV )
             return self;
         end
-        
+
         def connectToMq
             @mq = ConfigureMQ.new.get( @config.mqHost + "/" + @config.localQueueName, @config.queueTimeout )
-            
+
             return self
         end
-        
+
         #Subscriptions are specified by adding events to the
         #msg endpoint mapping
         def sendSubscriptions

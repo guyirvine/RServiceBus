@@ -7,6 +7,10 @@ class SubscriptionStorage_Redis<SubscriptionStorage
 
 	@redis
 
+    # Constructor
+    #
+    # @param [String] appName Name of the application, which is used as a Namespace
+    # @param [String] uri a location for the resource to which we will attach, eg redis://127.0.0.1/foo
 	def initialize( appName, uri )
 		super(appName, uri)
         port = uri.port.nil? ? 6379 : uri.port
@@ -37,7 +41,6 @@ class SubscriptionStorage_Redis<SubscriptionStorage
 	end
 
 	def add( eventName, queueName )
-#		RServiceBus.log "Storing subscrption for, " + eventName + ", to, " + queueName
 		content = @redis.get( @appName + ".Subscriptions" )
 		if content.nil? then
 			subscriptions = Hash.new
