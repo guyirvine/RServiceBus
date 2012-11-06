@@ -306,13 +306,16 @@ module RServiceBus
             @stats.incTotalSent
             
             msgName = msg.class.name
-            if !@config.messageEndpointMappings.has_key?( msgName ) then
+            if @config.messageEndpointMappings.has_key?( msgName ) then
+                queueName = @config.messageEndpointMappings[msgName]
+            elsif !@handlerList[msgName].nil? then
+                queueName = @config.localQueueName
+            else
                 log "No end point mapping found for: " + msgName
-                log "**** Check in RServiceBus.yml that the section MessageEndpointMappings contains an entry named : " + msgName
+                log "**** Check environment variable MessageEndpointMappings contains an entry named : " + msgName
                 raise "No end point mapping found for: " + msgName
             end
             
-            queueName = @config.messageEndpointMappings[msgName]
             
             self._SendNeedsWrapping( msg, queueName )
         end
