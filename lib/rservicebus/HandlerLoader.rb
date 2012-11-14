@@ -89,11 +89,11 @@ class HandlerLoader
 # Assigns appropriate resources to writable attributes in the handler that match keys in the resource hash
 #
 # @param [RServiceBus::Handler] handler
-# @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
-	def setAppResources( handler, appResources )
+## @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
+	def setAppResources( handler )
 		@host.log "Checking app resources for: #{handler.class.name}", true
 		@host.log "If your attribute is not getting set, check that it is in the 'attr_accessor' list", true
-		appResources.each do |k,v|
+		@appResources.each do |k,v|
 			if handler.class.method_defined?( k ) then
 				handler.instance_variable_set( "@#{k}", v.getResource() )
                 @resourceList[handler.class.name] = Array.new if @resourceList[handler.class.name].nil?
@@ -101,7 +101,7 @@ class HandlerLoader
 				@host.log "App resource attribute, #{k}, set for: " + handler.class.name
 			end
 		end
-		
+
 		return self
 	end
 
@@ -117,7 +117,7 @@ class HandlerLoader
 
 			handler = self.loadHandlerFromFile( handlerName, filePath )
 			self.setBusAttributeIfRequested( handler )
-			self.setAppResources( handler, @appResources )
+			self.setAppResources( handler )
 			@host.log "Loaded Handler: " + handlerName
 
 			return handler

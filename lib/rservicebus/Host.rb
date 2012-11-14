@@ -59,14 +59,14 @@ module RServiceBus
         
         def loadHandlers()
             log "Load Message Handlers"
-            handlerLoader = HandlerLoader.new( self, @appResources )
+            @handlerLoader = HandlerLoader.new( self, @appResources )
             
             @config.handlerPathList.each do |path|
-                handlerLoader.loadHandlersFromPath(path)
+                @handlerLoader.loadHandlersFromPath(path)
             end
             
-            @handlerList = handlerLoader.handlerList
-            @resourceByHandlerNameList = handlerLoader.resourceList
+            @handlerList = @handlerLoader.handlerList
+            @resourceByHandlerNameList = @handlerLoader.resourceList
             
             return self
         end
@@ -185,12 +185,13 @@ module RServiceBus
                         @handlerList[@msg.msg.class.name].each do |handler|
                             @resourceByHandlerNameList[handler.class.name].each do |resource|
                                 resource.reconnect
+                                @handlerLoader.setAppResources( handler )
                             end
                         end
-                        
-                        
+
+
                         retry if (retries -= 1) > 0
-                        
+
                         @stats.incTotalErrored
                         if e.class.name == "Beanstalk::NotConnected" then
                             puts "Lost connection to beanstalkd."
