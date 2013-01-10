@@ -181,13 +181,17 @@ module RServiceBus
 
                         puts e.message
                         puts e.backtrace
-                        
+
+                        tempHandlerList = Hash.new
+                        tempResourceList = Hash.new
                         @handlerList[@msg.msg.class.name].each do |handler|
+                            tempHandlerList[handler.class.name] = handler
                             @resourceByHandlerNameList[handler.class.name].each do |resource|
-                                resource.reconnect
-                                @handlerLoader.setAppResources( handler )
+                                tempResourceList[resource.class.name] = resource
                             end
                         end
+                        tempResourceList.each {|k,resource| resource.reconnect }
+                        tempHandlerList.each {|k,handler| @handlerLoader.setAppResources( handler ) }
 
 
                         retry if (retries -= 1) > 0

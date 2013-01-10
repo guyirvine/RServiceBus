@@ -1,0 +1,103 @@
+#!/usr/bin/env ruby
+
+require 'stringio'
+
+############################################
+ContentReadMe = StringIO.new( <<"END_DATA" )
+#Req
+
+##What
+This is the starting point for RServiceBus
+
+A single client, using the agent to send a message
+
+A single message handler, running inside rservicebus which receives
+the message and sends a reply
+
+The client then picks up the reply
+
+##How
+make sure beanstalk is running, then
+
+run the
+./run
+
+command in one terminal
+
+in a second terminal, run
+ruby Client.rb
+END_DATA
+
+
+############################################
+ContentClient = StringIO.new( <<"END_DATA" )
+require "rservicebus"
+require "rservicebus/Agent"
+require "./Contract"
+
+agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://localhost" ) )
+
+1.upto(2) do |request_nbr|
+    agent.sendMsg(HelloWorld.new( "Hello World! " + request_nbr.to_s ), "HelloWorld", "helloResponse")
+end
+
+msg = agent.checkForReply( "helloResponse"  )
+puts msg
+msg = agent.checkForReply( "helloResponse"  )
+puts msg
+END_DATA
+
+
+############################################
+ContentRun = StringIO.new( <<"END_DATA" )
+APPNAME=HelloWorld \
+ERROR_QUEUE_NAME=error \
+MAX_RETRIES=2 \
+VERBOSE=true \
+WORKING_DIR=./ \
+rservicebus
+END_DATA
+
+
+
+############################################
+ContentContract = StringIO.new( <<"END_DATA" )
+class HelloWorld
+    attr_reader :name
+    def initialize( name )
+        @name = name
+    end
+end
+END_DATA
+
+
+############################################
+ContentMessageHandler = StringIO.new( <<"END_DATA" )
+class MessageHandler_HelloWorld
+    
+    attr_accessor :Bus
+    
+    def Handle( msg )
+        #raise "Manually generated error for testng"
+        puts "Handling Hello World: " + msg.name
+        @Bus.Reply( "Hey. " + msg.name )
+    end
+end
+END_DATA
+
+################################################################################################
+class Init
+    
+    def Run
+        IO.write( "README.md", ContentReadMe.string );
+        IO.write( "Client.rb", ContentClient.string );
+        IO.write( "Contract.rb", ContentContract.string );
+        IO.write( "run", ContentRun.string );
+        
+        Dir.mkdir( "./MessageHandler" ) unless Dir.exists? "./MessageHandler";
+        IO.write( "MessageHandler/HelloWorld.rb", ContentMessageHandler.string );
+    end
+    
+end
+
+Init.new.Run
