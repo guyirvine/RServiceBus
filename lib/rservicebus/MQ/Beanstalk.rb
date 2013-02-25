@@ -12,7 +12,7 @@ module RServiceBus
         def connect( host, port )
             port ||= 11300
             string = "#{host}:#{port}"
-            
+
             begin
                 @beanstalk = Beanstalk::Pool.new([string])
                 rescue Exception => e
@@ -47,6 +47,11 @@ module RServiceBus
             end
             return @job.body
         end
+
+        def returnToQueue
+            @job.release
+            
+            end
         
         # "Commit" queue
         def ack
