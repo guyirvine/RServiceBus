@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Rservicebus : " />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Rservicebus BOB</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/guyirvine/RServiceBus">View on GitHub</a>
+
+          <h1 id="project_title">Rservicebus</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/guyirvine/RServiceBus/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/guyirvine/RServiceBus/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>A Ruby interpretation of NServiceBus</p>
+
+<h2>Principles</h2>
+
+<pre><code>    *Why are you doing it and what can go wrong
+    *Dont solve infrastructure problems with software
+            *Infrastructure in this case refers to anything not specific to the application domain
+</code></pre>
+
+<h2>Queues</h2>
+
+<pre><code>    * Queues specified by config, determined by message type
+</code></pre>
+
+<h2>Transport</h2>
+
+<pre><code>    * beanstalk
+</code></pre>
+
+<h2>MessageHandler</h2>
+
+<pre><code>    * Name by convention - Handler name matchs filename
+    * Single handler for message is in top level file
+    * Multiple handlers for message are in files under top level directory
+    * Handlers are dynamically loaded
+    * If a handler fails to load, the service wont start - infrastructure problem
+</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Rservicebus maintained by <a href="https://github.com/guyirvine">guyirvine</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
