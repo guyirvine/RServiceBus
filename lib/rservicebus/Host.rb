@@ -22,6 +22,10 @@ module RServiceBus
         
         @stats
         
+        #Provides a thin logging veneer
+        #
+        # @param [String] string Log entry
+        # @param [Boolean] ver Indicator for a verbose log entry
         def log(string, ver=false)
             type = ver ? "VERB" : "INFO"
             if @config.verbose || !ver then
@@ -30,11 +34,15 @@ module RServiceBus
             end
         end
         
+        #Thin veneer for Configuring external resources
+        #
         def configureAppResource
             @appResources = ConfigureAppResource.new.getResources( ENV )
             return self;
         end
         
+        #Thin veneer for Configuring the Message Queue
+        #
         def connectToMq
             @mq = ConfigureMQ.new.get( @config.mqHost + "/" + @config.localQueueName, @config.queueTimeout )
             
@@ -57,6 +65,8 @@ module RServiceBus
             return self
         end
         
+        #Load and configure Message Handlers
+        #
         def loadHandlers()
             log "Load Message Handlers"
             @handlerLoader = HandlerLoader.new( self, @appResources )
@@ -71,6 +81,8 @@ module RServiceBus
             return self
         end
         
+        #Load Contracts
+        #
         def loadContracts()
             log "Load Contracts"
             
@@ -81,6 +93,8 @@ module RServiceBus
             return self
         end
         
+        #For each directory given, find and load all librarys
+        #
         def loadLibs()
             log "Load Libs"
             
@@ -97,6 +111,8 @@ module RServiceBus
             return self
         end
         
+        #Load, configure and initialise Subscriptions
+        #
         def configureSubscriptions
             subscriptionStorage = ConfigureSubscriptionStorage.new.get( @config.appName, @config.subscriptionUri )
             @subscriptionManager = SubscriptionManager.new( subscriptionStorage )
@@ -104,6 +120,8 @@ module RServiceBus
             return self
         end
         
+        #Initialise statistics monitor
+        #
         def configureStatistics
             @stats = Stats.new
             
@@ -134,6 +152,8 @@ module RServiceBus
             return self
         end
         
+        #Ignition
+        #
         def run
             log "Starting the Host"
             
@@ -243,6 +263,7 @@ module RServiceBus
             end
             
             #Send the current msg to the appropriate handlers
+            #
             def HandleMessage()
                 msgName = @msg.msg.class.name
                 handlerList = @handlerList[msgName]
@@ -252,6 +273,7 @@ module RServiceBus
                     puts "No handler found for: " + msgName
                     puts YAML::dump(@msg)
                     raise "No Handler Found"
+
                     else
                     log "Handler found for: " + msgName, true
                     handlerList.each do |handler|
@@ -265,7 +287,7 @@ module RServiceBus
                     end
                 end
             end
-            
+
             #Sends a msg across the bus
             #
             # @param [String] serialized_object serialized RServiceBus::Message
