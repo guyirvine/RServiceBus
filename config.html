@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta charset='utf-8' />
+        <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+        <meta name="description" content="Rservicebus : " />
+        
+        <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+            
+            <title>RServiceBus</title>
+            </head>
+    
+    <body>
+        
+        <!-- HEADER -->
+        <div id="header_wrap" class="outer">
+            <header class="inner">
+                <a id="forkme_banner" href="https://github.com/guyirvine/RServiceBus">View on GitHub</a>
+                
+                <h1 id="project_title">Rservicebus - Configuration</h1>
+                <h2 id="project_tagline"></h2>
+                
+                <section id="downloads">
+                    <a class="zip_download_link" href="https://github.com/guyirvine/RServiceBus/zipball/master">Download this project as a .zip file</a>
+                    <a class="tar_download_link" href="https://github.com/guyirvine/RServiceBus/tarball/master">Download this project as a tar.gz file</a>
+                </section>
+            </header>
+        </div>
+        
+        <!-- MAIN CONTENT -->
+        <div id="main_content_wrap" class="outer">
+            <section id="main_content" class="inner">
+                <p>A Ruby interpretation of NServiceBus</p>
+                <a href="index.html">Home</a> | <a href="config.html">Configuration</a> | <a href="appresource.html">App Resources</a>
+                
+                <h2>To Start With</h2>
+                
+                <pre><code>
+*Environment variables are used for configuration
+*Convention over Configuration
+                    
+*Example - APPNAME=HelloWorld CONTRACTS=./Contract.rb rservicebus
+                    
+                </code></pre>
+                
+                <h2>APPNAME</h2>
+                
+                <p>Specifies the name of the Service.</p>
+                <p>This is used as a default for name of the queue to watch.</p>
+                <pre>
+                    <code>APPNAME=HelloWorld rservicebus</code>
+                </pre>
+                
+                <h2>MESSAGE_ENDPOINT_MAPPINGS</h2>
+                <p>Specifies where to route outgoing messages.</p>
+                <p>Format is msg name - queuename, sperarated by a colon. Multiple mappings are sperarated by semi-colons.
+                <p>Default: Only need if routing messages, no default required</p>
+                <pre>
+                    <code>msg_mame_1:end_point_1;msg_mame_2:end_point_2</code>
+                </pre>
+                
+                <h2>MSGHANDLERPATH</h2>
+                <p>Path to directory holding message handlers.</p>
+                <p>Default: Local directory</p>
+                <pre><code>MSGHANDLERPATH=path to message handlers</code></pre>
+                
+                <h2>LOCAL_QUEUE_NAME</h2>
+                <p>Name of the incoming queue.</p>
+                <p>Default: APPNAME</p>
+                <pre><code>LOCAL_QUEUE_NAME=path to message handlers</code></pre>
+
+                <h2>ERROR_QUEUE_NAME</h2>
+                <p>Name of the queue to place msgs which resulted in an error during processing.</p>
+                <p>Default: error</p>
+                <pre><code>ERROR_QUEUE_NAME=my_error_queue</code></pre>
+                
+                <h2>AUDIT_QUEUE_NAME</h2>
+                <p>Name of the queue to put a copy of all outgoing msgs.</p>
+                <p>Default: none - on if value specified</p>
+                <pre><code>AUDIT_QUEUE_NAME=my_audit_queue</code></pre>
+
+                <h2>FORWARD_RECEIVED_MESSAGES_TO</h2>
+                <p>Name of the queue to put a copy of all incoming msgs.</p>
+                <p>Default: none - on if value specified</p>
+                <pre><code>FORWARD_RECEIVED_MESSAGES_TO=my_received_msg_queue</code></pre>
+
+                <h2>MAX_RETRIES</h2>
+                <p>How many times to retry a msg before placing it on the error queue.</p>
+                <p>Default: 5</p>
+                <pre><code>MAX_RETRIES=2</code></pre>
+                
+                <h2>QUEUE_TIMEOUT</h2>
+                <p>Number of seconds to wait for a msg, before performing system tasks, and reaturning to listen state.</p>
+                <p>Default: 5</p>
+                <pre><code>QUEUE_TIMEOUT=10</code></pre>
+                
+                <h2>SUBSCRIPTION_URI</h2>
+                <p>URI pointing to the storage for subscriptions.</p>
+                <p>Default: redis://127.0.0.1:6379/</p>
+                <pre><code>SUBSCRIPTION_URI=redis://127.0.0.1:6390/</code></pre>
+                <!--
+                @statOutputCountdown = self.getValue( "STAT_OUTPUT_COUNTDOWN", "100" ).to_i
+                 -->
+
+                
+                <h2>CONTRACTS</h2>
+                <p>Semi-colon seperated list of files containing msg contracts. Files must be ruby files with a .rb extention</p>
+                <p>Default: none</p>
+                <pre><code>CONTRACTS=/path/to/contract.rb</code></pre>
+                
+                <h2>LIB</h2>
+                <p>Semi-colon seperated list of directories or ruby files to loaded</p>
+                <p>Default: ./lib - if it exists</p>
+                <pre><code>LIB=/path/to/app/</code></pre>
+
+                <h2>VERBOSE</h2>
+                <p>Output logging tagged as verbose.</p>
+                <p>Note. Message Handlers can call @Bus.log( "a verbose log msg", ture ).</p>
+                <p>Default: false</p>
+                <pre><code>VERBOSE=true</code></pre>
+                
+                <h2>MQ</h2>
+                <p>The type and location of service to use for the messaging infrastructure.</p>
+                <p>Default: beanstalk://localhost</p>
+                <pre><code>MQ=beanstalk://localhost:7000/</code></pre>
+                
+                <h2>WORKING_DIR</h2>
+                <p>A shortcut - will look for MessageHandler, Contract.rb, and lib in the specified directory.</p>
+                <p>Default: none</p>
+                <pre><code>WORKING_DIR=/path/to/working/dir</code></pre>
+
+                <h2>RSB_</h2>
+                <p>Indicates an rservicebus AppResource.</p>
+                <pre><code>RSB_Redis=redis://localhost:6379/</code></pre>
+                
+            </section>
+        </div>
+        
+        <!-- FOOTER  -->
+        <div id="footer_wrap" class="outer">
+            <footer class="inner">
+                <p class="copyright">Rservicebus maintained by <a href="https://github.com/guyirvine">guyirvine</a></p>
+                <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+            </footer>
+        </div>
+        
+        
+        
+    </body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta charset='utf-8' />
+        <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+        <meta name="description" content="Rservicebus : " />
+        
+        <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+            
+            <title>RServiceBus</title>
+            </head>
+    
+    <body>
+        
+        <!-- HEADER -->
+        <div id="header_wrap" class="outer">
+            <header class="inner">
+                <a id="forkme_banner" href="https://github.com/guyirvine/RServiceBus">View on GitHub</a>
+                
+                <h1 id="project_title">Rservicebus - App Resources</h1>
+                <h2 id="project_tagline"></h2>
+                
+                <section id="downloads">
+                    <a class="zip_download_link" href="https://github.com/guyirvine/RServiceBus/zipball/master">Download this project as a .zip file</a>
+                    <a class="tar_download_link" href="https://github.com/guyirvine/RServiceBus/tarball/master">Download this project as a tar.gz file</a>
+                </section>
+            </header>
+        </div>
+        
+        <!-- MAIN CONTENT -->
+        <div id="main_content_wrap" class="outer">
+            <section id="main_content" class="inner">
+                <p>A Ruby interpretation of NServiceBus</p>
+                <a href="index.html">Home</a> | <a href="config.html">Configuration</a> | <a href="appresource.html">App Resources</a>
+                
+                <h2>To Start With</h2>
+                
+                <pre><code>
+*Environment variables are used for configuration
+*Allow external resources for message handlers to be configured through rservicebus
+*Enables easier movement of apps through custom environments,
+                    eg dev, staging, prod.
+                    
+                </code></pre>
+                
+                <h2>Layout</h2>
+                
+                <pre>
+                    <code>RSB_&lt;name&gt;=&lt;type&gt;://[&lt;username&gt;:&lt;password&gt;@]&lt;host&gt;:&lt;port/[&lt;specific name&gt;]</code>
+                </pre>
+
+                <p>name: Name of the variable in the Message Handler, to which this resource will be assigned.</p>
+                <p>type: Type resource to be created, listed below</p>
+                <p>username:password: Optional, only used when relevant to the resource</p>
+                <p>host:port: where to find the resource</p>
+                <p>specific name: only used where appropriate, eg database name</p>
+                <pre>
+                    <code>RSB_Redis=redis://localhost:6379/</code>
+                </pre>
+                
+                <h2>redis</h2>
+                <p>Connect to a Redis server</p>
+                <pre><code>RSB_Redis=redis://localhost:6379/</code></pre>
+                
+                <h2>mysql</h2>
+                <p>Connect to a Redis mysql</p>
+                <pre><code>RSB_Mydb=mysql://localhost/</code></pre>
+
+                <h2>fluiddbmysql</h2>
+                <p>Connect to a Redis mysql</p>
+                <pre><code>RSB_Mydb=fluiddbmysql://localhost/</code></pre>
+                
+                <h2>fluiddbmysql2</h2>
+                <p>Connect to a Redis mysql</p>
+                <pre><code>RSB_Mydb=fluiddbmysql2://localhost/</code></pre>
+
+                <h2>fluiddbpgsql</h2>
+                <p>Connect to a Redis mysql</p>
+                <pre><code>RSB_Mydb=fluiddbpgsql://localhost/</code></pre>
+
+                <h2>dir</h2>
+                <p>Connect to a directory</p>
+                <pre><code>RSB_OutputDirectory=dir:///path/to/output/</code></pre>
+                
+                <h2>file</h2>
+                <p>Connect to a file</p>
+                <pre><code>RSB_InputCsvFile=file:///input/csv/file.csv</code></pre>
+                
+                
+            </section>
+        </div>
+        
+        <!-- FOOTER  -->
+        <div id="footer_wrap" class="outer">
+            <footer class="inner">
+                <p class="copyright">Rservicebus maintained by <a href="https://github.com/guyirvine">guyirvine</a></p>
+                <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+            </footer>
+        </div>
+        
+        
+        
+    </body>
+</html>
