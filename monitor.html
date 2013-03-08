@@ -18,7 +18,7 @@
             <header class="inner">
                 <a id="forkme_banner" href="https://github.com/guyirvine/RServiceBus">View on GitHub</a>
                 
-                <h1 id="project_title">Rservicebus - App Resources</h1>
+                <h1 id="project_title">Rservicebus - Monitors</h1>
                 <h2 id="project_tagline"></h2>
                 
                 <section id="downloads">
@@ -38,56 +38,40 @@
                 
                 <pre><code>
 *Environment variables are used for configuration
-*Allow external resources for message handlers to be configured through rservicebus
-*Enables easier movement of apps through custom environments,
-                    eg dev, staging, prod.
+*Allow rservicebus to observe events and generate msgs from them
                     
                 </code></pre>
                 
                 <h2>Layout</h2>
                 
                 <pre>
-                    <code>RSB_&lt;name&gt;=&lt;type&gt;://[&lt;username&gt;:&lt;password&gt;@]&lt;host&gt;:&lt;port/[&lt;specific name&gt;]</code>
+                    <code>RSBOB_&lt;name&gt;=&lt;type&gt;://[&lt;username&gt;:&lt;password&gt;@]&lt;host&gt;:&lt;port/[&lt;specific name&gt;]</code>
                 </pre>
 
-                <p>name: Name of the variable in the Message Handler, to which this resource will be assigned.</p>
-                <p>type: Type resource to be created, listed below</p>
+                <p>name: Name of the msg to be generated, and therefore, which message handler it will be sent.</p>
+                <p>type: Type of observer to be created, listed below</p>
                 <p>username:password: Optional, only used when relevant to the resource</p>
-                <p>host:port: where to find the resource</p>
-                <p>specific name: only used where appropriate, eg database name</p>
+                <p>host:port: where to find the thing to be observered</p>
+                <p>specific name: only used where appropriate, eg path</p>
                 <pre>
-                    <code>RSB_Redis=redis://localhost:6379/</code>
+                    <code>RSBOB_Indigo=csvdir:///path/to/dir/</code>
                 </pre>
                 
-                <h2>redis</h2>
-                <p>Connect to a Redis server</p>
-                <pre><code>RSB_Redis=redis://localhost:6379/</code></pre>
-                
-                <h2>mysql</h2>
-                <p>Connect to a Redis mysql</p>
-                <pre><code>RSB_Mydb=mysql://localhost/</code></pre>
-
-                <h2>fluiddbmysql</h2>
-                <p>Connect to a Redis mysql</p>
-                <pre><code>RSB_Mydb=fluiddbmysql://localhost/</code></pre>
-                
-                <h2>fluiddbmysql2</h2>
-                <p>Connect to a Redis mysql</p>
-                <pre><code>RSB_Mydb=fluiddbmysql2://localhost/</code></pre>
-
-                <h2>fluiddbpgsql</h2>
-                <p>Connect to a Redis mysql</p>
-                <pre><code>RSB_Mydb=fluiddbpgsql://localhost/</code></pre>
-
                 <h2>dir</h2>
-                <p>Connect to a directory</p>
-                <pre><code>RSB_OutputDirectory=dir:///path/to/output/</code></pre>
+                <p>Monitor a directory for files, and send a msg with the content</p>
+                <pre><code>RSBOB_Indigo=dir:///path/to/dir/</code></pre>
                 
-                <h2>file</h2>
-                <p>Connect to a file</p>
-                <pre><code>RSB_InputCsvFile=file:///input/csv/file.csv</code></pre>
+                <h2>csvdir</h2>
+                <p>Monitor a directory for csv files, and send a msg with the content parsed as csv</p>
+                <pre><code>RSBOB_Indigo=csvdir:///path/to/dir/</code></pre>
+
+                <h2>csvperlinedir</h2>
+                <p>Monitor a directory for csv files, and send a msg per line</p>
+                <pre><code>RSBOB_Indigo=csvperlinedir:///path/to/dir/</code></pre>
                 
-                
+                <h2>xmldir</h2>
+                <p>Monitor a directory for xml files, and send a msg with the content parsed as Xml</p>
+                <pre><code>RSBOB_Indigo=xmldir:///path/to/dir/</code></pre>
             </section>
         </div>
         
