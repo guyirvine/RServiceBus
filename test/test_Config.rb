@@ -142,25 +142,6 @@ class ConfigTest < Test::Unit::TestCase
 		
 	end
 
-	def test_loadContracts_nil
-		config = Test_Config.new
-
-		config.loadContracts
-
-		assert_equal 1, config.contractList.length
-		assert_equal "./Contract", config.contractList[0]
-	end
-
-	def test_loadContracts_empty
-		config = Test_Config.new
-
-		config.setValue( "CONTRACTS", "" )
-		config.loadContracts
-
-		assert_equal 1, config.contractList.length
-		assert_equal "./Contract", config.contractList[0]
-	end
-
 	def test_loadContracts_single
 		config = Test_Config.new
 
