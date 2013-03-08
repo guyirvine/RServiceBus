@@ -1,7 +1,7 @@
-#Req
+#DirMonitor
 
 ##What
-An example of using the csv directory observer to pull data in to the RServiceBus system
+An example of using the directory monitor to pull data in to the RServiceBus system
 
 A single client, which adds data to the input directory
 
