@@ -118,13 +118,15 @@ class Config
 #Expected format;
 #	/one/two/Contracts
 	def loadContracts()
-		if self.getValue( "CONTRACTS", "./Contract" ).nil? then
-			return self
-		end
         @contractList = Array.new
 
+        #This is a guard clause in case no Contracts have been specified
+        #If any guard clauses have been specified, then execution should drop to the second block
+        if self.getValue( "CONTRACTS" ).nil? then
+			return self
+		end
+
 		self.getValue( "CONTRACTS", "./Contract" ).split( ";" ).each do |path|
-			log "Loading contracts from, #{path}"
 			self.ensureContractFileExists( path )
 			@contractList << path
 		end

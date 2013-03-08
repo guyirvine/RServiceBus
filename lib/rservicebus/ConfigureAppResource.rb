@@ -7,7 +7,7 @@ module RServiceBus
 
         def getResources( env )
             resources = Hash.new
-            
+
             env.each do |k,v|
                 if v.is_a?(String) and
 					k.start_with?( "RSB_" ) then

@@ -33,14 +33,21 @@ module RServiceBus
                 puts "[#{type}] #{timestamp} :: #{string}"
             end
         end
-        
+
         #Thin veneer for Configuring external resources
         #
         def configureAppResource
             @appResources = ConfigureAppResource.new.getResources( ENV )
             return self;
         end
-        
+
+        #Thin veneer for Configuring external resources
+        #
+        def configureMonitors
+            @monitors = ConfigureMonitor.new( self, @appResources ).getMonitors( ENV )
+            return self;
+        end
+
         #Thin veneer for Configuring the Message Queue
         #
         def connectToMq
@@ -48,7 +55,7 @@ module RServiceBus
             
             return self
         end
-        
+
         #Subscriptions are specified by adding events to the
         #msg endpoint mapping
         def sendSubscriptions
@@ -70,11 +77,11 @@ module RServiceBus
         def loadHandlers()
             log "Load Message Handlers"
             @handlerLoader = HandlerLoader.new( self, @appResources )
-            
+
             @config.handlerPathList.each do |path|
                 @handlerLoader.loadHandlersFromPath(path)
             end
-            
+
             @handlerList = @handlerLoader.handlerList
             @resourceByHandlerNameList = @handlerLoader.resourceList
             
@@ -85,9 +92,10 @@ module RServiceBus
         #
         def loadContracts()
             log "Load Contracts"
-            
+
             @config.contractList.each do |path|
                 require path
+                log "Loaded Contract: #{path}", true
             end
             
             return self
@@ -129,7 +137,6 @@ module RServiceBus
         end
         
         def initialize()
-            
             @config = ConfigFromEnv.new
 			.configureLogging()
 			.loadHostSection()
@@ -141,11 +148,12 @@ module RServiceBus
             .loadWorkingDirList();
             
             self.configureStatistics()
-			.configureAppResource()
-			.connectToMq()
-			.loadHandlers()
             .loadContracts()
             .loadLibs()
+			.configureAppResource()
+			.configureMonitors()
+			.loadHandlers()
+			.connectToMq()
 			.configureSubscriptions()
 			.sendSubscriptions()
             
@@ -212,7 +220,7 @@ module RServiceBus
                         end
                         tempResourceList.each {|k,resource| resource.reconnect }
                         tempHandlerList.each {|k,handler| @handlerLoader.setAppResources( handler ) }
- 
+                        
                         if retries > 0 then
                             retries = retries - 1
                             @mq.returnToQueue
@@ -248,6 +256,12 @@ module RServiceBus
                     rescue NoMsgToProcess => e
                     #This exception is just saying there are no messages to process
                     statOutputCountdown = 0
+                    
+                    @monitors.each do |o|
+                        o.Look
+                    end
+                    
+                    
                     rescue Exception => e
                     if e.message == "SIGTERM" then
                         puts "Exiting on request ..."
@@ -273,7 +287,7 @@ module RServiceBus
                     puts "No handler found for: " + msgName
                     puts YAML::dump(@msg)
                     raise "No Handler Found"
-
+                    
                     else
                     log "Handler found for: " + msgName, true
                     handlerList.each do |handler|
@@ -287,7 +301,7 @@ module RServiceBus
                     end
                 end
             end
-
+            
             #Sends a msg across the bus
             #
             # @param [String] serialized_object serialized RServiceBus::Message

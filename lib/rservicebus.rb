@@ -6,6 +6,7 @@ require "yaml"
 require "uuidtools"
 require "redis"
 require "json"
+require "uri"
 
 require "rservicebus/helper_functions"
 require "rservicebus/ErrorMessage"
@@ -25,6 +26,8 @@ require "rservicebus/AppResource/Redis"
 require "rservicebus/SubscriptionManager"
 require "rservicebus/SubscriptionStorage"
 require "rservicebus/ConfigureSubscriptionStorage"
+
+require "rservicebus/ConfigureMonitor"
 
 require 'rservicebus/Agent'
 

@@ -22,6 +22,8 @@ class HandlerLoader
 
 	@handlerList
     @resourceList
+    
+    @listOfLoadedPaths
 
 # Constructor
 #
@@ -33,6 +35,8 @@ class HandlerLoader
 		
 		@handlerList = Hash.new
         @resourceList = Hash.new
+        
+        @listOfLoadedPaths = Hash.new
 	end
 
 # Cleans the given path to ensure it can be used for as a parameter for the require statement.
@@ -110,7 +114,12 @@ class HandlerLoader
 # @param [String] filePath
 # @param [String] handlerName
 # @returns [RServiceBus::Handler] handler
-	def loadAndConfigureHandler(filePath, handlerName)
+	def loadAndConfigureHandler(msgName, filePath, handlerName)
+        if @listOfLoadedPaths.has_key?( filePath ) then
+            @host.log "Not reloading, #{filePath}"
+            return
+        end
+
 		begin
 			@host.log "filePath: " + filePath, true
 			@host.log "handlerName: " + handlerName, true
@@ -120,7 +129,10 @@ class HandlerLoader
 			self.setAppResources( handler )
 			@host.log "Loaded Handler: " + handlerName
 
-			return handler
+            @handlerList[msgName] = Array.new unless @handlerList.has_key?( msgName )
+            @handlerList[msgName] << handler;
+            
+            @listOfLoadedPaths[filePath] = 1
 		rescue Exception => e
 			puts "Exception loading handler from file: " + filePath
 			puts e.message
@@ -155,12 +167,7 @@ class HandlerLoader
 					fileName = File.basename( filePath ).sub( ".rb", "" )
 					handlerName = "MessageHandler_#{msgName}_#{fileName}"
 
-					handler = self.loadAndConfigureHandler( filePath, handlerName )
-					if !@handlerList.has_key?( msgName ) then
-						@handlerList[msgName] = Array.new
-					end
-
-					@handlerList[msgName] << handler;
+					self.loadAndConfigureHandler( msgName, filePath, handlerName )
 				end
 			end
 		end
@@ -194,13 +201,7 @@ class HandlerLoader
 					self.loadHandlersFromSecondLevelPath( msgName, filePath )
 				else
 					handlerName = "MessageHandler_#{msgName}"
-					handler = self.loadAndConfigureHandler( filePath, handlerName )
-
-					if !@handlerList.has_key?( msgName ) then
-						@handlerList[msgName] = Array.new
-					end
-
-					@handlerList[msgName] << handler;
+					self.loadAndConfigureHandler( msgName, filePath, handlerName )
 				end
 			end
 		end
