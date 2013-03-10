@@ -57,7 +57,7 @@ module RServiceBus
                         when "xmldir"
                         require "rservicebus/Monitor/XmlDir"
 						monitor = Monitor_XmlDir.new( @host, name, uri )
-                        
+
                         when "dir"
                         require "rservicebus/Monitor/Dir"
 						monitor = Monitor_Dir.new( @host, name, uri )

@@ -6,3 +6,4 @@ err
 rservicebus-*.gem
 build
 *.xcworkspace
+*/archive/*
