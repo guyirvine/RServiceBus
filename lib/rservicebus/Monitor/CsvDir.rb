@@ -7,13 +7,13 @@ module RServiceBus
         
         
         def checkPayloadForNumberOfColumns( payload )
-            if @QueryStringParts.has_key?("cols") then
-                
-                cols = @QueryStringParts["cols"][0].to_i
-                payload.each_with_index do |row, idx|
-                    if row.length != cols then
-                        raise "Expected number of columns, #{cols}, Actual number of columns, #{row.length}, on line, #{idx}"
-                    end
+            return if @QueryStringParts.nil?
+            return unless @QueryStringParts.has_key?("cols")
+            
+            cols = @QueryStringParts["cols"][0].to_i
+            payload.each_with_index do |row, idx|
+                if row.length != cols then
+                    raise "Expected number of columns, #{cols}, Actual number of columns, #{row.length}, on line, #{idx}"
                 end
             end
             
