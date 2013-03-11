@@ -1,11 +1,30 @@
 require 'rservicebus/Monitor/Dir'
 require 'csv'
 
-class Monitor_CsvDir<Monitor_Dir
+module RServiceBus
     
-
-    def ProcessContent( content )
-        return CSV.parse( content )
+    class Monitor_CsvDir<Monitor_Dir
+        
+        
+        def checkPayloadForNumberOfColumns( payload )
+            if @QueryStringParts.has_key?("cols") then
+                
+                cols = @QueryStringParts["cols"][0].to_i
+                payload.each_with_index do |row, idx|
+                    if row.length != cols then
+                        raise "Expected number of columns, #{cols}, Actual number of columns, #{row.length}, on line, #{idx}"
+                    end
+                end
+            end
+            
+        end
+        
+        def ProcessContent( content )
+            payload = CSV.parse( content )
+            self.checkPayloadForNumberOfColumns( payload )
+            return payload
+        end
+        
     end
-
+    
 end

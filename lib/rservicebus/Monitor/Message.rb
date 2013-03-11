@@ -1,12 +1,16 @@
-class Monitor_Message
-    attr_reader :payload, :uri
-
-    @payload
-    @uri
-
-    def initialize( payload, uri )
-        @payload = payload
-        @uri = uri
+module RServiceBus
+    
+    class Monitor_Message
+        attr_reader :payload, :uri
+        
+        @payload
+        @uri
+        
+        def initialize( payload, uri )
+            @payload = payload
+            @uri = uri
+        end
+        
     end
     
 end
