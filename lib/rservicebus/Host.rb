@@ -240,8 +240,8 @@ module RServiceBus
                             end
                             
                             errorString = e.message + ". " + e.backtrace.join( ". " )
-                            log errorString
-                            
+                            #                            log errorString
+
                             @msg.addErrorMsg( @config.localQueueName, errorString )
                             serialized_object = YAML::dump(@msg)
                             self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
@@ -284,8 +284,8 @@ module RServiceBus
                 
                 if handlerList == nil then
                     log "No handler found for: " + msgName
-                    puts "No handler found for: " + msgName
-                    puts YAML::dump(@msg)
+                    #                    puts "No handler found for: " + msgName
+                    #                    puts YAML::dump(@msg)
                     raise "No Handler Found"
                     
                     else
@@ -295,7 +295,7 @@ module RServiceBus
                             handler.Handle( @msg.msg )
                             rescue Exception => e
                             log "An error occured in Handler: " + handler.class.name
-                            log e.message + ". " + e.backtrace[0]
+                            #log e.message + ". " + e.backtrace[0]
                             raise e
                         end
                     end

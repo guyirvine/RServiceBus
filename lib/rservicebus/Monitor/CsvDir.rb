@@ -4,8 +4,8 @@ require 'csv'
 class Monitor_CsvDir<Monitor_Dir
     
 
-    def ProcessPath( path )
-        return CSV.read( path )
+    def ProcessContent( content )
+        return CSV.parse( content )
     end
 
 end

@@ -56,8 +56,8 @@ class Monitor
         self._connect
     end
     
-    def send( payload )
-        msg = @MsgType.new( payload )
+    def send( payload, uri )
+        msg = @MsgType.new( payload, uri )
 
         @Bus.Send( msg )
     end
