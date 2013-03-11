@@ -7,5 +7,4 @@ gem "redis"
 gem "json"
 gem "rake"
 gem "zip"
-gem "zlib"
 
