@@ -10,7 +10,7 @@ def CreateAnonymousClass( name_for_class )
 end
 
 
-abort( "Usage: #{__FILE__} <Msg Name> <Queue Name> [Response Queue Name] [Beanstalk Host]" ) unless ARGV.length >=2 && ARGV.length <=4
+abort( "Usage: #{File.basename($0)} <Msg Name> <Queue Name> [Response Queue Name] [Beanstalk Host]" ) unless ARGV.length >=2 && ARGV.length <=4
 msg_name = ARGV[0]
 queue_name = ARGV[1]
 response_queue_name = "#{queue_name}Response" if ARGV.length >= 3

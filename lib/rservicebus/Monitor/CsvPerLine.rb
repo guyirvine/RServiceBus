@@ -5,9 +5,8 @@ module RServiceBus
     
     class Monitor_CsvPerLineDir<Monitor_Dir
         
-        
         def checkPayloadForNumberOfColumns( payload )
-            if @QueryStringParts.has_key?("cols") then
+            if !@QueryStringParts.nil? && @QueryStringParts.has_key?("cols") then
                 
                 cols = @QueryStringParts["cols"][0].to_i
                 payload.each_with_index do |row, idx|
