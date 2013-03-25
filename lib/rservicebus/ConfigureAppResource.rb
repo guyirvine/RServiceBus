@@ -29,6 +29,9 @@ module RServiceBus
                         when "fluiddbpgsql"
                         require "rservicebus/AppResource/FluidDbPgsql"
                         resources[k.sub( "RSB_", "" )] = AppResource_FluidDbPgsql.new( uri )
+                        when "fluiddbtinytds"
+                        require "rservicebus/AppResource/FluidDbTinyTds"
+                        resources[k.sub( "RSB_", "" )] = AppResource_FluidDbTinyTds.new( uri )
                         when "dir"
                         require "rservicebus/AppResource/Dir"
                         resources[k.sub( "RSB_", "" )] = AppResource_Dir.new( uri )
