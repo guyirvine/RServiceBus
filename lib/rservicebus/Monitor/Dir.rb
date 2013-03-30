@@ -13,7 +13,23 @@ module RServiceBus
         
         def connect(uri)
             #Pass the path through the Dir object to check syntax on startup
-            inputDir = Dir.new( uri.path )
+            begin
+                inputDir = Dir.new( uri.path )
+                if !File.writable?( uri.path ) then
+                    puts "***** Directory is not writable, #{uri.path}."
+                    puts "***** Make the directory, #{uri.path}, writable and try again."
+                    abort()
+                end
+                rescue Errno::ENOENT => e
+                    puts "***** Directory does not exist, #{uri.path}."
+                    puts "***** Create the directory, #{uri.path}, and try again."
+                    abort();
+                rescue Errno::ENOTDIR => e
+                puts "***** The specified path does not point to a directory, #{uri.path}."
+                puts "***** Either repoint path to a directory, or remove, #{uri.path}, and create it as a directory."
+                abort();
+            end
+            
             @Path = inputDir.path
             @InputFilter = Array.new
             
