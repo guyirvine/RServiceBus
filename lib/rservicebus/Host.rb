@@ -169,6 +169,9 @@ module RServiceBus
             if !@config.forwardReceivedMessagesTo.nil? then
                 log "Forwarding all received messages to: " + @config.forwardReceivedMessagesTo.to_s
             end
+            if !@config.forwardSentMessagesTo.nil? then
+                log "Forwarding all sent messages to: " + @config.forwardSentMessagesTo.to_s
+            end
             
             self.StartListeningToEndpoints
         end
@@ -312,7 +315,7 @@ module RServiceBus
                 if !@config.forwardSentMessagesTo.nil? then
                     @mq.send( @config.forwardSentMessagesTo, serialized_object )
                 end
-                
+
                 @mq.send( queueName, serialized_object )
             end
             
