@@ -1,0 +1,8 @@
+
+export APPNAME=TestTransaction
+export MAX_RETRIES=1
+export VERBOSE=true
+export RSB_Test=fluiddbpgsql://127.0.0.1/rservicebus_test
+export MESSAGE_ENDPOINT_MAPPINGS=TestMsg:TestTransactionAlt
+
+../rservicebus_examples

@@ -1,0 +1,12 @@
+#!/usr/local/bin/ruby
+
+msgName = ARGV.length == 0 ? "Failure" : "Success"
+
+`psql -c "UPDATE table1 SET field1 = 1" rservicebus_test`
+puts `psql -c "SELECT * FROM table1" rservicebus_test`
+
+`SendEmptyMessage #{msgName} TestTransaction`
+
+puts `psql -c "SELECT * FROM table1" rservicebus_test`
+sleep 1
+puts `beanstalk-admin-list`

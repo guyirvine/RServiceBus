@@ -22,6 +22,10 @@ module RServiceBus
         
         @stats
         
+        
+        @queueForMsgsToBeSentOnComplete
+        
+        
         #Provides a thin logging veneer
         #
         # @param [String] string Log entry
@@ -33,21 +37,21 @@ module RServiceBus
                 puts "[#{type}] #{timestamp} :: #{string}"
             end
         end
-
+        
         #Thin veneer for Configuring external resources
         #
         def configureAppResource
             @appResources = ConfigureAppResource.new.getResources( ENV )
             return self;
         end
-
+        
         #Thin veneer for Configuring external resources
         #
         def configureMonitors
             @monitors = ConfigureMonitor.new( self, @appResources ).getMonitors( ENV )
             return self;
         end
-
+        
         #Thin veneer for Configuring the Message Queue
         #
         def connectToMq
@@ -55,7 +59,7 @@ module RServiceBus
             
             return self
         end
-
+        
         #Subscriptions are specified by adding events to the
         #msg endpoint mapping
         def sendSubscriptions
@@ -77,11 +81,11 @@ module RServiceBus
         def loadHandlers()
             log "Load Message Handlers"
             @handlerLoader = HandlerLoader.new( self, @appResources )
-
+            
             @config.handlerPathList.each do |path|
                 @handlerLoader.loadHandlersFromPath(path)
             end
-
+            
             @handlerList = @handlerLoader.handlerList
             @resourceByHandlerNameList = @handlerLoader.resourceList
             
@@ -92,7 +96,7 @@ module RServiceBus
         #
         def loadContracts()
             log "Load Contracts"
-
+            
             @config.contractList.each do |path|
                 require path
                 log "Loaded Contract: #{path}", true
@@ -210,8 +214,10 @@ module RServiceBus
                         rescue Exception => e
                         sleep 0.5
                         
+                        puts "*** Excepton occured"
                         puts e.message
                         puts e.backtrace
+                        puts "***"
                         
                         tempHandlerList = Hash.new
                         tempResourceList = Hash.new
@@ -244,7 +250,7 @@ module RServiceBus
                             
                             errorString = e.message + ". " + e.backtrace.join( ". " )
                             #                            log errorString
-
+                            
                             @msg.addErrorMsg( @config.localQueueName, errorString )
                             serialized_object = YAML::dump(@msg)
                             self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
@@ -293,14 +299,52 @@ module RServiceBus
                     
                     else
                     log "Handler found for: " + msgName, true
+                    log "Prep app resources", true
+                    tempResourceList = Hash.new
                     handlerList.each do |handler|
-                        begin
-                            handler.Handle( @msg.msg )
-                            rescue Exception => e
-                            log "An error occured in Handler: " + handler.class.name
-                            #log e.message + ". " + e.backtrace[0]
-                            raise e
+                        if !@resourceByHandlerNameList[handler.class.name].nil? then
+                            @resourceByHandlerNameList[handler.class.name].each do |resource|
+                                tempResourceList[resource.class.name] = resource
+                            end
                         end
+                    end
+                    begin
+                        @queueForMsgsToBeSentOnComplete = Array.new
+                        
+                        tempResourceList.each do |name, resource|
+                            log "Prep resource, #{name}", true
+                            resource.Begin
+                        end
+                        
+                        handlerList.each do |handler|
+                            begin
+                                handler.Handle( @msg.msg )
+                                rescue Exception => e
+                                log "An error occured in Handler: " + handler.class.name
+                                raise e
+                            end
+                        end
+                        
+                        tempResourceList.each do |name, resource|
+                            log "Commit resource, #{name}", true
+                            resource.Commit
+                        end
+                        
+                        self.sendQueuedMsgs
+                        
+                        rescue Exception => e
+                        
+                        tempResourceList.each do |name, resource|
+                            log "Rollback resource, #{name}", true
+                            begin
+                                resource.Rollback
+                                rescue Exception => e1
+                                log "Nested exception rolling back, #{resource.class.name}, for msg, #{msgName}"
+                            end
+                        end
+                        @queueForMsgsToBeSentOnComplete = nil
+                        
+                        raise e
                     end
                 end
             end
@@ -315,7 +359,7 @@ module RServiceBus
                 if !@config.forwardSentMessagesTo.nil? then
                     @mq.send( @config.forwardSentMessagesTo, serialized_object )
                 end
-
+                
                 @mq.send( queueName, serialized_object )
             end
             
@@ -332,6 +376,16 @@ module RServiceBus
                 self._SendAlreadyWrappedAndSerialised( serialized_object, queueName )
             end
             
+            def sendQueuedMsgs
+                @queueForMsgsToBeSentOnComplete.each do |row|
+                    self._SendNeedsWrapping( row["msg"], row["queueName"] )
+                end
+            end
+            
+            def queueMsgForSendOnComplete( msg, queueName )
+                @queueForMsgsToBeSentOnComplete << Hash["msg", msg, "queueName", queueName]
+            end
+            
             #Sends a msg back across the bus
             #Reply queues are specified in each msg. It works like
             #email, where the reply address can actually be anywhere
@@ -341,7 +395,7 @@ module RServiceBus
                 log "Reply with: " + msg.class.name + " To: " + @msg.returnAddress, true
                 @stats.incTotalReply
                 
-                self._SendNeedsWrapping( msg, @msg.returnAddress )
+                self.queueMsgForSendOnComplete( msg, @msg.returnAddress )
             end
             
             
@@ -364,8 +418,7 @@ module RServiceBus
                     raise "No end point mapping found for: " + msgName
                 end
                 
-                
-                self._SendNeedsWrapping( msg, queueName )
+                self.queueMsgForSendOnComplete( msg, queueName )
             end
             
             #Sends an event to all subscribers across the bus
@@ -377,7 +430,7 @@ module RServiceBus
                 
                 subscriptions = @subscriptionManager.get(msg.class.name)
                 subscriptions.each do |subscriber|
-                    self._SendNeedsWrapping( msg, subscriber )
+                    self.queueMsgForSendOnComplete( msg, subscriber )
                 end
                 
             end
@@ -388,10 +441,8 @@ module RServiceBus
             def Subscribe( eventName )
                 log "Bus.Subscribe: " + eventName, true
                 
-                
                 queueName = @config.messageEndpointMappings[eventName]
                 subscription = Message_Subscription.new( eventName )
-                
                 
                 self._SendNeedsWrapping( subscription, queueName )
             end

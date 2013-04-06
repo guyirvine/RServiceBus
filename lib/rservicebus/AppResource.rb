@@ -53,5 +53,20 @@ module RServiceBus
             self._connect
         end
         
+        # Transaction Semantics
+        def Begin
+            
+        end
+        
+        # Transaction Semantics
+        def Commit
+            
+        end
+
+        # Transaction Semantics
+        def Rollback
+            
+        end
+        
     end
 end
