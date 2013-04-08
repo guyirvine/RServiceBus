@@ -1,0 +1,12 @@
+#!/usr/local/bin/ruby
+
+msgName = ARGV.length == 0 ? "Failure" : "Success"
+
+`/usr/local/mysql/bin/mysql -D test -e "UPDATE table1 SET field1 = 1"`
+puts `/usr/local/mysql/bin/mysql -D test -e "SELECT * FROM table1"`
+
+`SendEmptyMessage #{msgName} TestTransaction`
+
+puts `/usr/local/mysql/bin/mysql -D test -e "SELECT * FROM table1"`
+sleep 1
+puts `beanstalk-admin-list`
