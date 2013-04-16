@@ -111,6 +111,7 @@ module RServiceBus
             log "Load Libs"
             
             @config.libList.each do |path|
+$:.unshift path
                 if Dir.exists?( path ) then
                     path = path.strip.chomp( "/" )
                     path = path + "/**/*.rb"
@@ -320,6 +321,7 @@ module RServiceBus
                             begin
                                 handler.Handle( @msg.msg )
                                 rescue Exception => e
+                                puts "E #{e.message}"
                                 log "An error occured in Handler: " + handler.class.name
                                 raise e
                             end
