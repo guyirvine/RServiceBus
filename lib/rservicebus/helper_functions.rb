@@ -21,4 +21,10 @@ module RServiceBus
 #		end
 	end
 
+    def RServiceBus.createAnonymousClass( name_for_class )
+        newAnonymousClass = Class.new(Object)
+        Object.const_set( name_for_class, newAnonymousClass )
+        return Object.const_get( name_for_class ).new
+    end
+    
 end

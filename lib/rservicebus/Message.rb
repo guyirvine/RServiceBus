@@ -41,6 +41,13 @@ class Message
 # @return [Object] The msg to be sent
 	def msg
 		return YAML::load( @_msg )
+        rescue ArgumentError => e
+            raise e if e.message.index( "undefined class/module " ).nil?
+
+            puts e.message
+            msg_name = e.message.sub( "undefined class/module ", "" )
+        
+            raise ClassNotFoundForMsg.new( msg_name )
 	end
 
 end

@@ -3,12 +3,6 @@
 require "rservicebus"
 require "rservicebus/Agent"
 
-def CreateAnonymousClass( name_for_class )
-    newAnonymousClass = Class.new(Object)
-    Object.const_set( name_for_class, newAnonymousClass )
-    return Object.const_get( name_for_class ).new
-end
-
 
 abort( "Usage: #{File.basename($0)} <Msg Name> <Queue Name> [Response Queue Name] [Beanstalk Host]" ) unless ARGV.length >=2 && ARGV.length <=4
 msg_name = ARGV[0]
@@ -17,5 +11,5 @@ response_queue_name = "#{queue_name}Response" if ARGV.length >= 3
 beanstalkHost = "beanstalk://localhost" if ARGV.length == 4
 
 agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://localhost" ) )
-msg = CreateAnonymousClass( msg_name )
+msg = RServiceBus.createAnonymousClass( msg_name )
 agent.sendMsg(msg, queue_name, response_queue_name)

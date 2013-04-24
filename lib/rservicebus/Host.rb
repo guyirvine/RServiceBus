@@ -1,6 +1,10 @@
 module RServiceBus
     
     
+    class NoHandlerFound<StandardError
+    end
+    class ClassNotFoundForMsg<StandardError
+    end
     class NoMsgToProcess<StandardError
     end
     
@@ -212,6 +216,22 @@ $:.unshift path
                             end
                         end
                         @mq.ack
+                        rescue ClassNotFoundForMsg => e
+                            puts "*** Class not found for msg, #{e.message}"
+                            puts "*** Ensure, #{e.message}, is defined in Contract.rb, most likely as 'Class #{e.message} end"
+                        
+                            @msg.addErrorMsg( @config.localQueueName, e.message )
+                            serialized_object = YAML::dump(@msg)
+                            self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
+                            @mq.ack
+                        rescue NoHandlerFound => e
+                            puts "*** Handler not found for msg, #{e.message}"
+                            puts "*** Ensure a handler named, #{e.message}, is present in the MessageHandler directory."
+                        
+                            @msg.addErrorMsg( @config.localQueueName, e.message )
+                            serialized_object = YAML::dump(@msg)
+                            self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
+                            @mq.ack
                         rescue Exception => e
                         sleep 0.5
                         
@@ -222,6 +242,11 @@ $:.unshift path
                         
                         tempHandlerList = Hash.new
                         tempResourceList = Hash.new
+                        puts @msg.to_s
+                        puts @msg.msg.to_s
+                        puts @msg.msg.class.to_s
+                        puts @msg.msg.class.name
+                        
                         @handlerList[@msg.msg.class.name].each do |handler|
                             tempHandlerList[handler.class.name] = handler
                             @resourceByHandlerNameList[handler.class.name].each do |resource|
@@ -293,10 +318,7 @@ $:.unshift path
                 handlerList = @handlerList[msgName]
                 
                 if handlerList == nil then
-                    log "No handler found for: " + msgName
-                    #                    puts "No handler found for: " + msgName
-                    #                    puts YAML::dump(@msg)
-                    raise "No Handler Found"
+                    raise NoHandlerFound.new( msgName )
                     
                     else
                     log "Handler found for: " + msgName, true
