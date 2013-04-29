@@ -112,9 +112,11 @@ module RServiceBus
         end
         
         def commitResourcesUsedToProcessMsg( msgName )
+            @host.log "HandlerManager.commitResourcesUsedToProcessMsg, #{msgName}", true
             list = self.getListOfResourcesNeededToProcessMsg( msgName )
             list.each do |resourceName|
                     r = @appResources[resourceName]
+                    @host.log "Commit resource, #{r.class.name}", true
                     r.Commit
             end
         end
