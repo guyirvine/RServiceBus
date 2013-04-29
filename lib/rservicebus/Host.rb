@@ -197,6 +197,7 @@ module RServiceBus
                     if statOutputCountdown == 0 then
                         log @stats.getForReporting
                         statOutputCountdown = @config.statOutputCountdown
+                        GC.start
                     end
                     statOutputCountdown = statOutputCountdown - 1
                     

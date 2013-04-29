@@ -47,10 +47,10 @@ module RServiceBus
         end
         
         def addHandler( msgName, handler )
-            #        @handlerList[msgName] = Array.new unless @handlerList.has_key?( msgName )
             @handlerList[msgName] = Array.new if @handlerList[msgName].nil?
+            return unless @handlerList[msgName].index{ |x| x.class.name == handler.class.name }.nil?
+
             @handlerList[msgName] << handler
-            
             self.setBusAttributeIfRequested( handler )
             self.interrogateHandlerForAppResources( handler )
         end
