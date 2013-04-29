@@ -25,7 +25,9 @@ module RServiceBus
         # @param [String] uri a location for the resource to which we will attach, eg redis://127.0.0.1/foo
         def initialize( uri )
             @uri = uri
+            #Do a connect / disconnect loop on startup to validate the connection
             self._connect
+            self.finished
         end
 
         # The method which actually configures the resource.

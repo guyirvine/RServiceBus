@@ -6,10 +6,7 @@ module RServiceBus
 #	loading handlers
 class HandlerLoader
 
-	attr_reader :handlerList, :resourceList
-
-	@host
-	@appResources
+	attr_reader :handlerList
 
 	@baseDir
 	@filepath
@@ -21,7 +18,6 @@ class HandlerLoader
 	@handler
 
 	@handlerList
-    @resourceList
     
     @listOfLoadedPaths
 
@@ -29,12 +25,10 @@ class HandlerLoader
 #
 # @param [RServiceBus::Host] host instance
 # @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
-	def initialize( host, appResources )
-		@host = host
-		@appResources = appResources
-		
-		@handlerList = Hash.new
-        @resourceList = Hash.new
+	def initialize( host, handlerManager )
+        @host = host
+        
+		@handlerManager = handlerManager
         
         @listOfLoadedPaths = Hash.new
 	end
@@ -78,43 +72,12 @@ class HandlerLoader
 		return handler
 	end
 	
-# setBusAttributeIfRequested
-#
-# @param [RServiceBus::Handler] handler
-	def setBusAttributeIfRequested( handler )
-		if defined?( handler.Bus ) then
-			handler.Bus = @host
-			@host.log "Bus attribute set for: " + handler.class.name
-		end
-		
-		return self
-	end
-
-# Assigns appropriate resources to writable attributes in the handler that match keys in the resource hash
-#
-# @param [RServiceBus::Handler] handler
-## @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
-	def setAppResources( handler )
-		@host.log "Checking app resources for: #{handler.class.name}", true
-		@host.log "If your attribute is not getting set, check that it is in the 'attr_accessor' list", true
-		@appResources.each do |k,v|
-			if handler.class.method_defined?( k ) then
-				handler.instance_variable_set( "@#{k}", v.getResource() )
-                @resourceList[handler.class.name] = Array.new if @resourceList[handler.class.name].nil?
-                @resourceList[handler.class.name] << v
-				@host.log "App resource attribute, #{k}, set for: " + handler.class.name
-			end
-		end
-
-		return self
-	end
-
 # Wrapper function
 #
 # @param [String] filePath
 # @param [String] handlerName
 # @returns [RServiceBus::Handler] handler
-	def loadAndConfigureHandler(msgName, filePath, handlerName)
+	def loadHandler(msgName, filePath, handlerName)
         if @listOfLoadedPaths.has_key?( filePath ) then
             @host.log "Not reloading, #{filePath}"
             return
@@ -125,12 +88,9 @@ class HandlerLoader
 			@host.log "handlerName: " + handlerName, true
 
 			handler = self.loadHandlerFromFile( handlerName, filePath )
-			self.setBusAttributeIfRequested( handler )
-			self.setAppResources( handler )
 			@host.log "Loaded Handler: " + handlerName
 
-            @handlerList[msgName] = Array.new unless @handlerList.has_key?( msgName )
-            @handlerList[msgName] << handler;
+            @handlerManager.addHandler( msgName, handler )
             
             @listOfLoadedPaths[filePath] = 1
 		rescue Exception => e
@@ -167,7 +127,7 @@ class HandlerLoader
 					fileName = File.basename( filePath ).sub( ".rb", "" )
 					handlerName = "MessageHandler_#{msgName}_#{fileName}"
 
-					self.loadAndConfigureHandler( msgName, filePath, handlerName )
+					self.loadHandler( msgName, filePath, handlerName )
 				end
 			end
 		end
@@ -201,7 +161,7 @@ class HandlerLoader
 					self.loadHandlersFromSecondLevelPath( msgName, filePath )
 				else
 					handlerName = "MessageHandler_#{msgName}"
-					self.loadAndConfigureHandler( msgName, filePath, handlerName )
+					self.loadHandler( msgName, filePath, handlerName )
 				end
 			end
 		end

@@ -12,7 +12,7 @@ module RServiceBus
     class Host
         
         @handlerList
-        @resourceByHandlerNameList
+        @resourceListByHandlerName
         
         @subscriptions
         
@@ -84,14 +84,12 @@ module RServiceBus
         #
         def loadHandlers()
             log "Load Message Handlers"
-            @handlerLoader = HandlerLoader.new( self, @appResources )
+            @handlerManager = HandlerManager.new( self, @appResources )
+            @handlerLoader = HandlerLoader.new( self, @handlerManager )
             
             @config.handlerPathList.each do |path|
                 @handlerLoader.loadHandlersFromPath(path)
             end
-            
-            @handlerList = @handlerLoader.handlerList
-            @resourceByHandlerNameList = @handlerLoader.resourceList
             
             return self
         end
@@ -115,7 +113,7 @@ module RServiceBus
             log "Load Libs"
             
             @config.libList.each do |path|
-$:.unshift path
+                $:.unshift path
                 if Dir.exists?( path ) then
                     path = path.strip.chomp( "/" )
                     path = path + "/**/*.rb"
@@ -197,11 +195,11 @@ $:.unshift path
                 #Popping a msg off the queue should not be in the message handler, as it affects retry
                 begin
                     if statOutputCountdown == 0 then
-                        #                        log @stats.getForReporting
-                        statOutputCountdown = @config.statOutputCountdown-1
-                        else
-                        statOutputCountdown = statOutputCountdown - 1
+                        log @stats.getForReporting
+                        statOutputCountdown = @config.statOutputCountdown
                     end
+                    statOutputCountdown = statOutputCountdown - 1
+                    
                     body = @mq.pop
                     begin
                         @stats.incTotalProcessed
@@ -217,21 +215,21 @@ $:.unshift path
                         end
                         @mq.ack
                         rescue ClassNotFoundForMsg => e
-                            puts "*** Class not found for msg, #{e.message}"
-                            puts "*** Ensure, #{e.message}, is defined in Contract.rb, most likely as 'Class #{e.message} end"
+                        puts "*** Class not found for msg, #{e.message}"
+                        puts "*** Ensure, #{e.message}, is defined in Contract.rb, most likely as 'Class #{e.message} end"
                         
-                            @msg.addErrorMsg( @config.localQueueName, e.message )
-                            serialized_object = YAML::dump(@msg)
-                            self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
-                            @mq.ack
+                        @msg.addErrorMsg( @config.localQueueName, e.message )
+                        serialized_object = YAML::dump(@msg)
+                        self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
+                        @mq.ack
                         rescue NoHandlerFound => e
-                            puts "*** Handler not found for msg, #{e.message}"
-                            puts "*** Ensure a handler named, #{e.message}, is present in the MessageHandler directory."
+                        puts "*** Handler not found for msg, #{e.message}"
+                        puts "*** Ensure a handler named, #{e.message}, is present in the MessageHandler directory."
                         
-                            @msg.addErrorMsg( @config.localQueueName, e.message )
-                            serialized_object = YAML::dump(@msg)
-                            self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
-                            @mq.ack
+                        @msg.addErrorMsg( @config.localQueueName, e.message )
+                        serialized_object = YAML::dump(@msg)
+                        self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
+                        @mq.ack
                         rescue Exception => e
                         sleep 0.5
                         
@@ -239,22 +237,6 @@ $:.unshift path
                         puts e.message
                         puts e.backtrace
                         puts "***"
-                        
-                        tempHandlerList = Hash.new
-                        tempResourceList = Hash.new
-                        puts @msg.to_s
-                        puts @msg.msg.to_s
-                        puts @msg.msg.class.to_s
-                        puts @msg.msg.class.name
-                        
-                        @handlerList[@msg.msg.class.name].each do |handler|
-                            tempHandlerList[handler.class.name] = handler
-                            @resourceByHandlerNameList[handler.class.name].each do |resource|
-                                tempResourceList[resource.class.name] = resource
-                            end
-                        end
-                        tempResourceList.each {|k,resource| resource.reconnect }
-                        tempHandlerList.each {|k,handler| @handlerLoader.setAppResources( handler ) }
                         
                         if retries > 0 then
                             retries = retries - 1
@@ -315,61 +297,32 @@ $:.unshift path
             #
             def HandleMessage()
                 msgName = @msg.msg.class.name
-                handlerList = @handlerList[msgName]
+                handlerList = @handlerManager.getHandlerListForMsg(msgName)
                 
-                if handlerList == nil then
-                    raise NoHandlerFound.new( msgName )
+                log "Handler found for: " + msgName, true
+                begin
+                    @queueForMsgsToBeSentOnComplete = Array.new
                     
-                    else
-                    log "Handler found for: " + msgName, true
-                    log "Prep app resources", true
-                    tempResourceList = Hash.new
                     handlerList.each do |handler|
-                        if !@resourceByHandlerNameList[handler.class.name].nil? then
-                            @resourceByHandlerNameList[handler.class.name].each do |resource|
-                                tempResourceList[resource.class.name] = resource
-                            end
+                        begin
+                            handler.Handle( @msg.msg )
+                            rescue Exception => e
+                            puts "E #{e.message}"
+                            log "An error occured in Handler: " + handler.class.name
+                            raise e
                         end
                     end
-                    begin
-                        @queueForMsgsToBeSentOnComplete = Array.new
-                        
-                        tempResourceList.each do |name, resource|
-                            log "Prep resource, #{name}", true
-                            resource.Begin
-                        end
-                        
-                        handlerList.each do |handler|
-                            begin
-                                handler.Handle( @msg.msg )
-                                rescue Exception => e
-                                puts "E #{e.message}"
-                                log "An error occured in Handler: " + handler.class.name
-                                raise e
-                            end
-                        end
-                        
-                        tempResourceList.each do |name, resource|
-                            log "Commit resource, #{name}", true
-                            resource.Commit
-                        end
-                        
-                        self.sendQueuedMsgs
-                        
-                        rescue Exception => e
-                        
-                        tempResourceList.each do |name, resource|
-                            log "Rollback resource, #{name}", true
-                            begin
-                                resource.Rollback
-                                rescue Exception => e1
-                                log "Nested exception rolling back, #{resource.class.name}, for msg, #{msgName}"
-                            end
-                        end
-                        @queueForMsgsToBeSentOnComplete = nil
-                        
-                        raise e
-                    end
+                    
+                    @handlerManager.commitResourcesUsedToProcessMsg( msgName )
+                    
+                    self.sendQueuedMsgs
+                    
+                    rescue Exception => e
+                    
+                    @handlerManager.rollbackResourcesUsedToProcessMsg( msgName )
+                    @queueForMsgsToBeSentOnComplete = nil
+                    
+                    raise e
                 end
             end
             
@@ -430,11 +383,11 @@ $:.unshift path
             def Send( msg )
                 log "Bus.Send", true
                 @stats.incTotalSent
-                
+
                 msgName = msg.class.name
                 if @config.messageEndpointMappings.has_key?( msgName ) then
                     queueName = @config.messageEndpointMappings[msgName]
-                    elsif !@handlerList[msgName].nil? then
+                    elsif @handlerManager.canMsgBeHandledLocally(msgName) then
                     queueName = @config.localQueueName
                     else
                     log "No end point mapping found for: " + msgName

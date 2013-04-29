@@ -13,6 +13,6 @@ class MessageHandler_HelloWorld
         
         @Bus.Send( TestMsg.new )
 
-        raise if msg.id == 1
+        raise "A user based exception" if msg.id == 1
 	end
 end
