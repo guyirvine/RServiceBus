@@ -118,6 +118,7 @@ module RServiceBus
                     r = @appResources[resourceName]
                     @host.log "Commit resource, #{r.class.name}", true
                     r.Commit
+                    r.finished
             end
         end
         
@@ -129,6 +130,7 @@ module RServiceBus
                     r = @appResources[resourceName]
                     @host.log "Rollback resource, #{r.class.name}", true
                     r.Rollback
+                    r.finished
                     rescue Exception => e1
                     @host.log "Caught nested exception rolling back, #{r.class.name}, for msg, #{msgName}"
                     @host.log "****"
