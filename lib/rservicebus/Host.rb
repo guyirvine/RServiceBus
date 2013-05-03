@@ -114,13 +114,6 @@ module RServiceBus
             
             @config.libList.each do |path|
                 $:.unshift path
-                if Dir.exists?( path ) then
-                    path = path.strip.chomp( "/" )
-                    path = path + "/**/*.rb"
-                end
-                Dir.glob( path ).each do |path|
-                    require path
-                end
             end
             
             return self
