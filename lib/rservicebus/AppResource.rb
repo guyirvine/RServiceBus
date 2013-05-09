@@ -17,13 +17,14 @@ module RServiceBus
 
         def _connect
             @connection = self.connect(@uri)
-            puts "#{self.class.name}. Connected to, #{@uri.to_s}" unless !ENV["QUIET"].nil?
+            @host.log "#{self.class.name}. Connected to, #{@uri.to_s}", true
         end
 
         # Resources are attached resources, and can be specified using the URI syntax.
         #
         # @param [String] uri a location for the resource to which we will attach, eg redis://127.0.0.1/foo
-        def initialize( uri )
+        def initialize( host, uri )
+            @host = host
             @uri = uri
             #Do a connect / disconnect loop on startup to validate the connection
             self._connect

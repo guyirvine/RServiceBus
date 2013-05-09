@@ -59,13 +59,13 @@ module RServiceBus
         #
         # @param [RServiceBus::Handler] handler
         ## @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
-        def setAppResources( handler )
+        def setAppResources_to_be_removed( handler )
             @host.log "Checking app resources for: #{handler.class.name}", true
             @host.log "If your attribute is not getting set, check that it is in the 'attr_accessor' list", true
             @appResources.each do |k,v|
                 if handler.class.method_defined?( k ) then
                     v._connect
-                    v.Begin
+                    #                    v.Begin
                     handler.instance_variable_set( "@#{k}", v.getResource() )
                     @host.log "App resource attribute, #{k}, set for: " + handler.class.name
                 end
@@ -89,7 +89,7 @@ module RServiceBus
                 next if @resourceListByHandlerName[handler.class.name].nil?
                 @resourceListByHandlerName[handler.class.name].each do |k|
                     handler.instance_variable_set( "@#{k}", @appResources[k].getResource() )
-                    @host.log "App resource attribute, #{k}, set for: " + handler.class.name
+                    @host.log "App resource attribute, #{k}, set for: " + handler.class.name, true
                 end
             end
             
@@ -100,10 +100,10 @@ module RServiceBus
 
             list = self.getListOfResourcesNeededToProcessMsg( msgName )
             list.each do |resourceName|
-                @host.log( "Preparing reousrce: #{resourceName}", true )
                 r = @appResources[resourceName]
                 r._connect
                 r.Begin
+                @host.log( "Preparing resource: #{resourceName}. Begin", true )
             end
             
             self.setResourcesForHandlersNeededToProcessMsg( msgName )

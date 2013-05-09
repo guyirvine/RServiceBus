@@ -45,7 +45,7 @@ module RServiceBus
         #Thin veneer for Configuring external resources
         #
         def configureAppResource
-            @appResources = ConfigureAppResource.new.getResources( ENV )
+            @appResources = ConfigureAppResource.new.getResources( ENV, self )
             return self;
         end
         
@@ -188,7 +188,7 @@ module RServiceBus
                 #Popping a msg off the queue should not be in the message handler, as it affects retry
                 begin
                     if statOutputCountdown == 0 then
-                        log @stats.getForReporting
+                        log @stats.getForReporting, true
                         statOutputCountdown = @config.statOutputCountdown
                         GC.start
                     end
@@ -267,10 +267,14 @@ module RServiceBus
                     rescue NoMsgToProcess => e
                     #This exception is just saying there are no messages to process
                     statOutputCountdown = 0
-                    
+                    @queueForMsgsToBeSentOnComplete = Array.new
+
                     @monitors.each do |o|
                         o.Look
                     end
+
+                    self.sendQueuedMsgs
+                    @queueForMsgsToBeSentOnComplete = nil
                     
                     
                     rescue Exception => e

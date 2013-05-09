@@ -18,17 +18,47 @@ module RServiceBus
             
         end
         
+        def checkSendHash
+            if !@QueryStringParts.nil? && @QueryStringParts.has_key?("hash") then
+                flag = @QueryStringParts["hash"][0]
+                return flag == "Y"
+            end
+            
+            return false
+        end
+        
+        
+        def SendArray( payload, uri )
+            payload.each do |csvline|
+                self.send( csvline, uri )
+            end
+        end
+
+        def SendHash( payload, uri )
+            headLine = payload.shift
+            payload.each do |csvline|
+                hash = Hash.new
+                csvline.each_with_index do |v,idx|
+                    hash[headLine[idx]] = v
+                end
+                self.send( hash, uri )
+            end
+        end
+
         def ProcessPath( filePath )
             uri = URI.parse( "file://#{filePath}" )
             
             content = IO.read( filePath )
             payload = CSV.parse( content )
             
-            self.checkPayloadForNumberOfColumns( payload )
             
-            payload.each do |csvline|
-                self.send( csvline, uri )
+            self.checkPayloadForNumberOfColumns( payload )
+            if self.checkSendHash then
+                self.SendHash( payload, uri )
+            else
+                self.SendArray( payload, uri )
             end
+
 
             return content
         end
