@@ -1,7 +1,7 @@
 module RServiceBus
 
 #Implementation of Subscription Storage to Redis
-class SubscriptionStorage_Marshal<SubscriptionStorage
+class SubscriptionStorage_File<SubscriptionStorage
 
 	@path
 

@@ -89,7 +89,7 @@ module RServiceBus
             @maxRetries = self.getValue( "MAX_RETRIES", "5" ).to_i
             @queueTimeout = self.getValue( "QUEUE_TIMEOUT", "5" ).to_i
             @statOutputCountdown = self.getValue( "STAT_OUTPUT_COUNTDOWN", "100" ).to_i
-            @subscriptionUri = self.getValue( "SUBSCRIPTION_URI", "marshal:///tmp/#{appName}_subscriptions.yaml" )
+            @subscriptionUri = self.getValue( "SUBSCRIPTION_URI", "file:///tmp/#{appName}_subscriptions.yaml" )
 
             auditQueueName = self.getValue( "AUDIT_QUEUE_NAME" )
             if auditQueueName.nil? then
