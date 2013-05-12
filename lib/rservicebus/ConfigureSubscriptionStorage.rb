@@ -13,6 +13,10 @@ module RServiceBus
                 require "rservicebus/SubscriptionStorage/Redis"
                 s = SubscriptionStorage_Redis.new( appName, uri )
                 
+                when "marshal"
+                require "rservicebus/SubscriptionStorage/Marshal"
+                s = SubscriptionStorage_Marshal.new( appName, uri )
+                
                 else
                 abort("Scheme, #{uri.scheme}, not recognised when configuring subscription storage, #{uri_string}");
             end

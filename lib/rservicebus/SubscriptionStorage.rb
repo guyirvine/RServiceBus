@@ -6,6 +6,7 @@ require "uri"
 #
 class SubscriptionStorage
 	@appName
+    @uri
 
     # Constructor
     #
@@ -13,6 +14,7 @@ class SubscriptionStorage
     # @param [String] uri a location for the resource to which we will attach, eg redis://127.0.0.1/foo
 	def initialize(appName, uri)
 		@appName = appName
+        @uri = uri
 	end
 
     # Get a list of all subscription, as an Array
