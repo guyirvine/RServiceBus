@@ -1,11 +1,11 @@
 PWD=`pwd`
 
-cp data/array.csv input
+cp data/hash.csv input
 
 APPNAME=HelloWorld \
 MAX_RETRIES=2 \
 VERBOSE=true \
 QUEUE_TIMEOUT=1 \
-RSBOB_HelloWorld=csvdir://$PWD/input \
+RSBOB_HelloWorld=csvdir://$PWD/input?hash=Y \
 RSB_OutputDir=dir://$PWD/output \
 ../rservicebus_examples

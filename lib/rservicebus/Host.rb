@@ -165,7 +165,8 @@ module RServiceBus
         def run
             log "Starting the Host"
             
-            log "Watching, " + @config.localQueueName
+            log "Watching, #{@config.localQueueName}"
+	    $0 = "rservicebus - #{@config.localQueueName}"
             if !@config.forwardReceivedMessagesTo.nil? then
                 log "Forwarding all received messages to: " + @config.forwardReceivedMessagesTo.to_s
             end
@@ -303,7 +304,9 @@ module RServiceBus
                     
                     handlerList.each do |handler|
                         begin
+                            log "Handler, #{handler.class.name}, started processing msg, #{msgName}"
                             handler.Handle( @msg.msg )
+                            log "Handler, #{handler.class.name}, finished processing msg, #{msgName}"
                             rescue Exception => e
                             puts "E #{e.message}"
                             log "An error occured in Handler: " + handler.class.name
