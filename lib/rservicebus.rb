@@ -1,6 +1,9 @@
 #Add the currently running directory to the start of the load path
 #$:.unshift File.dirname(__FILE__) + '/../../lib'
 
+#Don't buffer stdout
+$stdout.sync = true
+
 require "rubygems"
 require "yaml"
 require "uuidtools"
