@@ -3,6 +3,8 @@ require 'net/scp'
 module RServiceBus
 
     class ScpUploadHelper
+        attr_reader :uri
+        
         def initialize( uri )
             @uri = uri
         end
