@@ -13,6 +13,9 @@ class Stats
 		@totalReply = 0
 
 		@totalByMessageType = Hash.new
+        
+        @written = false
+
 	end
 
 	def incTotalProcessed
@@ -51,14 +54,26 @@ class Stats
 
 	end
 
+	def getForReporting2
+        if @written == false then
+            @written = true
+            types = Hash.new(0)
+            ObjectSpace.each_object do|obj|
+                types[obj.class]+=1
+            end
+
+            return types
+        end
+    end
+
 	def getForReporting
 		string = "T:#{@totalProcessed};E:#{@totalErrored};S:#{@totalSent};P:#{@totalPublished};R:#{@totalReply}"
 
-		if @hash.length > 0 then
-			@hash.each do |k,v|
-				string = "#{string};#{k}:#{v}"
-			end
-		end
+#		if @hash.length > 0 then
+#			@hash.each do |k,v|
+#				string = "#{string};#{k}:#{v}"
+#			end
+#		end
 		
 		return string
 	end

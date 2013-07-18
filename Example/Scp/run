@@ -1,0 +1,9 @@
+PWD=`pwd`
+APPNAME=HelloWorld \
+ERROR_QUEUE_NAME=error \
+MAX_RETRIES=2 \
+VERBOSE=true \
+WORKING_DIR=./ \
+RSB_DataDir=dir://$PWD/data \
+RSB_ScpUpload=scpupload://username@host:/path/to/destination \
+../rservicebus_examples

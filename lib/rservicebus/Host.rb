@@ -90,7 +90,7 @@ module RServiceBus
             @config.handlerPathList.each do |path|
                 @handlerLoader.loadHandlersFromPath(path)
             end
-            
+
             return self
         end
         
@@ -190,6 +190,7 @@ module RServiceBus
                 begin
                     if statOutputCountdown == 0 then
                         log @stats.getForReporting, true
+                        #                        log @handlerManager.getStats, true
                         statOutputCountdown = @config.statOutputCountdown
                         GC.start
                     end

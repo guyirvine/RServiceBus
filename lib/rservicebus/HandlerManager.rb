@@ -5,7 +5,7 @@ module RServiceBus
     #	handlernames, and
     #	loading handlers
     class HandlerManager
-        
+
         # Constructor
         #
         # @param [RServiceBus::Host] host instance
@@ -17,8 +17,8 @@ module RServiceBus
             @handlerList = Hash.new
             @resourceListByHandlerName = Hash.new
         end
-        
-        
+
+
         # setBusAttributeIfRequested
         #
         # @param [RServiceBus::Handler] handler
@@ -144,6 +144,15 @@ module RServiceBus
         
         def canMsgBeHandledLocally( msgName )
             return @handlerList.has_key?(msgName)
+        end
+        
+        def getStats
+            list = Array.new
+            @handlerList.each do |k,v|
+                list << v.inspect
+            end
+            
+            return list
         end
     end
 end

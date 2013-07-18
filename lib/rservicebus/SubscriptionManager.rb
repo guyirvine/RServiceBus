@@ -14,7 +14,9 @@ class SubscriptionManager
 	def get( eventName )
 		subscriptions = @subscriptions[eventName]
 		if subscriptions.nil? then
-			RServiceBus.log "No subscribers for event, " + eventName
+			RServiceBus.log "No subscribers for event, #{eventName}"
+			RServiceBus.log "If there should be, ensure you have the appropriate evironment variable set, eg MESSAGE_ENDPOINT_MAPPINGS=#{eventName}:<Queue Name>"
+            
 			return Array.new
 		end
 

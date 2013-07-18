@@ -1,0 +1,6 @@
+APPNAME=Profile \
+MAX_RETRIES=1 \
+VERBOSE=true \
+WORKING_DIR=./ \
+../rservicebus_examples
+
