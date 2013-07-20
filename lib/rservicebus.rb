@@ -19,6 +19,7 @@ require "rservicebus/ConfigureAppResource"
 require "rservicebus/ConfigureMQ"
 require "rservicebus/Host"
 require "rservicebus/Config"
+require "rservicebus/EndpointMapping"
 require "rservicebus/Stats"
 
 require "rservicebus/Message"

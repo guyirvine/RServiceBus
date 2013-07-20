@@ -36,11 +36,10 @@ module RServiceBus
             Object.const_set( name, newAnonymousClass )
             @MsgType = Object.const_get( name )
             
-            
             @uri = uri
             self._connect
         end
-        
+
         # A notification that allows cleanup
         def finished
         end

@@ -62,6 +62,10 @@ module RServiceBus
                         require "rservicebus/Monitor/Dir"
 						monitor = Monitor_Dir.new( @host, name, uri )
                         
+                        when "dirnotifier"
+                        require "rservicebus/Monitor/DirNotifier"
+						monitor = Monitor_DirNotifier.new( @host, name, uri )
+
                         when "csvperlinedir"
                         require "rservicebus/Monitor/CsvPerLine"
 						monitor = Monitor_CsvPerLineDir.new( @host, name, uri )

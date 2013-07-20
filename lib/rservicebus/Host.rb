@@ -68,15 +68,9 @@ module RServiceBus
         #msg endpoint mapping
         def sendSubscriptions
             log "Send Subscriptions"
-            @config.messageEndpointMappings.each do |eventName,queueName|
-                log "Checking, " + eventName + " for Event", true
-                if eventName.end_with?( "Event" ) then
-                    log eventName + ", is an event. About to send subscription to, " + queueName, true
-                    self.Subscribe( eventName )
-                    log "Subscribed to, " + eventName + " at, " + queueName
-                end
-            end
-            
+
+            @endpointMapping.getSubscriptionEndpoints.each { |eventName| self.Subscribe( eventName ) }
+
             return self
         end
         
@@ -90,7 +84,7 @@ module RServiceBus
             @config.handlerPathList.each do |path|
                 @handlerLoader.loadHandlersFromPath(path)
             end
-
+            
             return self
         end
         
@@ -142,10 +136,11 @@ module RServiceBus
 			.loadHostSection()
 			.configureMq()
 			.loadContracts()
-			.loadMessageEndpointMappings()
 			.loadHandlerPathList()
             .loadLibs()
             .loadWorkingDirList();
+            
+            @endpointMapping = EndpointMapping.new.Configure
             
             self.configureStatistics()
             .loadContracts()
@@ -156,6 +151,7 @@ module RServiceBus
 			.connectToMq()
 			.configureSubscriptions()
 			.sendSubscriptions()
+
             
             return self
         end
@@ -166,7 +162,7 @@ module RServiceBus
             log "Starting the Host"
             
             log "Watching, #{@config.localQueueName}"
-	    $0 = "rservicebus - #{@config.localQueueName}"
+            $0 = "rservicebus - #{@config.localQueueName}"
             if !@config.forwardReceivedMessagesTo.nil? then
                 log "Forwarding all received messages to: " + @config.forwardReceivedMessagesTo.to_s
             end
@@ -270,11 +266,11 @@ module RServiceBus
                     #This exception is just saying there are no messages to process
                     statOutputCountdown = 0
                     @queueForMsgsToBeSentOnComplete = Array.new
-
+                    
                     @monitors.each do |o|
                         o.Look
                     end
-
+                    
                     self.sendQueuedMsgs
                     @queueForMsgsToBeSentOnComplete = nil
                     
@@ -373,11 +369,22 @@ module RServiceBus
             def Reply( msg )
                 log "Reply with: " + msg.class.name + " To: " + @msg.returnAddress, true
                 @stats.incTotalReply
-                
+
                 self.queueMsgForSendOnComplete( msg, @msg.returnAddress )
             end
             
-            
+            def getEndpointForMsg( msgName )
+                queueName = @endpointMapping.get( msgName )
+                return queueName unless queueName.nil?
+                
+                return @config.localQueueName if @handlerManager.canMsgBeHandledLocally(msgName)
+                
+                log "No end point mapping found for: " + msgName
+                log "**** Check environment variable MessageEndpointMappings contains an entry named : " + msgName
+                raise "No end point mapping found for: " + msgName
+            end
+
+
             #Send a msg across the bus
             #msg destination is specified at the infrastructure level
             #
@@ -385,17 +392,9 @@ module RServiceBus
             def Send( msg )
                 log "Bus.Send", true
                 @stats.incTotalSent
-
+                
                 msgName = msg.class.name
-                if @config.messageEndpointMappings.has_key?( msgName ) then
-                    queueName = @config.messageEndpointMappings[msgName]
-                    elsif @handlerManager.canMsgBeHandledLocally(msgName) then
-                    queueName = @config.localQueueName
-                    else
-                    log "No end point mapping found for: " + msgName
-                    log "**** Check environment variable MessageEndpointMappings contains an entry named : " + msgName
-                    raise "No end point mapping found for: " + msgName
-                end
+                queueName = self.getEndpointForMsg( msgName )
                 
                 self.queueMsgForSendOnComplete( msg, queueName )
             end
@@ -419,8 +418,8 @@ module RServiceBus
             # @param [String] eventName event to be subscribes to
             def Subscribe( eventName )
                 log "Bus.Subscribe: " + eventName, true
-                
-                queueName = @config.messageEndpointMappings[eventName]
+
+                queueName = self.getEndpointForMsg( eventName )
                 subscription = Message_Subscription.new( eventName )
                 
                 self._SendNeedsWrapping( subscription, queueName )

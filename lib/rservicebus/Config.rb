@@ -39,32 +39,6 @@ module RServiceBus
             return value
         end
         
-        #Marshals data for message end points
-        #
-        #Expected format;
-        #	<msg mame 1>:<end point 1>;<msg mame 2>:<end point 2>
-        def loadMessageEndpointMappings()
-            mapping = self.getValue( "MESSAGE_ENDPOINT_MAPPINGS" )
-            
-            messageEndpointMappings=Hash.new
-            if !mapping.nil? then
-                mapping.split( ";" ).each do |line|
-                    match = line.match( /(.+):(.+)/ )
-                    if match.nil? then
-                        log "Mapping string provided is invalid"
-                        log "The entire mapping string is: #{mapping}"
-                        log "*** Could not find ':' in mapping entry, #{line}"
-                        exit()
-                    end
-                    messageEndpointMappings[match[1]] = match[2]
-                end
-            end
-            
-            @messageEndpointMappings=messageEndpointMappings
-            
-            return self
-        end
-        
         #Marshals paths for message handlers
         #
         #Note. trailing slashs will be stripped
