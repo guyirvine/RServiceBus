@@ -6,6 +6,14 @@ module RServiceBus
     #	<msg mame 1>:<end point 1>;<msg mame 2>:<end point 2>
     class EndpointMapping
         
+        def getValue( name )
+            return RServiceBus.getValue( name )
+        end
+        
+        def log( string )
+            RServiceBus.log( string )
+        end
+
         def configureMapping( mapping )
             match = mapping.match( /(.+):(.+)/ )
             if match.nil? then
@@ -15,23 +23,23 @@ module RServiceBus
                 exit()
             end
             
-            RServiceBus.log( "EndpointMapping.configureMapping: #{match[1]}, #{match[2]}", true )
+            self.log( "EndpointMapping.configureMapping: #{match[1]}, #{match[2]}", true )
             @endpoints[match[1]] = match[2]
-            
+
         end
         
         def Configure
-            RServiceBus.log( "EndpointMapping.Configure" )
-            mappings = RServiceBus.getValue( "MESSAGE_ENDPOINT_MAPPINGS" )
+            self.log( "EndpointMapping.Configure" )
+            mappings = self.getValue( "MESSAGE_ENDPOINT_MAPPINGS" )
             return self if mappings.nil?
-            
+
             mappings.split( ";" ).each do |mapping|
                 self.configureMapping( mapping )
             end
             
             return self
         end
-        
+
         def initialize
             @endpoints=Hash.new
         end

@@ -34,49 +34,6 @@ end
 
 class ConfigTest < Test::Unit::TestCase
 
-	def test_loadMessageEndpointMappings_empty
-		config = Test_Config.new
-
-		config.setValue( "MESSAGE_ENDPOINT_MAPPINGS", "" )
-		config.loadMessageEndpointMappings
-
-		assert_equal 0, config.messageEndpointMappings.length
-	end
-
-	def test_loadMessageEndpointMappings_single_without_seperator
-		config = Test_Config.new
-
-		config.setValue( "MESSAGE_ENDPOINT_MAPPINGS", "msg:endpoint" )
-		config.loadMessageEndpointMappings
-
-		assert_equal 1, config.messageEndpointMappings.length
-		assert_equal "endpoint", config.messageEndpointMappings["msg"]
-		
-	end
-
-	def test_loadMessageEndpointMappings_single_with_seperator
-		config = Test_Config.new
-
-		config.setValue( "MESSAGE_ENDPOINT_MAPPINGS", "msg:endpoint;" )
-		config.loadMessageEndpointMappings
-
-		assert_equal 1, config.messageEndpointMappings.length
-		assert_equal "endpoint", config.messageEndpointMappings["msg"]
-		
-	end
-
-	def test_loadMessageEndpointMappings_two
-		config = Test_Config.new
-
-		config.setValue( "MESSAGE_ENDPOINT_MAPPINGS", "msg1:endpoint1;msg2:endpoint2" )
-		config.loadMessageEndpointMappings
-
-		assert_equal 2, config.messageEndpointMappings.length
-		assert_equal "endpoint1", config.messageEndpointMappings["msg1"]
-		assert_equal "endpoint2", config.messageEndpointMappings["msg2"]
-		
-	end
-
 	def test_loadHandlerPathList_nil
 		config = Test_Config.new
 
