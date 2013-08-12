@@ -345,16 +345,16 @@ module RServiceBus
             def _SendNeedsWrapping( msg, queueName )
                 log "Bus._SendNeedsWrapping", true
 
+                rMsg = RServiceBus::Message.new( msg, @config.localQueueName )
                 if queueName.index( "@" ).nil? then
-                    @mq.send( queueName, serialized_object )
+                    q = queueName
                     else
                     parts = queueName.split( "@" )
-                    msg.setRemoteQueueName( parts[0] )
-                    msg.setRemoteHostName( parts[1] )
-                    @mq.send( 'transport-out', serialized_object )
+                    rMsg.setRemoteQueueName( parts[0] )
+                    rMsg.setRemoteHostName( parts[1] )
+                    q = 'transport-out'
                 end
-                
-                rMsg = RServiceBus::Message.new( msg, @config.localQueueName )
+
                 serialized_object = YAML::dump(rMsg)
                 log "Sending: " + msg.class.name + " to: " + queueName, true
                 self._SendAlreadyWrappedAndSerialised( serialized_object, queueName )

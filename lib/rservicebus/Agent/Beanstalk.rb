@@ -17,9 +17,21 @@ class Agent_Beanstalk
 # @param [String] returnAddress the name of a queue to send replies to
 	def sendMsg(messageObj, queueName, returnAddress=nil)
 		msg = RServiceBus::Message.new( messageObj, returnAddress )
-		serialized_object = YAML::dump(msg)
+        
+        
+        if queueName.index( "@" ).nil? then
+            q = queueName
+	else
+            parts = queueName.split( "@" )
+            msg.setRemoteQueueName( parts[0] )
+            msg.setRemoteHostName( parts[1] )
+	    q = 'transport-out'
+        end
+        
+        
+        		serialized_object = YAML::dump(msg)
 
-		@beanstalk.use( queueName )
+		@beanstalk.use( q )
 		@beanstalk.put( serialized_object )
 	end
 
