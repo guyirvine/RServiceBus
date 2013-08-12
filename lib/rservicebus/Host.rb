@@ -41,7 +41,7 @@ module RServiceBus
                 puts "[#{type}] #{timestamp} :: #{string}"
             end
         end
-        
+
         #Thin veneer for Configuring external resources
         #
         def configureAppResource
@@ -344,6 +344,15 @@ module RServiceBus
             # @param [String] queueName endpoint to which the msg will be sent
             def _SendNeedsWrapping( msg, queueName )
                 log "Bus._SendNeedsWrapping", true
+
+                if queueName.index( "@" ).nil? then
+                    @mq.send( queueName, serialized_object )
+                    else
+                    parts = queueName.split( "@" )
+                    msg.setRemoteQueueName( parts[0] )
+                    msg.setRemoteHostName( parts[1] )
+                    @mq.send( 'transport-out', serialized_object )
+                end
                 
                 rMsg = RServiceBus::Message.new( msg, @config.localQueueName )
                 serialized_object = YAML::dump(rMsg)

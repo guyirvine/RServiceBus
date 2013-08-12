@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+#
+# The application 'rservicebus-transport' is installed as part of a gem, and
+# this file is here to facilitate running it.
+#
+
+require 'rubygems'
+require 'rservicebus'
+require 'rservicebus/Transporter'
+
+def run_rservicebus_transport()
+	RServiceBus::Transporter.new().Run()
+end
+
+run_rservicebus_transport
+

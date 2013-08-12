@@ -1,0 +1,4 @@
+source: /usr/local/bin/beanstalkd -l 127.0.0.1 -p 2020
+destination: /usr/local/bin/beanstalkd -l 127.0.0.1 -p 2021
+transporter: env TIMEOUT=10 REMOTE_USER_MEGA=user /usr/local/bin/ruby rservicebus-transport.rb
+

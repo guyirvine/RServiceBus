@@ -10,7 +10,7 @@ module RServiceBus
             return RServiceBus.getValue( name )
         end
         
-        def log( string )
+        def log( string, ver=false )
             RServiceBus.log( string )
         end
 
