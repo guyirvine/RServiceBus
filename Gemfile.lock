@@ -2,17 +2,27 @@ GEM
   remote: https://rubygems.org/
   specs:
     beanstalk-client (1.1.1)
+    fluiddb (0.0.32)
     haml (3.1.6)
     json (1.7.3)
+    net-ssh (2.6.8)
+    net-ssh-gateway (1.2.0)
+      net-ssh (>= 2.6.5)
+    rake (10.1.0)
     redis (3.0.1)
     uuidtools (2.1.2)
+    zip (2.0.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   beanstalk-client
+  fluiddb
   haml
   json
+  net-ssh-gateway
+  rake
   redis
   uuidtools
+  zip

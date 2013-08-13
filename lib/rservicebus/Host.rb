@@ -330,11 +330,11 @@ module RServiceBus
             # @param [String] queueName endpoint to which the msg will be sent
             def _SendAlreadyWrappedAndSerialised( serialized_object, queueName )
                 log "Bus._SendAlreadyWrappedAndSerialised", true
-                
+
                 if !@config.forwardSentMessagesTo.nil? then
                     @mq.send( @config.forwardSentMessagesTo, serialized_object )
                 end
-                
+
                 @mq.send( queueName, serialized_object )
             end
             

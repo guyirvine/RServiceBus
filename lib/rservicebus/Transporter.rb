@@ -52,7 +52,7 @@ class Transporter
 		#Get the next job from the source queue
         job = @source.reserve @timeout
         msg = YAML::load(job.body)
-        
+
         log "job: #{job.body}", true
         
         
@@ -63,27 +63,21 @@ class Transporter
         
         # Open port 27018 to forward to 127.0.0.11300 on the remote host
         gateway.open('127.0.0.1', 11300, 27018)
-        
+
 		log "Connect to destination beanstalk"
         begin
-            destincationUrl = '127.0.0.1:27018'
-            destination = Beanstalk::Pool.new([destincationUrl])
+            destinationUrl = '127.0.0.1:27018'
+            destination = Beanstalk::Pool.new([destinationUrl])
             rescue Exception => e
             if e.message == "Beanstalk::NotConnected" then
-                puts "***Could not connect to destination, check beanstalk is running at, #{destincationUrl}"
+                puts "***Could not connect to destination, check beanstalk is running at, #{destinationUrl}"
                 raise CouldNotConnectToDestination.new
             end
             raise
         end
         
-        
-		#getDestinationQueueName
-		destinationQueueName = "transportIn"
-        queueName = msg.destinationQueueName
-        
-		#putMsg
         log "Put msg, #{job.body}", true
-        destination.use( destinationQueueName )
+        destination.use( msg.remoteQueueName )
         destination.put( job.body )
         
         
