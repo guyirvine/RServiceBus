@@ -31,7 +31,7 @@ class EndpointMappingTest < Test::Unit::TestCase
 		config = Test_EndpointMapping.new
 
 		config.setValue( "MESSAGE_ENDPOINT_MAPPINGS", "" )
-		config.Configure
+		config.Configure( "localQueueName" )
 
 		assert_equal 0, config.endpoints.length
 	end
@@ -40,7 +40,7 @@ class EndpointMappingTest < Test::Unit::TestCase
 		config = Test_EndpointMapping.new
 
 		config.setValue( "MESSAGE_ENDPOINT_MAPPINGS", "msg:endpoint" )
-		config.Configure
+		config.Configure( "localQueueName" )
 
 		assert_equal 1, config.endpoints.length
 		assert_equal "endpoint", config.endpoints["msg"]
@@ -51,7 +51,7 @@ class EndpointMappingTest < Test::Unit::TestCase
 		config = Test_EndpointMapping.new
 
 		config.setValue( "MESSAGE_ENDPOINT_MAPPINGS", "msg:endpoint;" )
-		config.Configure
+		config.Configure( "localQueueName" )
 
 		assert_equal 1, config.endpoints.length
 		assert_equal "endpoint", config.endpoints["msg"]
@@ -62,7 +62,7 @@ class EndpointMappingTest < Test::Unit::TestCase
 		config = Test_EndpointMapping.new
 
 		config.setValue( "MESSAGE_ENDPOINT_MAPPINGS", "msg1:endpoint1;msg2:endpoint2" )
-		config.Configure
+		config.Configure( "localQueueName" )
 
 		assert_equal 2, config.endpoints.length
 		assert_equal "endpoint1", config.endpoints["msg1"]
