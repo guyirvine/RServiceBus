@@ -33,5 +33,15 @@ module RServiceBus
         return value
     end
 
+    def RServiceBus.sendMsg( msg, responseQueue="agent" )
+	require "rservicebus/EndpointMapping"
+	endpointMapping = EndpointMapping.new
+	endpointMapping.Configure
+	queueName = endpointMapping.get( msg.class.name )	
+
+	agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://127.0.0.1:11300" ) )	
+	agent.sendMsg(msg, queueName, responseQueue)
+
+    end
     
 end

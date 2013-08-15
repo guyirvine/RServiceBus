@@ -36,10 +36,11 @@ module RServiceBus
             @queueNameList << match[2]
         end
         
-        def Configure( localQueueName )
+        def Configure( localQueueName=nil )
             self.log( "EndpointMapping.Configure" )
             
-            @queueNameList = [localQueueName]
+            @queueNameList = []
+            @queueNameList << localQueueName unless localQueueName.nil?
             
             mappings = self.getValue( "MESSAGE_ENDPOINT_MAPPINGS" )
             return self if mappings.nil?
