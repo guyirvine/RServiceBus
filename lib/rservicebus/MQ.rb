@@ -11,7 +11,7 @@ module RServiceBus
         
         # Resources are attached resources, and can be specified using the URI syntax.
         #
-        # @param [URI] uri the type and location of queue, eg bunny://127.0.0.1/foo
+        # @param [URI] uri the type and location of queue, eg beanstalk://127.0.0.1/foo
         # @param [Integer] timeout the amount of time to wait for a msg to arrive
         def initialize( uri, timeout )
             @timeout = timeout

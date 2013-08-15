@@ -1,1 +1,0 @@
-APPNAME=HelloWorld ERROR_QUEUE_NAME=error MAX_RETRIES=2 VERBOSE=true MSGHANDLERPATH=./MessageHandler CONTRACTS=./Contract.rb MQ=bunny://localhost ../rservicebus_examples

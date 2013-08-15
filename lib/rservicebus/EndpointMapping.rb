@@ -13,7 +13,7 @@ module RServiceBus
         def log( string, ver=false )
             RServiceBus.log( string )
         end
-
+        
         def configureMapping( mapping )
             match = mapping.match( /(.+):(.+)/ )
             if match.nil? then
@@ -25,21 +25,32 @@ module RServiceBus
             
             self.log( "EndpointMapping.configureMapping: #{match[1]}, #{match[2]}", true )
             @endpoints[match[1]] = match[2]
-
+            
+            @queueNameList.each do |q|
+                if q != match[2] && q.downcase == match[2].downcase then
+                    log( "*** Two queues specified with only case sensitive difference." )
+                    log( "*** #{q} != #{match[2]}" )
+                    log( "*** If you meant these queues to be the same, please match case and restart the bus." )
+                end
+            end
+            @queueNameList << match[2]
         end
         
-        def Configure
+        def Configure( localQueueName )
             self.log( "EndpointMapping.Configure" )
+            
+            @queueNameList = [localQueueName]
+            
             mappings = self.getValue( "MESSAGE_ENDPOINT_MAPPINGS" )
             return self if mappings.nil?
-
+            
             mappings.split( ";" ).each do |mapping|
                 self.configureMapping( mapping )
             end
             
             return self
         end
-
+        
         def initialize
             @endpoints=Hash.new
         end

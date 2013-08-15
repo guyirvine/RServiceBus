@@ -8,9 +8,6 @@ module RServiceBus
             if uri.scheme == "beanstalk" then
                 require "rservicebus/Agent/Beanstalk"
                 return Agent_Beanstalk.new()
-                elsif uri.scheme == "bunny" then
-                require "rservicebus/Agent/Bunny"
-                return Agent_Bunny.new()
                 else
                 raise StandardError.new( "Scheme not recognised" )
                 

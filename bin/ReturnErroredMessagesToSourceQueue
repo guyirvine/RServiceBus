@@ -1,4 +1,49 @@
 #!/usr/bin/env ruby
 
-puts `ReturnErroredMessagesToSourceQueueBeanstalk`
-puts `ReturnErroredMessagesToSourceQueueBunny`
+require "yaml"
+
+require "beanstalk-client"
+
+require "rservicebus"
+
+begin
+    host = 'localhost:11300'
+    errorQueueName = "error"
+    beanstalk = Beanstalk::Pool.new([host])
+    
+    tubes = beanstalk.list_tubes[host]
+    if !tubes.include?(errorQueueName) then
+        abort( "Nothing waiting on the Beanstalk error queue" )
+    end
+    
+    tubeStats = beanstalk.stats_tube(errorQueueName)
+    number_of_messages = tubeStats["current-jobs-ready"]
+    puts
+    puts "Attempting to return #{number_of_messages} to their source queue"
+    puts
+    
+    begin
+        beanstalk.watch(errorQueueName)
+        1.upto(number_of_messages) do |request_nbr|
+            job = beanstalk.reserve 1
+            payload = job.body
+            
+            puts "#" + request_nbr.to_s + ": " + payload
+            msg = YAML::load(payload)
+            queueName = msg.getLastErrorMsg.sourceQueue
+            
+            beanstalk.use( queueName )
+            beanstalk.put( payload )
+            
+            job.delete
+        end
+        rescue Exception => e
+        if e.message == "TIMED_OUT" then
+            else
+            raise
+        end
+    end
+    
+    rescue Beanstalk::NotConnected=>e
+    puts "Beanstalk not running"
+end

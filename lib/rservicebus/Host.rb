@@ -140,7 +140,7 @@ module RServiceBus
             .loadLibs()
             .loadWorkingDirList();
             
-            @endpointMapping = EndpointMapping.new.Configure
+            @endpointMapping = EndpointMapping.new.Configure( @config.localQueueName )
             
             self.configureStatistics()
             .loadContracts()

@@ -13,10 +13,6 @@ module RServiceBus
                 require "rservicebus/MQ/Beanstalk"
                 mq = MQ_Beanstalk.new( uri, timeout )
 
-                when "bunny"
-                require "rservicebus/MQ/Bunny"
-                mq = MQ_Bunny.new( uri, timeout )
-
                 else
                 abort("Scheme, #{uri.scheme}, not recognised when configuring mq, #{string}");
             end
