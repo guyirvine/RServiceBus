@@ -75,12 +75,15 @@ class Transporter
             end
             raise
         end
-        
+
         log "Put msg, #{job.body}", true
         destination.use( msg.remoteQueueName )
         destination.put( job.body )
-        
-        
+ 
+        if !ENV['AUDIT_QUEUE_NAME'].nil? then
+            @source.use ENV['AUDIT_QUEUE_NAME']
+            @source.put job.body
+        end
 		#removeJob
 		job.delete
         
