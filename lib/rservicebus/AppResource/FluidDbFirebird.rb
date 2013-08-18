@@ -11,17 +11,17 @@ module RServiceBus
 
         # Transaction Semantics
         def Begin
-            @connection.execute( "BEGIN", [] )
+            @connection.connection.transaction()
         end
 
         # Transaction Semantics
         def Commit
-            @connection.execute( "COMMIT", [] )
+            @connection.connection.commit()
         end
 
         # Transaction Semantics
         def Rollback
-            @connection.execute( "ROLLBACK", [] )
+            @connection.connection.rollback()
         end
         
     end

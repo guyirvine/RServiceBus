@@ -25,6 +25,8 @@ require "rservicebus/Stats"
 require "rservicebus/Message"
 require "rservicebus/Message/Subscription"
 
+require "rservicebus/UserMessage/WithPayload"
+
 require "rservicebus/AppResource"
 require "rservicebus/AppResource/Redis"
 

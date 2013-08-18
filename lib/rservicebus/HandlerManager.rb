@@ -135,7 +135,7 @@ module RServiceBus
                     @host.log "Caught nested exception rolling back, #{r.class.name}, for msg, #{msgName}"
                     @host.log "****"
                     @host.log e1.message
-                    @host.log e.backtrace
+                    @host.log e1.backtrace
                     @host.log "****"
                 end
             end
