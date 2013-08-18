@@ -32,6 +32,11 @@ module RServiceBus
                         when "fluiddbtinytds"
                         require "rservicebus/AppResource/FluidDbTinyTds"
                         resources[k.sub( "RSB_", "" )] = AppResource_FluidDbTinyTds.new( host, uri )
+
+                        when "fluiddbfirebird"
+                        require "rservicebus/AppResource/FluidDbFirebird"
+                        resources[k.sub( "RSB_", "" )] = AppResource_FluidDbFirebird.new( host, uri )
+                        
                         when "dir"
                         require "rservicebus/AppResource/Dir"
                         resources[k.sub( "RSB_", "" )] = AppResource_Dir.new( host, uri )
