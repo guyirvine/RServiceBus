@@ -337,7 +337,7 @@ module RServiceBus
 
                 @mq.send( queueName, serialized_object )
             end
-            
+
             #Sends a msg across the bus
             #
             # @param [RServiceBus::Message] msg msg to be sent
@@ -348,16 +348,17 @@ module RServiceBus
                 rMsg = RServiceBus::Message.new( msg, @config.localQueueName )
                 if queueName.index( "@" ).nil? then
                     q = queueName
+                    log "Sending, #{msg.class.name} to, queueName", true
                     else
                     parts = queueName.split( "@" )
                     rMsg.setRemoteQueueName( parts[0] )
                     rMsg.setRemoteHostName( parts[1] )
                     q = 'transport-out'
+                    log "Sending, #{msg.class.name} to, queueName, via #{q}", true
                 end
 
                 serialized_object = YAML::dump(rMsg)
-                log "Sending: " + msg.class.name + " to: " + queueName, true
-                self._SendAlreadyWrappedAndSerialised( serialized_object, queueName )
+                self._SendAlreadyWrappedAndSerialised( serialized_object, q )
             end
             
             def sendQueuedMsgs

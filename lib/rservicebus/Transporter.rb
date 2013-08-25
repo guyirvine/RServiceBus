@@ -57,7 +57,7 @@ class Transporter
         
         
 		#Get destination url from job
-        remote_host = 'mega'
+        remote_host = msg.remoteHostName
         remote_user = getValue( "REMOTE_USER_#{remote_host.upcase}", "beanstalk" )
         gateway = Net::SSH::Gateway.new(remote_host, remote_user)
         
@@ -89,6 +89,7 @@ class Transporter
         
         
         gateway.shutdown!
+		log "Job sent to, #{remote_user}@#{remote_host}/#{msg.remoteQueueName}"
         
         rescue Exception => e
         if e.message == "TIMED_OUT" then
