@@ -42,6 +42,11 @@ module RServiceBus
             @queueNameList = []
             @queueNameList << localQueueName unless localQueueName.nil?
             
+            if !self.getValue( "MESSAGE_ENDPOINT_MAPPING" ).nil? then
+                log( "*** MESSAGE_ENDPOINT_MAPPING environment variable was detected")
+                log( "*** You may have intended MESSAGE_ENDPOINT_MAPPINGS, note the 'S' on the end")
+            end
+            
             mappings = self.getValue( "MESSAGE_ENDPOINT_MAPPINGS" )
             return self if mappings.nil?
             

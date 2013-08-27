@@ -46,6 +46,9 @@ module RServiceBus
                         when "scpupload"
                         require "rservicebus/AppResource/ScpUpload"
                         resources[k.sub( "RSB_", "" )] = AppResource_ScpUpload.new( host, uri )
+                        when "smb"
+                        require "rservicebus/AppResource/Smb"
+                        resources[k.sub( "RSB_", "" )] = AppResource_Smb.new( host, uri )
                         else
 						abort("Scheme, #{uri.scheme}, not recognised when configuring app resource, #{k}=#{v}");
                     end
