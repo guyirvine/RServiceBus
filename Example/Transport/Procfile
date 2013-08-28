@@ -1,4 +1,2 @@
-source: /usr/local/bin/beanstalkd -l 127.0.0.1 -p 2020
-destination: /usr/local/bin/beanstalkd -l 127.0.0.1 -p 2021
-transporter: env TIMEOUT=10 REMOTE_USER_MEGA=user rservicebus-transport
+transporter: env TIMEOUT=2 REMOTE_USER_LOCALHOST=localuser rservicebus-transport
 

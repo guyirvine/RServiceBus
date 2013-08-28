@@ -48,26 +48,44 @@ class Transporter
 		abort();
 	end
     
-    def process
-		#Get the next job from the source queue
-        job = @source.reserve @timeout
-        msg = YAML::load(job.body)
+    def connectToRemoteSSH( remoteHostName )
+        return if @remoteHostName == remoteHostName
+        
+        self.disconnectFromRemoteSSH
 
-        log "job: #{job.body}", true
-        
-        
 		#Get destination url from job
-        remote_host = msg.remoteHostName
-        remote_user = getValue( "REMOTE_USER_#{remote_host.upcase}", "beanstalk" )
-        gateway = Net::SSH::Gateway.new(remote_host, remote_user)
+        @remoteHostName = remoteHostName
+        @remoteUserName = getValue( "REMOTE_USER_#{remoteHostName.upcase}", "beanstalk" )
+        @gateway = Net::SSH::Gateway.new(remoteHostName, @remoteUserName)
         
         # Open port 27018 to forward to 127.0.0.11300 on the remote host
-        gateway.open('127.0.0.1', 11300, 27018)
+        @gateway.open('127.0.0.1', 11300, 27018)
+        log "Connect to Remote SSH, #{@remoteHostName}"
+        
+        return @gateway
+    end
 
-		log "Connect to destination beanstalk"
+    def disconnectFromRemoteSSH
+        return if @gateway.nil?
+        
+        log "Disconnect from Remote SSH, #{@remoteHostName}"
+        @gateway.shutdown!
+        @remoteHostName = nil
+        @gateway = nil
+    end
+
+    
+    def connectToRemoteBeanstalk( remoteHostName, remoteQueueName )
+        self.connectToRemoteSSH( remoteHostName )
+        
+        #Test connection
+        return if @remoteQueueName == remoteQueueName
+        
+
+        log "Connect to Remote Beanstalk, #{remoteQueueName}"
         begin
             destinationUrl = '127.0.0.1:27018'
-            destination = Beanstalk::Pool.new([destinationUrl])
+            @destination = Beanstalk::Pool.new([destinationUrl])
             rescue Exception => e
             if e.message == "Beanstalk::NotConnected" then
                 puts "***Could not connect to destination, check beanstalk is running at, #{destinationUrl}"
@@ -75,10 +93,33 @@ class Transporter
             end
             raise
         end
+        
+        log "Use queue, #{remoteQueueName}", true
+        @destination.use( remoteQueueName )
+        @remoteQueueName = remoteQueueName
+    end
+    
+    def disconnectFromRemoteBeanstalk
+        self.disconnectFromRemoteSSH
+        return if @destination.nil?
 
-        log "Put msg, #{job.body}", true
-        destination.use( msg.remoteQueueName )
-        destination.put( job.body )
+        log "Disconnect from Remote Beanstalk, #{@remoteQueueName}"
+        @destination.close
+        @remoteQueueName = nil
+    end
+
+    
+    def process
+		#Get the next job from the source queue
+        job = @source.reserve @timeout
+        msg = YAML::load(job.body)
+
+        #        log "job: #{job.body}", true
+
+        self.connectToRemoteBeanstalk( msg.remoteHostName, msg.remoteQueueName )
+
+        log "Put msg", true
+        @destination.put( job.body )
  
         if !ENV['AUDIT_QUEUE_NAME'].nil? then
             @source.use ENV['AUDIT_QUEUE_NAME']
@@ -87,11 +128,11 @@ class Transporter
 		#removeJob
 		job.delete
         
-        
-        gateway.shutdown!
-		log "Job sent to, #{remote_user}@#{remote_host}/#{msg.remoteQueueName}"
-        
+		log "Job sent to, #{@remoteUserName}@#{@remoteHostName}/#{@remoteQueueName}"
+
+
         rescue Exception => e
+        self.disconnectFromRemoteSSH
         if e.message == "TIMED_OUT" then
             log "No Msg", true
             return
@@ -105,6 +146,7 @@ class Transporter
 		while true
 			process
 		end
+        self.disconnectFromRemoteSSH
 	end
 end
 
