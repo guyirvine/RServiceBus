@@ -1,4 +1,7 @@
 module RServiceBus
+
+    class PropertyNotSet<StandardError
+    end
     
 	def RServiceBus.convertDTOToHash( obj )
 		hash = {};
@@ -44,4 +47,11 @@ module RServiceBus
 
     end
     
+    def RServiceBus.RaisePropertyNotSet( propertyName, handlerName, explaination )
+        puts "*** Set RSB_#{propertyName} for, #{handlerName}"
+        puts explaination
+        
+        raise PropertyNotSet.new( error )
+    end
+
 end
