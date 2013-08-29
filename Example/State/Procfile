@@ -1,0 +1,2 @@
+state: env APPNAME=State MAX_RETRIES=0 VERBOSE=true WORKING_DIR=./ RSB_State=state:///Users/girvine/Ruby/rservicebus/Example/State/state/1.dat ../rservicebus_examples
+
