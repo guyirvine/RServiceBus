@@ -7,6 +7,8 @@ module RServiceBus
     end
     class NoMsgToProcess<StandardError
     end
+    class PropertyNotSet<StandardError
+    end
     
     #Host process for rservicebus
     class Host
@@ -214,14 +216,23 @@ module RServiceBus
                         serialized_object = YAML::dump(@msg)
                         self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
                         @mq.ack
+
                         rescue NoHandlerFound => e
                         puts "*** Handler not found for msg, #{e.message}"
                         puts "*** Ensure a handler named, #{e.message}, is present in the MessageHandler directory."
-                        
+
                         @msg.addErrorMsg( @config.localQueueName, e.message )
                         serialized_object = YAML::dump(@msg)
                         self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
                         @mq.ack
+                        
+                        rescue PropertyNotSet => e
+                        #This has been re-rasied from a rescue in the handler
+                        puts "*** #{e.message}"
+                        #"Property, #{e.message}, not set for, #{handler.class.name}"
+                        propertyName = e.message[10, e.message.index(",", 10)-10]
+                        puts "*** Ensure the environemnt variable, RSB_#{propertyName}, has been set at startup."
+                        
                         rescue Exception => e
                         sleep 0.5
                         
@@ -304,6 +315,8 @@ module RServiceBus
                             log "Handler, #{handler.class.name}, started processing msg, #{msgName}"
                             handler.Handle( @msg.msg )
                             log "Handler, #{handler.class.name}, finished processing msg, #{msgName}"
+                            rescue PropertyNotSet => e
+                                raise PropertyNotSet.new( "Property, #{e.message}, not set for, #{handler.class.name}" )
                             rescue Exception => e
                             puts "E #{e.message}"
                             log "An error occured in Handler: " + handler.class.name
