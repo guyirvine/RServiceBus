@@ -225,7 +225,7 @@ module RServiceBus
                         rescue Exception => e
                         sleep 0.5
                         
-                        puts "*** Excepton occured"
+                        puts "*** Exception occured"
                         puts e.message
                         puts e.backtrace
                         puts "***"
