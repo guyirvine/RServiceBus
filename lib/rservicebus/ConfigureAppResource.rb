@@ -10,6 +10,9 @@ module RServiceBus
 
             env.each do |k,v|
                 if v.is_a?(String) and
+					k.start_with?( "RSBFDB_" ) then
+                    uri = URI.parse( v )
+                elsif v.is_a?(String) and
 					k.start_with?( "RSB_" ) then
                     uri = URI.parse( v )
                     case uri.scheme

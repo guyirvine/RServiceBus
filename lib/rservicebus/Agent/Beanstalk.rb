@@ -1,6 +1,10 @@
 module RServiceBus
 require 'beanstalk-client'
 
+class QueueNotFoundForMsg<StandardError
+end
+
+
 #A means for a stand-alone process to interact with the bus, without being a full
 #rservicebus application
 class Agent_Beanstalk
@@ -16,6 +20,8 @@ class Agent_Beanstalk
 # @param [String] queueName the name of the queue to be send the msg to
 # @param [String] returnAddress the name of a queue to send replies to
 	def sendMsg(messageObj, queueName, returnAddress=nil)
+		raise QueueNotFoundForMsg.new( messageObj.class.name ) if queueName.nil?
+
 		msg = RServiceBus::Message.new( messageObj, returnAddress )
 
 
