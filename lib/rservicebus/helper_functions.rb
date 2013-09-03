@@ -42,7 +42,13 @@ module RServiceBus
 
 	agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://127.0.0.1:11300" ) )	
 	agent.sendMsg(msg, queueName, responseQueue)
-
+	
+	rescue QueueNotFoundForMsg=>e
+		msg = "\n"
+		msg = "#{msg}*** Queue not found for, #{e.message}\n"
+		msg = "#{msg}*** Ensure you have an environment variable set for this Message Type, eg, \n"
+		msg = "#{msg}*** MESSAGE_ENDPOINT_MAPPINGS=#{e.message}:<QueueName>\n"
+		raise StandardError.new( msg )
     end
     
 end
