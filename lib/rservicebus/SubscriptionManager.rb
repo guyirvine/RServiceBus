@@ -24,7 +24,7 @@ class SubscriptionManager
 	end
 
 	def add( eventName, queueName )
-		RServiceBus.log "Adding subscrption for, " + eventName + ", to, " + queueName
+		RServiceBus.log "Adding subscription for, " + eventName + ", to, " + queueName
 		@subscriptions = @subscriptionStorage.add( eventName, queueName )
 	end
 
