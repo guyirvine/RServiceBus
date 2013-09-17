@@ -32,7 +32,7 @@ module RServiceBus
             sourceUrl = getValue( 'SOURCE_URL', "127.0.0.1:11300" )
             @source = Beanstalk::Pool.new([sourceUrl])
             @source.watch sourceQueueName
-            
+
             log "Connected to, #{sourceQueueName}@#{sourceUrl}"
             
             rescue Exception => e
@@ -74,14 +74,16 @@ module RServiceBus
                 @remoteHostName = remoteHostName
                 @remoteUserName = getValue( "REMOTE_USER_#{remoteHostName.upcase}", "beanstalk" )
                 
+                @localPort = getValue( "LOCAL_PORT", 27018 ).to_i
+                
                 log "Connect SSH, #{@remoteUserName}@#{@remoteHostName}"
                 # Open port 27018 to forward to 127.0.0.11300 on the remote host
                 @gateway = Net::SSH::Gateway.new(@remoteHostName, @remoteUserName)
-                @gateway.open('127.0.0.1', 11300, 27018)
+                @gateway.open('127.0.0.1', 11300, @localPort)
                 log "Connected to SSH, #{@remoteUserName}@#{@remoteHostName}"
                 
                 begin
-                    destinationUrl = '127.0.0.1:27018'
+                    destinationUrl = "127.0.0.1:#{@localPort}"
                     log "Connect to Remote Beanstalk, #{destinationUrl}", true
                     @destination = Beanstalk::Pool.new([destinationUrl])
                     log "Connected to Remote Beanstalk, #{destinationUrl}"

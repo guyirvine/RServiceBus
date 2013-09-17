@@ -373,7 +373,7 @@ module RServiceBus
                 serialized_object = YAML::dump(rMsg)
                 self._SendAlreadyWrappedAndSerialised( serialized_object, q )
             end
-            
+
             def sendQueuedMsgs
                 @queueForMsgsToBeSentOnComplete.each do |row|
                     self._SendNeedsWrapping( row["msg"], row["queueName"] )

@@ -3,10 +3,10 @@ module RServiceBus
     require "FluidDb/Db"
     
     #Implementation of an AppResource - Redis
-    class AppResource_FluidDbPgsql<AppResource
+    class AppResource_FluidDb<AppResource
         
         def connect(uri)
-            return FluidDb::Db.new( uri )
+            return FluidDb::Db( uri )
         end
 
         # Transaction Semantics

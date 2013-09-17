@@ -21,7 +21,7 @@ module RServiceBus
         puts "[#{type}] #{timestamp} :: #{string}"
         #		end
 	end
-    
+
     def RServiceBus.createAnonymousClass( name_for_class )
         newAnonymousClass = Class.new(Object)
         Object.const_set( name_for_class, newAnonymousClass )
@@ -38,17 +38,44 @@ module RServiceBus
 	require "rservicebus/EndpointMapping"
 	endpointMapping = EndpointMapping.new
 	endpointMapping.Configure
-	queueName = endpointMapping.get( msg.class.name )	
+	queueName = endpointMapping.get( msg.class.name )
 
-	agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://127.0.0.1:11300" ) )	
+	agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://127.0.0.1:11300" ) )
+    Audit.new( agent ).audit( msg )
 	agent.sendMsg(msg, queueName, responseQueue)
-	
+
 	rescue QueueNotFoundForMsg=>e
 		msg = "\n"
 		msg = "#{msg}*** Queue not found for, #{e.message}\n"
 		msg = "#{msg}*** Ensure you have an environment variable set for this Message Type, eg, \n"
 		msg = "#{msg}*** MESSAGE_ENDPOINT_MAPPINGS=#{e.message}:<QueueName>\n"
 		raise StandardError.new( msg )
+    end
+    
+    def RServiceBus.sendMsg( msg, responseQueue="agent" )
+        require "rservicebus/EndpointMapping"
+        endpointMapping = EndpointMapping.new
+        endpointMapping.Configure
+        queueName = endpointMapping.get( msg.class.name )
+        
+        agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://127.0.0.1:11300" ) )
+        Audit.new( agent ).auditOutgoing( msg )
+        agent.sendMsg(msg, queueName, responseQueue)
+        
+        rescue QueueNotFoundForMsg=>e
+		msg = "\n"
+		msg = "#{msg}*** Queue not found for, #{e.message}\n"
+		msg = "#{msg}*** Ensure you have an environment variable set for this Message Type, eg, \n"
+		msg = "#{msg}*** MESSAGE_ENDPOINT_MAPPINGS=#{e.message}:<QueueName>\n"
+		raise StandardError.new( msg )
+    end
+    
+    def RServiceBus.checkForReply( queueName )
+        agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://127.0.0.1:11300" ) )
+        msg = agent.checkForReply( queueName )
+        Audit.new( agent ).auditIncoming( msg )
+
+        return msg
     end
     
 end

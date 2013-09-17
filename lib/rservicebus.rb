@@ -21,6 +21,7 @@ require "rservicebus/Host"
 require "rservicebus/Config"
 require "rservicebus/EndpointMapping"
 require "rservicebus/Stats"
+require "rservicebus/Audit"
 
 require "rservicebus/Message"
 require "rservicebus/Message/Subscription"

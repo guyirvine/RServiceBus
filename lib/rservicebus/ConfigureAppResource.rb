@@ -12,6 +12,8 @@ module RServiceBus
                 if v.is_a?(String) and
 					k.start_with?( "RSBFDB_" ) then
                     uri = URI.parse( v )
+                    require "rservicebus/AppResource/FluidDb"
+                    resources[k.sub( "RSBFDB_", "" )] = AppResource_FluidDb.new( host, uri )
                 elsif v.is_a?(String) and
 					k.start_with?( "RSB_" ) then
                     uri = URI.parse( v )
