@@ -32,7 +32,7 @@ module RServiceBus
             sourceUrl = getValue( 'SOURCE_URL', "127.0.0.1:11300" )
             @source = Beanstalk::Pool.new([sourceUrl])
             @source.watch sourceQueueName
-
+            
             log "Connected to, #{sourceQueueName}@#{sourceUrl}"
             
             rescue Exception => e
@@ -57,7 +57,7 @@ module RServiceBus
             
             @destination.close unless @destination.nil?
             @destination = nil
-
+            
             @remoteUserName = nil
             @remoteQueueName = nil
         end
@@ -68,19 +68,37 @@ module RServiceBus
             if @gateway.nil? || remoteHostName != @remoteHostName || @destination.nil? then
                 self.disconnect
             end
-
+            
             if @gateway.nil? then
                 #Get destination url from job
                 @remoteHostName = remoteHostName
-                @remoteUserName = getValue( "REMOTE_USER_#{remoteHostName.upcase}", "beanstalk" )
+                @remoteUserName = getValue( "REMOTE_USER_#{remoteHostName.upcase}" )
+                if @remoteUserName.nil? then
+                    log "**** Username not specified for Host, #{remoteHostName}"
+                    log "**** Add an environment variable of the form, REMOTE_USER_#{remoteHostName.upcase}=[USERNAME]"
+                    abort()
+                end
                 
                 @localPort = getValue( "LOCAL_PORT", 27018 ).to_i
+                log "Local Port: #{@localPort}", true
                 
-                log "Connect SSH, #{@remoteUserName}@#{@remoteHostName}"
-                # Open port 27018 to forward to 127.0.0.11300 on the remote host
-                @gateway = Net::SSH::Gateway.new(@remoteHostName, @remoteUserName)
-                @gateway.open('127.0.0.1', 11300, @localPort)
-                log "Connected to SSH, #{@remoteUserName}@#{@remoteHostName}"
+                begin
+                    log "Connect SSH, #{@remoteUserName}@#{@remoteHostName}"
+                    # Open port 27018 to forward to 127.0.0.11300 on the remote host
+                    @gateway = Net::SSH::Gateway.new(@remoteHostName, @remoteUserName)
+                    @gateway.open('127.0.0.1', 11300, @localPort)
+                    log "Connected to SSH, #{@remoteUserName}@#{@remoteHostName}"
+                    
+                    rescue Errno::EADDRINUSE => e
+                    puts "*** Local transport port in use, #{@localPort}"
+                    puts "*** Change local transport port, #{@localPort}, using format, LOCAL_PORT=#{@localPort+1}"
+                    abort()
+                    rescue Errno::EACCES => e
+                    puts "*** Local transport port specified, #{@localPort}, needs sudo access"
+                    puts "*** Change local transport port using format, LOCAL_PORT=27018"
+                    abort()
+                    
+                end
                 
                 begin
                     destinationUrl = "127.0.0.1:#{@localPort}"
