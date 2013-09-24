@@ -53,6 +53,15 @@ module RServiceBus
         
         #Thin veneer for Configuring external resources
         #
+        def configureStateManager
+            @stateManager = StateManager.new
+            return self;
+        end
+        
+        
+        
+        #Thin veneer for Configuring external resources
+        #
         def configureMonitors
             @monitors = ConfigureMonitor.new( self, @appResources ).getMonitors( ENV )
             return self;
@@ -80,7 +89,7 @@ module RServiceBus
         #
         def loadHandlers()
             log "Load Message Handlers"
-            @handlerManager = HandlerManager.new( self, @appResources )
+            @handlerManager = HandlerManager.new( self, @appResources, @stateManager )
             @handlerLoader = HandlerLoader.new( self, @handlerManager )
             
             @config.handlerPathList.each do |path|
@@ -148,6 +157,7 @@ module RServiceBus
             .loadContracts()
             .loadLibs()
 			.configureAppResource()
+            .configureStateManager()
 			.configureMonitors()
 			.loadHandlers()
 			.connectToMq()
@@ -309,7 +319,7 @@ module RServiceBus
                 log "Handler found for: " + msgName, true
                 begin
                     @queueForMsgsToBeSentOnComplete = Array.new
-                    
+
                     handlerList.each do |handler|
                         begin
                             log "Handler, #{handler.class.name}, started processing msg, #{msgName}"

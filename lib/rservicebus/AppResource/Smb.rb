@@ -4,28 +4,20 @@ require "net/smb"
 
     class AppResource_Smb<AppResource
 
-        def connect(uri)
-            begin
-                remote = smb.open( uri.path, "b" )
-                #if !File.writable?( uri.path ) then
-                #    puts "*** Warning. Directory is not writable, #{uri.path}."
-                #    puts "*** Warning. Make the directory, #{uri.path}, writable and try again."
-                #end
-                rescue Errno::ENOENT => e
-                puts "***** Directory does not exist, #{uri.path}."
-                puts "***** Create the directory, #{uri.path}, and try again."
-                puts "***** eg, mkdir #{uri.path}"
-                abort();
-                rescue Errno::ENOTDIR => e
-                puts "***** The specified path does not point to a directory, #{uri.path}."
-                puts "***** Either repoint path to a directory, or remove, #{uri.path}, and create it as a directory."
-                puts "***** eg, rm #{uri.path} && mkdir #{uri.path}"
-                abort();
-            end
-            
-            return remote;
-        end
-        
-    end
-    
+	def processUri
+		host = @uri.host
+
+		parts = @uri.path.split( "/" )
+		parts.shift
+		share = parts.shift
+		path = parts.join( "/" )
+		
+		@clean_path = "smb://#{host}/#{share}/#{URI.decode(path)}"
+
+		@smb = Net::SMB.new
+		@smb.auth_callback {|host, share|
+			  [@uri.user,@uri.password]
+		}
+	end
+    end 
 end

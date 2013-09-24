@@ -28,6 +28,8 @@ require "rservicebus/Message/Subscription"
 
 require "rservicebus/UserMessage/WithPayload"
 
+require "rservicebus/StateManager"
+
 require "rservicebus/AppResource"
 require "rservicebus/AppResource/Redis"
 

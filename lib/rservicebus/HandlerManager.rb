@@ -10,9 +10,10 @@ module RServiceBus
         #
         # @param [RServiceBus::Host] host instance
         # @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
-        def initialize( host, appResources )
+        def initialize( host, appResources, stateManager )
             @host = host
             @appResources = appResources
+            @stateManager = stateManager
             
             @handlerList = Hash.new
             @resourceListByHandlerName = Hash.new
@@ -31,6 +32,27 @@ module RServiceBus
             return self
         end
 
+        # setStateAttributeIfRequested
+        #
+        # @param [RServiceBus::Handler] handler
+        def setStateAttributeIfRequested( handler )
+            if defined?( handler.State ) then
+                handler.State = @stateManager.Get( handler )
+                @host.log "Bus attribute set for: " + handler.class.name
+            end
+            
+            return self
+        end
+        
+        # checkIfStateAttributeRequested
+        #
+        # @param [RServiceBus::Handler] handler
+        def checkIfStateAttributeRequested( handler )
+            @stateManager.Required if defined?( handler.State )
+            
+            return self
+        end
+        
         def interrogateHandlerForAppResources( handler )
             @host.log "Checking app resources for: #{handler.class.name}", true
             @host.log "If your attribute is not getting set, check that it is in the 'attr_accessor' list", true
@@ -52,6 +74,7 @@ module RServiceBus
 
             @handlerList[msgName] << handler
             self.setBusAttributeIfRequested( handler )
+            self.checkIfStateAttributeRequested( handler )
             self.interrogateHandlerForAppResources( handler )
         end
         
@@ -86,6 +109,8 @@ module RServiceBus
         
         def setResourcesForHandlersNeededToProcessMsg( msgName )
             @handlerList[msgName].each do |handler|
+                self.setStateAttributeIfRequested( handler )
+
                 next if @resourceListByHandlerName[handler.class.name].nil?
                 @resourceListByHandlerName[handler.class.name].each do |k|
                     handler.instance_variable_set( "@#{k}", @appResources[k].getResource() )
@@ -98,6 +123,7 @@ module RServiceBus
         def getHandlerListForMsg( msgName )
             raise NoHandlerFound.new( msgName ) if @handlerList[msgName].nil?
 
+            @stateManager.Begin
             list = self.getListOfResourcesNeededToProcessMsg( msgName )
             list.each do |resourceName|
                 r = @appResources[resourceName]
@@ -120,6 +146,7 @@ module RServiceBus
                     r.Commit
                     r.finished
             end
+            @stateManager.Commit
         end
         
         def rollbackResourcesUsedToProcessMsg( msgName )
