@@ -7,7 +7,6 @@ $stdout.sync = true
 require "rubygems"
 require "yaml"
 require "uuidtools"
-require "redis"
 require "json"
 require "uri"
 
@@ -29,9 +28,9 @@ require "rservicebus/Message/Subscription"
 require "rservicebus/UserMessage/WithPayload"
 
 require "rservicebus/StateManager"
+require "rservicebus/CronManager"
 
 require "rservicebus/AppResource"
-require "rservicebus/AppResource/Redis"
 
 require "rservicebus/SubscriptionManager"
 require "rservicebus/SubscriptionStorage"

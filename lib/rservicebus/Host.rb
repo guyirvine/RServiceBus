@@ -51,13 +51,20 @@ module RServiceBus
             return self;
         end
         
-        #Thin veneer for Configuring external resources
+        #Thin veneer for Configuring state
         #
         def configureStateManager
             @stateManager = StateManager.new
             return self;
         end
         
+        #Thin veneer for Configuring Cron
+        #
+        def configureCronManager
+            @cronManager = CronManager.new( self )
+            return self;
+        end
+
         
         
         #Thin veneer for Configuring external resources
@@ -158,6 +165,7 @@ module RServiceBus
             .loadLibs()
 			.configureAppResource()
             .configureStateManager()
+            .configureCronManager()
 			.configureMonitors()
 			.loadHandlers()
 			.connectToMq()
@@ -287,14 +295,16 @@ module RServiceBus
                     #This exception is just saying there are no messages to process
                     statOutputCountdown = 0
                     @queueForMsgsToBeSentOnComplete = Array.new
-                    
                     @monitors.each do |o|
                         o.Look
                     end
-                    
                     self.sendQueuedMsgs
                     @queueForMsgsToBeSentOnComplete = nil
                     
+                    @queueForMsgsToBeSentOnComplete = Array.new
+		    @cronManager.Run
+                    self.sendQueuedMsgs
+                    @queueForMsgsToBeSentOnComplete = nil
                     
                     rescue Exception => e
                     if e.message == "SIGTERM" then

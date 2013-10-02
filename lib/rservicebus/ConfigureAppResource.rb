@@ -19,6 +19,7 @@ module RServiceBus
                     uri = URI.parse( v )
                     case uri.scheme
                         when "redis"
+                    require "rservicebus/AppResource/Redis"
 						resources[k.sub( "RSB_", "" )] = AppResource_Redis.new( host, uri )
                         
                         when "mysql"
