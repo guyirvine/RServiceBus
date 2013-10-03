@@ -89,8 +89,9 @@ class CircuitBreakerTest < Test::Unit::TestCase
         cb.Failure
         assert_equal true, cb.Live
 
-        sleep 0.1
+        sleep 0.2
 
+        cb.Live
         cb.Failure
         assert_equal true, cb.Live
     end
