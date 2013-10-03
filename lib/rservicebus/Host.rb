@@ -9,7 +9,7 @@ module RServiceBus
     end
     class PropertyNotSet<StandardError
     end
-    
+
     #Host process for rservicebus
     class Host
         
@@ -65,8 +65,14 @@ module RServiceBus
             return self;
         end
 
-        
-        
+        #Thin veneer for Configuring Cron
+        #
+        def configureCircuitBreaker
+            @circuitBreaker = CircuitBreaker.new( self )
+            return self;
+        end
+
+
         #Thin veneer for Configuring external resources
         #
         def configureMonitors
@@ -166,6 +172,7 @@ module RServiceBus
 			.configureAppResource()
             .configureStateManager()
             .configureCronManager()
+            .configureCircuitBreaker()
 			.configureMonitors()
 			.loadHandlers()
 			.connectToMq()
@@ -200,7 +207,7 @@ module RServiceBus
             statOutputCountdown = 0
             messageLoop = true
             retries = @config.maxRetries
-            
+
             while messageLoop do
                 #Popping a msg off the queue should not be in the message handler, as it affects retry
                 begin
@@ -211,6 +218,11 @@ module RServiceBus
                         GC.start
                     end
                     statOutputCountdown = statOutputCountdown - 1
+                    
+                    if @circuitBreaker.Broken then
+                        sleep 0.5
+                        next
+                    end
                     
                     body = @mq.pop
                     begin
@@ -264,6 +276,8 @@ module RServiceBus
                             @mq.returnToQueue
                             else
                             
+                            @circuitBreaker.Failure
+
                             @stats.incTotalErrored
                             if e.class.name == "Beanstalk::NotConnected" then
                                 puts "Lost connection to beanstalkd."
@@ -302,9 +316,12 @@ module RServiceBus
                     @queueForMsgsToBeSentOnComplete = nil
                     
                     @queueForMsgsToBeSentOnComplete = Array.new
-		    @cronManager.Run
+                    @cronManager.Run
                     self.sendQueuedMsgs
                     @queueForMsgsToBeSentOnComplete = nil
+                    
+                    
+                    @circuitBreaker.Success
                     
                     rescue Exception => e
                     if e.message == "SIGTERM" then

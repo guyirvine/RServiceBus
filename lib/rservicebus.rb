@@ -29,6 +29,7 @@ require "rservicebus/UserMessage/WithPayload"
 
 require "rservicebus/StateManager"
 require "rservicebus/CronManager"
+require "rservicebus/CircuitBreaker"
 
 require "rservicebus/AppResource"
 
