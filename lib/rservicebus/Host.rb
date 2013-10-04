@@ -60,13 +60,6 @@ module RServiceBus
         
         #Thin veneer for Configuring Cron
         #
-        def configureCronManager
-            @cronManager = CronManager.new( self )
-            return self;
-        end
-
-        #Thin veneer for Configuring Cron
-        #
         def configureCircuitBreaker
             @circuitBreaker = CircuitBreaker.new( self )
             return self;
@@ -110,6 +103,13 @@ module RServiceBus
             end
             
             return self
+        end
+        
+        #Thin veneer for Configuring Cron
+        #
+        def configureCronManager
+            @cronManager = CronManager.new( self, @handlerManager.getListOfMsgNames )
+            return self;
         end
         
         #Load Contracts
@@ -171,10 +171,10 @@ module RServiceBus
             .loadLibs()
 			.configureAppResource()
             .configureStateManager()
-            .configureCronManager()
             .configureCircuitBreaker()
 			.configureMonitors()
 			.loadHandlers()
+            .configureCronManager()
 			.connectToMq()
 			.configureSubscriptions()
 			.sendSubscriptions()

@@ -5,7 +5,7 @@ module RServiceBus
     #	handlernames, and
     #	loading handlers
     class HandlerManager
-
+        
         # Constructor
         #
         # @param [RServiceBus::Host] host instance
@@ -18,8 +18,8 @@ module RServiceBus
             @handlerList = Hash.new
             @resourceListByHandlerName = Hash.new
         end
-
-
+        
+        
         # setBusAttributeIfRequested
         #
         # @param [RServiceBus::Handler] handler
@@ -31,7 +31,7 @@ module RServiceBus
             
             return self
         end
-
+        
         # setStateAttributeIfRequested
         #
         # @param [RServiceBus::Handler] handler
@@ -71,7 +71,7 @@ module RServiceBus
         def addHandler( msgName, handler )
             @handlerList[msgName] = Array.new if @handlerList[msgName].nil?
             return unless @handlerList[msgName].index{ |x| x.class.name == handler.class.name }.nil?
-
+            
             @handlerList[msgName] << handler
             self.setBusAttributeIfRequested( handler )
             self.checkIfStateAttributeRequested( handler )
@@ -110,7 +110,7 @@ module RServiceBus
         def setResourcesForHandlersNeededToProcessMsg( msgName )
             @handlerList[msgName].each do |handler|
                 self.setStateAttributeIfRequested( handler )
-
+                
                 next if @resourceListByHandlerName[handler.class.name].nil?
                 @resourceListByHandlerName[handler.class.name].each do |k|
                     handler.instance_variable_set( "@#{k}", @appResources[k].getResource() )
@@ -122,7 +122,7 @@ module RServiceBus
         
         def getHandlerListForMsg( msgName )
             raise NoHandlerFound.new( msgName ) if @handlerList[msgName].nil?
-
+            
             @stateManager.Begin
             list = self.getListOfResourcesNeededToProcessMsg( msgName )
             list.each do |resourceName|
@@ -141,10 +141,10 @@ module RServiceBus
             @host.log "HandlerManager.commitResourcesUsedToProcessMsg, #{msgName}", true
             list = self.getListOfResourcesNeededToProcessMsg( msgName )
             list.each do |resourceName|
-                    r = @appResources[resourceName]
-                    @host.log "Commit resource, #{r.class.name}", true
-                    r.Commit
-                    r.finished
+                r = @appResources[resourceName]
+                @host.log "Commit resource, #{r.class.name}", true
+                r.Commit
+                r.finished
             end
             @stateManager.Commit
         end
@@ -181,5 +181,11 @@ module RServiceBus
             
             return list
         end
+        
+        def getListOfMsgNames
+            return @handlerList.keys
+        end
+        
+        
     end
 end

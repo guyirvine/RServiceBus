@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'rservicebus'
-  s.version     = '0.1.35'
+  s.version     = '0.1.36'
   s.date        = '2013-10-05'
   s.summary     = "RServiceBus"
   s.description = "A Ruby interpretation of NServiceBus"
