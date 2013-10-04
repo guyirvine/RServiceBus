@@ -76,7 +76,7 @@
                 <pre><code>ERROR_QUEUE_NAME=my_error_queue</code></pre>
                 
                 <h2>AUDIT_QUEUE_NAME</h2>
-                <p>Name of the queue to put a copy of all outgoing msgs.</p>
+                <p>Name of the queue to put a copy of all incoming and outgoing msgs.</p>
                 <p>Default: none - on if value specified</p>
                 <pre><code>AUDIT_QUEUE_NAME=my_audit_queue</code></pre>
 
@@ -84,6 +84,11 @@
                 <p>Name of the queue to put a copy of all incoming msgs.</p>
                 <p>Default: none - on if value specified</p>
                 <pre><code>FORWARD_RECEIVED_MESSAGES_TO=my_received_msg_queue</code></pre>
+
+                <h2>FORWARD_SENT_MESSAGES_TO</h2>
+                <p>Name of the queue to put a copy of all outgoing msgs.</p>
+                <p>Default: none - on if value specified</p>
+                <pre><code>FORWARD_SENT_MESSAGES_TO=my_sent_msg_queue</code></pre>
 
                 <h2>MAX_RETRIES</h2>
                 <p>How many times to retry a msg before placing it on the error queue.</p>
