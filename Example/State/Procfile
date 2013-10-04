@@ -1,2 +1,2 @@
-state: env APPNAME=State MAX_RETRIES=0 VERBOSE=true WORKING_DIR=./ ../rservicebus_examples
+state: env APPNAME=State MAX_RETRIES=0 VERBOSE=true WORKING_DIR=./ STATE_URI=dir:///Users/girvine/Ruby/rservicebus/Example/State/state ../rservicebus_examples
 
