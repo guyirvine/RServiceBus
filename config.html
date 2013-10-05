@@ -37,10 +37,10 @@
                 <h2>To Start With</h2>
                 
                 <pre><code>
-*Environment variables are used for configuration
-*Convention over Configuration
+                    *Environment variables are used for configuration
+                    *Convention over Configuration
                     
-*Example - APPNAME=HelloWorld CONTRACTS=./Contract.rb rservicebus
+                    *Example - APPNAME=HelloWorld CONTRACTS=./Contract.rb rservicebus
                     
                 </code></pre>
                 
@@ -69,7 +69,7 @@
                 <p>Name of the incoming queue.</p>
                 <p>Default: APPNAME</p>
                 <pre><code>LOCAL_QUEUE_NAME=path to message handlers</code></pre>
-
+                
                 <h2>ERROR_QUEUE_NAME</h2>
                 <p>Name of the queue to place msgs which resulted in an error during processing.</p>
                 <p>Default: error</p>
@@ -79,17 +79,17 @@
                 <p>Name of the queue to put a copy of all incoming and outgoing msgs.</p>
                 <p>Default: none - on if value specified</p>
                 <pre><code>AUDIT_QUEUE_NAME=my_audit_queue</code></pre>
-
+                
                 <h2>FORWARD_RECEIVED_MESSAGES_TO</h2>
                 <p>Name of the queue to put a copy of all incoming msgs.</p>
                 <p>Default: none - on if value specified</p>
                 <pre><code>FORWARD_RECEIVED_MESSAGES_TO=my_received_msg_queue</code></pre>
-
+                
                 <h2>FORWARD_SENT_MESSAGES_TO</h2>
                 <p>Name of the queue to put a copy of all outgoing msgs.</p>
                 <p>Default: none - on if value specified</p>
                 <pre><code>FORWARD_SENT_MESSAGES_TO=my_sent_msg_queue</code></pre>
-
+                
                 <h2>MAX_RETRIES</h2>
                 <p>How many times to retry a msg before placing it on the error queue.</p>
                 <p>Default: 5</p>
@@ -105,9 +105,9 @@
                 <p>Default: redis://127.0.0.1:6379/</p>
                 <pre><code>SUBSCRIPTION_URI=redis://127.0.0.1:6390/</code></pre>
                 <!--
-                @statOutputCountdown = self.getValue( "STAT_OUTPUT_COUNTDOWN", "100" ).to_i
+                 @statOutputCountdown = self.getValue( "STAT_OUTPUT_COUNTDOWN", "100" ).to_i
                  -->
-
+                
                 
                 <h2>CONTRACTS</h2>
                 <p>Semi-colon seperated list of files containing msg contracts. Files must be ruby files with a .rb extention</p>
@@ -118,7 +118,7 @@
                 <p>Semi-colon seperated list of directories or ruby files to loaded</p>
                 <p>Default: ./lib - if it exists</p>
                 <pre><code>LIB=/path/to/app/</code></pre>
-
+                
                 <h2>VERBOSE</h2>
                 <p>Output logging tagged as verbose.</p>
                 <p>Note. Message Handlers can call @Bus.log( "a verbose log msg", ture ).</p>
@@ -134,11 +134,23 @@
                 <p>A shortcut - will look for MessageHandler, Contract.rb, and lib in the specified directory.</p>
                 <p>Default: none</p>
                 <pre><code>WORKING_DIR=/path/to/working/dir</code></pre>
-
+                
                 <h2>RSB_</h2>
                 <p>Indicates an rservicebus AppResource.</p>
                 <pre><code>RSB_Redis=redis://localhost:6379/</code></pre>
                 
+                <h2>STATE_URI</h2>
+                <p>Where state files will be stored, when using the StateManager</p>
+                <pre><code>STATE_URI=dir:///path/to/state/dir/</code></pre>
+                
+                <h2>RSBCRON_MSGNAME</h2>
+                <p>Send a specific message at set intervals</p>
+                <pre><code>RSBCRON_MSGNAME="0 0 * * *"</code></pre>
+                
+                <h2>RSBCRON="0 0 * * * "</h2>
+                <p>Send a messages at set intervals, allowing Pattern Matching for msgname</p>
+                <pre><code>RSBCRON="0 0 * * * MSG*;0 1 * * * ANOTHER_MSG*"</code></pre>
+
             </section>
         </div>
         
