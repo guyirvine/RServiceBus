@@ -36,29 +36,22 @@
                 
                 <h2>To Start With</h2>
                 
-                <pre><code>
-                    *Environment variables are used for configuration
-                    *Convention over Configuration
+                <pre><code>*Environment variables are used for configuration
+*Convention over Configuration
                     
-                    *Example - APPNAME=HelloWorld CONTRACTS=./Contract.rb rservicebus
-                    
-                </code></pre>
+*Example - APPNAME=HelloWorld CONTRACTS=./Contract.rb rservicebus</code></pre>
                 
                 <h2>APPNAME</h2>
                 
                 <p>Specifies the name of the Service.</p>
                 <p>This is used as a default for name of the queue to watch.</p>
-                <pre>
-                    <code>APPNAME=HelloWorld rservicebus</code>
-                </pre>
+                <pre><code>APPNAME=HelloWorld rservicebus</code></pre>
                 
                 <h2>MESSAGE_ENDPOINT_MAPPINGS</h2>
                 <p>Specifies where to route outgoing messages.</p>
                 <p>Format is msg name - queuename, sperarated by a colon. Multiple mappings are sperarated by semi-colons.
                 <p>Default: Only need if routing messages, no default required</p>
-                <pre>
-                    <code>msg_mame_1:end_point_1;msg_mame_2:end_point_2</code>
-                </pre>
+                <pre><code>msg_mame_1:end_point_1;msg_mame_2:end_point_2</code></pre>
                 
                 <h2>MSGHANDLERPATH</h2>
                 <p>Path to directory holding message handlers.</p>
