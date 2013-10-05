@@ -22,16 +22,25 @@ begin
     puts "Attempting to return #{number_of_messages} to their source queue"
     puts
     
+    startMatch = "_msg: ! '--- !ruby/object:"
+    firstMatch = "_msg: ! "
+    secondMatch = "--- !ruby/object:"
     begin
         beanstalk.watch(errorQueueName)
         1.upto(number_of_messages) do |request_nbr|
             job = beanstalk.reserve 1
             payload = job.body
-            
-            puts "#" + request_nbr.to_s + ": " + payload
+
+            firstIndex = payload.index( firstMatch )
+            secondIndex = payload.index( secondMatch, firstIndex )
+            startIndex = secondIndex + secondMatch.length
+
+            msgName = payload.match( '(\w*)', startIndex )[1]
+
             msg = YAML::load(payload)
             queueName = msg.getLastErrorMsg.sourceQueue
-            
+            puts "#" + "#{request_nbr.to_s}: #{msgName} to #{queueName}"
+
             beanstalk.use( queueName )
             beanstalk.put( payload )
             
