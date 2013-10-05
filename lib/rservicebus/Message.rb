@@ -3,7 +3,7 @@ module RServiceBus
 #This is the top level message that is passed around the bus
 class Message
 
-	attr_reader :returnAddress, :msgId, :remoteQueueName, :remoteHostName
+attr_reader :returnAddress, :msgId, :remoteQueueName, :remoteHostName, :lastErrorSourceQueue, :lastErrorString
 
 # Constructor
 #
@@ -28,6 +28,9 @@ class Message
 # @param [Object] sourceQueue The name of the queue to which the msg should be returned
 # @param [Object] errorString A readible version of what occured
 	def addErrorMsg( sourceQueue, errorString )
+        @lastErrorSourceQueue = sourceQueue
+        @lastErrorString = errorString
+        
 		@errorList << RServiceBus::ErrorMessage.new( sourceQueue, errorString )
 	end
 
