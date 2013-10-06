@@ -149,7 +149,7 @@ module RServiceBus
         #Initialise statistics monitor
         #
         def configureStatistics
-            @stats = Stats.new
+            @stats = StatisticManager.new( self )
             
             return self
         end
@@ -204,20 +204,14 @@ module RServiceBus
         # - Most of this should be queue independant
         def StartListeningToEndpoints
             log "Waiting for messages. To exit press CTRL+C"
-            statOutputCountdown = 0
+            #            statOutputCountdown = 0
             messageLoop = true
             retries = @config.maxRetries
 
             while messageLoop do
                 #Popping a msg off the queue should not be in the message handler, as it affects retry
                 begin
-                    if statOutputCountdown == 0 then
-                        log @stats.getForReporting, true
-                        #                        log @handlerManager.getStats, true
-                        statOutputCountdown = @config.statOutputCountdown
-                        GC.start
-                    end
-                    statOutputCountdown = statOutputCountdown - 1
+                    @stats.tick
                     
                     if @circuitBreaker.Broken then
                         sleep 0.5
@@ -230,7 +224,12 @@ module RServiceBus
                         @msg = YAML::load(body)
                         if @msg.msg.class.name == "RServiceBus::Message_Subscription" then
                             @subscriptionManager.add( @msg.msg.eventName, @msg.returnAddress )
-                            
+                        elsif @msg.msg.class.name == "RServiceBus::Message_StatisticOutputOn" then
+                            @stats.output = true
+                        elsif @msg.msg.class.name == "RServiceBus::Message_StatisticOutputOff" then
+                            @stats.output = false
+                        
+
                             else
                             self.HandleMessage()
                             if !@config.forwardReceivedMessagesTo.nil? then

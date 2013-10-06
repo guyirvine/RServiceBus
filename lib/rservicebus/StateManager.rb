@@ -21,17 +21,17 @@ module RServiceBus
         
         #Start
         def Begin
-            @stateStorage.Begin
+            @stateStorage.Begin unless @stateStorage.nil?
         end
 
         #Get
         def Get( handler )
-            return @stateStorage.Get( handler )
+            return @stateStorage.Get( handler ) unless @stateStorage.nil?
         end
         
         #Finish
         def Commit
-            @stateStorage.Commit
+            @stateStorage.Commit unless @stateStorage.nil?
         end
 
 

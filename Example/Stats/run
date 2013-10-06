@@ -2,9 +2,7 @@ APPNAME=HelloWorld \
 ERROR_QUEUE_NAME=error \
 MAX_RETRIES=2 \
 VERBOSE=true \
-WORKING_DIR=./ \
-RSBCRON_HelloWorld="* * * * *" \
+STAT_OUTPUT_COUNTDOWN=1 \
 QUEUE_TIMEOUT=1 \
-STAT_OUTPUT_COUNTDOWN=5 \
-VERBOSE=true \
+WORKING_DIR=./ \
 ../rservicebus_examples

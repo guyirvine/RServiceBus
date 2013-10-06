@@ -47,7 +47,7 @@ class CronManager
             hash['cron'] = CronParser.new(cron_string)
             hash['next'] = hash['cron'].next(Time.now)
             @list << hash
-            @Bus.log( "Cron set for, #{name}, #{cron_string}" )
+            @Bus.log( "Cron set for, #{n}, #{cron_string}" )
         end
     end
     

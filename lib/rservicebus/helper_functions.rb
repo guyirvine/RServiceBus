@@ -16,7 +16,7 @@ module RServiceBus
 
 	def RServiceBus.log(string, ver=false)
         return unless ENV['TESTING'].nil?
-        
+    
 		type = ver ? "VERB" : "INFO"
         #		if @config.verbose || !ver then
         timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )

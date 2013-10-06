@@ -20,10 +20,12 @@ require "rservicebus/Host"
 require "rservicebus/Config"
 require "rservicebus/EndpointMapping"
 require "rservicebus/Stats"
+require "rservicebus/StatisticManager"
 require "rservicebus/Audit"
 
 require "rservicebus/Message"
 require "rservicebus/Message/Subscription"
+require "rservicebus/Message/StatisticOutput"
 
 require "rservicebus/UserMessage/WithPayload"
 
