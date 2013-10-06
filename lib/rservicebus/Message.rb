@@ -26,7 +26,7 @@ class Message
 # retaining historical error messages.
 #
 # @param [Object] sourceQueue The name of the queue to which the msg should be returned
-# @param [Object] errorString A readible version of what occured
+# @param [Object] errorString A readible version of what occurred
 	def addErrorMsg( sourceQueue, errorString )
 		@errorList << RServiceBus::ErrorMessage.new( sourceQueue, errorString )
 	end
