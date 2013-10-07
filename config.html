@@ -37,9 +37,9 @@
                 <h2>To Start With</h2>
                 
                 <pre><code>*Environment variables are used for configuration
-*Convention over Configuration
+                    *Convention over Configuration
                     
-*Example - APPNAME=HelloWorld CONTRACTS=./Contract.rb rservicebus</code></pre>
+                    *Example - APPNAME=HelloWorld CONTRACTS=./Contract.rb rservicebus</code></pre>
                 
                 <h2>APPNAME</h2>
                 
@@ -143,7 +143,10 @@
                 <h2>RSBCRON</h2>
                 <p>Send a messages at set intervals, allowing Pattern Matching for msgname</p>
                 <pre><code>RSBCRON="0 0 * * * MSG*;0 1 * * * ANOTHER_MSG*"</code></pre>
-
+                
+                <h2>RSBMSG_COMPRESS</h2>
+                <p>Compress the payload of a msg</p>
+                <pre><code>RSBMSG_COMPRESS=true</code></pre>
             </section>
         </div>
         
