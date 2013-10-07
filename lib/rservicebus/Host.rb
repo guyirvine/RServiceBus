@@ -405,7 +405,7 @@ module RServiceBus
                     rMsg.setRemoteQueueName( parts[0] )
                     rMsg.setRemoteHostName( parts[1] )
                     q = 'transport-out'
-                    log "Sending, #{msg.class.name} to, queueName, via #{q}", true
+                    log "Sending, #{msg.class.name} to, #{queueName}, via #{q}", true
                 end
 
                 serialized_object = YAML::dump(rMsg)

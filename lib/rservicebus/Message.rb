@@ -1,5 +1,7 @@
 module RServiceBus
 
+require 'zlib'
+
 #This is the top level message that is passed around the bus
 class Message
 
@@ -10,7 +12,14 @@ attr_reader :returnAddress, :msgId, :remoteQueueName, :remoteHostName, :lastErro
 # @param [Object] msg The msg to be sent
 # @param [Object] returnAddress A queue to which the destination message handler can send replies
 	def initialize( msg, returnAddress )
-		@_msg=YAML::dump(msg)
+        if !RServiceBus.getValue( "RSBMSG_COMPRESS" ).nil? then
+            @compressed = true
+            @_msg=Zlib::Deflate.deflate(YAML::dump(msg))
+        else
+            @compressed = false
+            @_msg=YAML::dump(msg)
+        end
+        
 		@returnAddress=returnAddress
 		
 		@createdAt = DateTime.now
@@ -53,7 +62,11 @@ attr_reader :returnAddress, :msgId, :remoteQueueName, :remoteHostName, :lastErro
 
 # @return [Object] The msg to be sent
 	def msg
-		return YAML::load( @_msg )
+        if @compressed == true then
+            return YAML::load( Zlib::Inflate.inflate( @_msg ))
+        else
+            return YAML::load( @_msg )
+        end
         rescue ArgumentError => e
             raise e if e.message.index( "undefined class/module " ).nil?
 
