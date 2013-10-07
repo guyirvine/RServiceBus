@@ -37,11 +37,7 @@ module RServiceBus
         # @param [String] string Log entry
         # @param [Boolean] ver Indicator for a verbose log entry
         def log(string, ver=false)
-            type = ver ? "VERB" : "INFO"
-            if @config.verbose || !ver then
-                timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
-                puts "[#{type}] #{timestamp} :: #{string}"
-            end
+            RServiceBus.log( string, ver )
         end
 
         #Thin veneer for Configuring external resources
@@ -156,7 +152,6 @@ module RServiceBus
         
         def initialize()
             @config = ConfigFromEnv.new
-			.configureLogging()
 			.loadHostSection()
 			.configureMq()
 			.loadContracts()
@@ -228,6 +223,12 @@ module RServiceBus
                             @stats.output = true
                         elsif @msg.msg.class.name == "RServiceBus::Message_StatisticOutputOff" then
                             @stats.output = false
+                            elsif @msg.msg.class.name == "RServiceBus::Message_VerboseOutputOn" then
+                            ENV["VERBOSE"] = "true"
+                            log "Turn on Verbose logging"
+                            elsif @msg.msg.class.name == "RServiceBus::Message_VerboseOutputOff" then
+                            ENV.delete( "VERBOSE" )
+                            log "Turn off Verbose logging"
                         
 
                             else

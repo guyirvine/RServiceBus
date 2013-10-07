@@ -18,10 +18,10 @@ module RServiceBus
         return unless ENV['TESTING'].nil?
     
 		type = ver ? "VERB" : "INFO"
-        #		if @config.verbose || !ver then
-        timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
-        puts "[#{type}] #{timestamp} :: #{string}"
-        #		end
+        if !ENV["VERBOSE"].nil? || !ver then
+            timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
+            puts "[#{type}] #{timestamp} :: #{string}"
+        end
 	end
 
     def RServiceBus.createAnonymousClass( name_for_class )

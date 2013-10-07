@@ -26,6 +26,7 @@ require "rservicebus/Audit"
 require "rservicebus/Message"
 require "rservicebus/Message/Subscription"
 require "rservicebus/Message/StatisticOutput"
+require "rservicebus/Message/VerboseOutput"
 
 require "rservicebus/UserMessage/WithPayload"
 
