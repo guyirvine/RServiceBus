@@ -346,11 +346,12 @@ module RServiceBus
                 begin
                     @queueForMsgsToBeSentOnComplete = Array.new
 
+                    log "Started processing msg, #{msgName}"
                     handlerList.each do |handler|
                         begin
-                            log "Handler, #{handler.class.name}, started processing msg, #{msgName}"
+                            log "Handler, #{handler.class.name}, Started"
                             handler.Handle( @msg.msg )
-                            log "Handler, #{handler.class.name}, finished processing msg, #{msgName}"
+                            log "Handler, #{handler.class.name}, Finished"
                             rescue PropertyNotSet => e
                                 raise PropertyNotSet.new( "Property, #{e.message}, not set for, #{handler.class.name}" )
                             rescue Exception => e
@@ -359,10 +360,11 @@ module RServiceBus
                             raise e
                         end
                     end
-                    
+
                     @handlerManager.commitResourcesUsedToProcessMsg( msgName )
                     
                     self.sendQueuedMsgs
+                    log "Finished processing msg, #{msgName}"
                     
                     rescue Exception => e
                     
