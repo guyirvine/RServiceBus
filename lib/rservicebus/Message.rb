@@ -43,14 +43,6 @@ module RServiceBus
             @errorList << RServiceBus::ErrorMessage.new( sourceQueue, errorString )
         end
         
-        # Convenience function
-        #
-        # @return [String]
-        def getLastErrorMsg
-            return @errorList.last
-        end
-        
-        
         def setRemoteHostName( hostName )
             @remoteHostName = hostName
         end

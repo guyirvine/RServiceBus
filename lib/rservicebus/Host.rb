@@ -266,7 +266,7 @@ module RServiceBus
                         rescue Exception => e
                         sleep 0.5
                         
-                        puts "*** Exception occured"
+                        puts "*** Exception occurred"
                         puts e.message
                         puts e.backtrace
                         puts "***"
@@ -357,7 +357,7 @@ module RServiceBus
                                 raise PropertyNotSet.new( "Property, #{e.message}, not set for, #{handler.class.name}" )
                             rescue Exception => e
                             puts "E #{e.message}"
-                            log "An error occured in Handler: " + handler.class.name
+                            log "An error occurred in Handler: " + handler.class.name
                             raise e
                         end
                     end

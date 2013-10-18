@@ -158,6 +158,13 @@ module RServiceBus
             pathList.split( ";" ).each do |path|
                 
                 path = path.strip.chomp( "/" )
+
+                if !Dir.exists?( "#{path}" ) then
+                    puts "Error while processing working directory list"
+                    puts "*** path, #{path}, does not exist"
+                    next
+                end
+                
                 if Dir.exists?( "#{path}/MessageHandler" ) then
                     @handlerPathList << "#{path}/MessageHandler"
                 end
