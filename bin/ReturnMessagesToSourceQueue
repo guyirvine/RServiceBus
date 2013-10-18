@@ -1,0 +1,114 @@
+#!/usr/bin/env ruby
+
+require "yaml"
+require "beanstalk-client"
+require "rservicebus"
+
+def returnMsg( beanstalk, job, request_nbr )
+    firstMatch = "ruby/object:"
+
+            payload = job.body
+
+            firstIndex = payload.index( firstMatch )
+            startIndex = payload.index( firstMatch, firstIndex + 1 ) + firstMatch.length
+
+            msgName = payload.match( '(\w*)', startIndex )[1]
+
+            msg = YAML::load(payload)
+            if msg.getLastErrorMsg.nil? then
+                puts "*** Requested msg, #{request_nbr}, does not have a sourceQueue to which it can be returned"
+                puts "*** Only errored msgs can be Returned"
+                puts "*** Generally, msgs would not be manually moved between queues"
+                puts "*** If you do need to, try"
+                puts "*** beanstalk-admin-dump <source queue name> | beanstalk-admin-load <destination queue name>"
+
+                job.release
+                return
+            end
+            queueName = msg.getLastErrorMsg.sourceQueue
+            puts "#" + "#{request_nbr.to_s}: #{msgName} to #{queueName}"
+
+            beanstalk.use( queueName )
+            beanstalk.put( payload )
+            
+            job.delete
+end
+
+
+index=nil
+if ARGV.length == 0 then
+        queueName = "error"
+elsif ARGV.length == 1 then
+        queueName = ARGV[0]
+elsif ARGV.length == 2 then
+        queueName = ARGV[0]
+        index = ARGV[1].to_i
+else
+        abort( "Usage: ReturnMessagesToSourceQueue [queue name] [index]" )
+end
+
+begin
+    host = 'localhost:11300'
+    beanstalk = Beanstalk::Pool.new([host])
+    
+    tubes = beanstalk.list_tubes[host]
+    if !tubes.include?(queueName) then
+        abort( "Nothing waiting on the Beanstalk queue, #{queueName}" )
+    end
+    
+    tubeStats = beanstalk.stats_tube(queueName)
+    number_of_messages = tubeStats["current-jobs-ready"]
+    if index.nil? then
+        puts
+        puts "Attempting to return #{number_of_messages} to their source queue"
+        puts
+    
+        begin
+            beanstalk.watch(queueName)
+            1.upto(number_of_messages) do |request_nbr|
+                job = beanstalk.reserve 1
+            
+                returnMsg( beanstalk, job, request_nbr )
+            end
+            rescue Exception => e
+            if e.message == "TIMED_OUT" then
+                else
+                raise
+            end
+        end
+    else
+        if index > number_of_messages then
+            puts "*** Requested msg, #{index}, is greater than the number of msgs in the queue, #{number_of_messages}"
+            puts "*** Try a smaller index, or remove the index number to return all msgs"
+            abort();
+        end
+
+        puts
+        puts "Attempting to msg number, #{index} to it's source queue"
+        puts
+    
+        begin
+            beanstalk.watch(queueName)
+            jobList = Array.new
+            1.upto(index-1) do |request_nbr|
+                job = beanstalk.reserve 1
+                jobList << job
+            end
+            job = beanstalk.reserve 1
+            returnMsg( beanstalk, job, index )
+
+            jobList.each do |job|
+                job.release
+            end
+
+            rescue Exception => e
+            if e.message == "TIMED_OUT" then
+                else
+                raise
+            end
+        end
+    end
+    
+    rescue Beanstalk::NotConnected=>e
+    puts "Beanstalk not running"
+end

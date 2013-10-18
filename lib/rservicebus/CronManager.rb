@@ -73,13 +73,12 @@ class CronManager
     
     def Run
         now = Time.now
-        @list.map! do |v|
+        @list.each_with_index do |v,idx|
             if now > v['next'] then
                 @Bus.log "CronManager.Send, #{v['name']}", true
                 @Bus.Send( RServiceBus.createAnonymousClass( v['name'] ) )
-                v['next'] = v['cron'].next(now)
+                @list[idx]['next'] = v['cron'].next(now)
             end
-            return v
         end
     end
     
