@@ -72,7 +72,7 @@ module RServiceBus
         #Thin veneer for Configuring the Message Queue
         #
         def connectToMq
-            @mq = ConfigureMQ.new.get( @config.mqHost + "/" + @config.localQueueName, @config.queueTimeout )
+            @mq = MQ.get
             
             return self
         end
@@ -153,13 +153,14 @@ module RServiceBus
         def initialize()
             @config = ConfigFromEnv.new
 			.loadHostSection()
-			.configureMq()
 			.loadContracts()
 			.loadHandlerPathList()
             .loadLibs()
             .loadWorkingDirList();
-            
-            @endpointMapping = EndpointMapping.new.Configure( @config.localQueueName )
+
+            self.connectToMq()
+
+            @endpointMapping = EndpointMapping.new.Configure( @mq.localQueueName )
             
             self.configureStatistics()
             .loadContracts()
@@ -170,7 +171,6 @@ module RServiceBus
 			.configureMonitors()
 			.loadHandlers()
             .configureCronManager()
-			.connectToMq()
 			.configureSubscriptions()
 			.sendSubscriptions()
 
@@ -183,8 +183,8 @@ module RServiceBus
         def run
             log "Starting the Host"
             
-            log "Watching, #{@config.localQueueName}"
-            $0 = "rservicebus - #{@config.localQueueName}"
+            log "Watching, #{@mq.localQueueName}"
+            $0 = "rservicebus - #{@mq.localQueueName}"
             if !@config.forwardReceivedMessagesTo.nil? then
                 log "Forwarding all received messages to: " + @config.forwardReceivedMessagesTo.to_s
             end
@@ -242,7 +242,7 @@ module RServiceBus
                         puts "*** Class not found for msg, #{e.message}"
                         puts "*** Ensure, #{e.message}, is defined in Contract.rb, most likely as 'Class #{e.message} end"
                         
-                        @msg.addErrorMsg( @config.localQueueName, e.message )
+                        @msg.addErrorMsg( @mq.localQueueName, e.message )
                         serialized_object = YAML::dump(@msg)
                         self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
                         @mq.ack
@@ -251,7 +251,7 @@ module RServiceBus
                         puts "*** Handler not found for msg, #{e.message}"
                         puts "*** Ensure a handler named, #{e.message}, is present in the MessageHandler directory."
 
-                        @msg.addErrorMsg( @config.localQueueName, e.message )
+                        @msg.addErrorMsg( @mq.localQueueName, e.message )
                         serialized_object = YAML::dump(@msg)
                         self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
                         @mq.ack
@@ -294,7 +294,7 @@ module RServiceBus
                             errorString = e.message + ". " + e.backtrace.join( ". " )
                             #                            log errorString
                             
-                            @msg.addErrorMsg( @config.localQueueName, errorString )
+                            @msg.addErrorMsg( @mq.localQueueName, errorString )
                             serialized_object = YAML::dump(@msg)
                             self._SendAlreadyWrappedAndSerialised(serialized_object, @config.errorQueueName)
                             @mq.ack
@@ -397,7 +397,7 @@ module RServiceBus
             def _SendNeedsWrapping( msg, queueName )
                 log "Bus._SendNeedsWrapping", true
 
-                rMsg = RServiceBus::Message.new( msg, @config.localQueueName )
+                rMsg = RServiceBus::Message.new( msg, @mq.localQueueName )
                 if queueName.index( "@" ).nil? then
                     q = queueName
                     log "Sending, #{msg.class.name} to, queueName", true
@@ -439,7 +439,7 @@ module RServiceBus
                 queueName = @endpointMapping.get( msgName )
                 return queueName unless queueName.nil?
                 
-                return @config.localQueueName if @handlerManager.canMsgBeHandledLocally(msgName)
+                return @mq.localQueueName if @handlerManager.canMsgBeHandledLocally(msgName)
                 
                 log "No end point mapping found for: " + msgName
                 log "**** Check environment variable MessageEndpointMappings contains an entry named : " + msgName

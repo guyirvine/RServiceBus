@@ -42,7 +42,8 @@ module RServiceBus
 	endpointMapping.Configure
 	queueName = endpointMapping.get( msg.class.name )
 
-	agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://127.0.0.1:11300" ) )
+    ENV["RSBMQ"] = "beanstalk://localhost" if ENV["RSBMQ"].nil?
+    agent = RServiceBus::Agent.new
     Audit.new( agent ).audit( msg )
 	agent.sendMsg(msg, queueName, responseQueue)
 
@@ -60,7 +61,8 @@ module RServiceBus
         endpointMapping.Configure
         queueName = endpointMapping.get( msg.class.name )
         
-        agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://127.0.0.1:11300" ) )
+        ENV["RSBMQ"] = "beanstalk://localhost" if ENV["RSBMQ"].nil?
+        agent = RServiceBus::Agent.new
         Audit.new( agent ).auditOutgoing( msg )
         agent.sendMsg(msg, queueName, responseQueue)
         
@@ -73,7 +75,8 @@ module RServiceBus
     end
     
     def RServiceBus.checkForReply( queueName )
-        agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://127.0.0.1:11300" ) )
+        ENV["RSBMQ"] = "beanstalk://localhost" if ENV["RSBMQ"].nil?
+        agent = RServiceBus::Agent.new
         msg = agent.checkForReply( queueName )
         Audit.new( agent ).auditIncoming( msg )
 

@@ -2,14 +2,13 @@ module RServiceBus
     
     #Marshals configuration information for an rservicebus host
     class Config
-        attr_reader :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :subscriptionUri, :queueTimeout, :statOutputCountdown, :contractList, :libList, :forwardSentMessagesTo, :mqHost
+        attr_reader :appName, :messageEndpointMappings, :handlerPathList, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :subscriptionUri, :statOutputCountdown, :contractList, :libList, :forwardSentMessagesTo, :mqHost
         
         @appName
         @messageEndpointMappings
         @handlerPathList
         @contractList
         
-        @localQueueName
         @errorQueueName
         @forwardSentMessagesTo
         @maxRetries
@@ -17,8 +16,6 @@ module RServiceBus
         @subscriptionUri
         
         @mq
-        
-        @queueTimeout
         
         def initialize()
             puts "Cannot instantiate config directly."
@@ -56,10 +53,8 @@ module RServiceBus
         
         def loadHostSection()
             @appName = self.getValue( "APPNAME", "RServiceBus" )
-            @localQueueName = self.getValue( "LOCAL_QUEUE_NAME", @appName )
             @errorQueueName = self.getValue( "ERROR_QUEUE_NAME", "error" )
             @maxRetries = self.getValue( "MAX_RETRIES", "5" ).to_i
-            @queueTimeout = self.getValue( "QUEUE_TIMEOUT", "5" ).to_i
             @statOutputCountdown = self.getValue( "STAT_OUTPUT_COUNTDOWN", "100" ).to_i
             @subscriptionUri = self.getValue( "SUBSCRIPTION_URI", "file:///tmp/#{appName}_subscriptions.yaml" )
 
@@ -192,7 +187,7 @@ module RServiceBus
     end
     
     class ConfigFromSetter<Config
-        attr_writer :appName, :messageEndpointMappings, :handlerPathList, :localQueueName, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :beanstalkHost
+        attr_writer :appName, :messageEndpointMappings, :handlerPathList, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :beanstalkHost
         
         def initialize()
         end

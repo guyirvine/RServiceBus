@@ -10,34 +10,63 @@ module RServiceBus
     # - dependency injection.
     #
     class MQ
+        
+        attr_reader :localQueueName
+        
         @uri
+        
+        
+        def MQ.get
+            mqString = RServiceBus.getValue( "RSBMQ", "beanstalk://localhost" );
+            uri = URI.parse( mqString )
+            
+            case uri.scheme
+                when "beanstalk"
+                require "rservicebus/MQ/Beanstalk"
+                mq = MQ_Beanstalk.new( uri )
+                
+                when "redis"
+                require "rservicebus/MQ/Redis"
+                mq = MQ_Redis.new( uri )
+                
+                else
+                abort("Scheme, #{uri.scheme}, not recognised when configuring mq, #{string}");
+            end
+            
+            return mq
+        end
         
         # Resources are attached resources, and can be specified using the URI syntax.
         #
         # @param [URI] uri the type and location of queue, eg beanstalk://127.0.0.1/foo
         # @param [Integer] timeout the amount of time to wait for a msg to arrive
-        def initialize( uri, timeout )
-            @timeout = timeout
+        def initialize( uri )
+            
             if uri.is_a? URI then
                 @uri = uri
                 else
                 puts "uri must be a valid URI"
                 abort()
             end
-            
-            host = uri.host
-            port = uri.port
-            queue = uri.path.sub( "/", "" )
-            
-            if ( queue == "" )
+
+            if uri.path == "" || uri.path == "/" then
+                @localQueueName = RServiceBus.getValue( "APPNAME", "RServiceBus" )
+                else
+                @localQueueName = uri.path
+                @localQueueName[0] = ""
+            end
+
+            if @localQueueName == "" then
+                puts "@localQueueName: #{@localQueueName}"
                 puts "Queue name must be supplied "
                 puts "*** uri, #{uri}, needs to contain a queue name"
                 puts "*** the structure is scheme://host[:port]/queuename"
                 abort()
             end
-
+            
+            @timeout = RServiceBus.getValue( "QUEUE_TIMEOUT", "5" ).to_i
             self.connect(uri.host, uri.port)
-            self.subscribe( queue )
+            self.subscribe( @localQueueName )
         end
         
         # Connect to the broker
