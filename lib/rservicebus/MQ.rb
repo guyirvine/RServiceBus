@@ -2,6 +2,9 @@ module RServiceBus
     
     require "uri"
     
+    class JobTooBigError<StandardError
+    end
+    
     # Wrapper base class for Queue implementations available to the applications, allowing rservicebus to instatiate and configure
     # queue implementations at startup
     # - dependency injection.

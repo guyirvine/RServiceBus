@@ -16,9 +16,9 @@ module RServiceBus
             begin
                 @beanstalk = Beanstalk::Pool.new([string])
                 
-                current = @beanstalk.stats["max-job-size"]
-                if current < 4194304 then
-                    puts "***WARNING: Lowest recommended.max-job-size is 4m, current max-job-size, #{current.to_f / (1024*1024)}m"
+                @max_job_size = @beanstalk.stats["max-job-size"]
+                if @max_job_size < 4194304 then
+                    puts "***WARNING: Lowest recommended.max-job-size is 4m, current max-job-size, #{@max_job_size.to_f / (1024*1024)}m"
                     puts "***WARNING: Set the job size with the -z switch, eg /usr/local/bin/beanstalkd -z 4194304"
                 end
                 rescue Exception => e
@@ -64,12 +64,17 @@ module RServiceBus
             @job.delete
             @job = nil;
         end
-        
+
         # At least called in the Host rescue block, to ensure all network links are healthy
         def send( queueName, msg )
+            if msg.length > @max_job_size then
+                puts "***Attempting to send a msg which will not fit on queue."
+                puts "***Msg size, #{msg.length}, max msg size, #{@max_job_size}."
+                raise JobTooBigError.new( "Msg size, #{msg.length}, max msg size, #{@max_job_size}" )
+            end
             @beanstalk.use( queueName )
             @beanstalk.put( msg )
         end
-        
+
     end
 end
