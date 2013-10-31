@@ -221,8 +221,10 @@ module RServiceBus
                             @subscriptionManager.add( @msg.msg.eventName, @msg.returnAddress )
                         elsif @msg.msg.class.name == "RServiceBus::Message_StatisticOutputOn" then
                             @stats.output = true
+                            log "Turn on Stats logging"
                         elsif @msg.msg.class.name == "RServiceBus::Message_StatisticOutputOff" then
                             @stats.output = false
+                            log "Turn off Stats logging"
                             elsif @msg.msg.class.name == "RServiceBus::Message_VerboseOutputOn" then
                             ENV["VERBOSE"] = "true"
                             log "Turn on Verbose logging"

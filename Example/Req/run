@@ -5,6 +5,7 @@ MSGHANDLERPATH=./MessageHandler \
 VERBOSE=true \
 QUEUE_TIMEOUT=1 \
 CONTRACTS=./Contract.rb \
+AUDIT_QUEUE_NAME=a_queue \
 ../rservicebus_examples
 
 #RSBVERBOSE=true \

@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+#
+# The application 'rservicebus' is installed as part of a gem, and
+# this file is here to facilitate running it.
+#
+
+require 'rubygems'
+require "rservicebus"
+require "rservicebus/Agent"
+
+
+
+if ARGV.length == 3 then
+    queue_name = ARGV[0]
+    switch_name = ARGV[1].upcase
+    switch_state = ARGV[2].upcase == "TRUE" || ARGV[2].upcase == "ON"
+else
+    puts "Usage: rsb_ctl <queue name> <switch> <switch state>"
+    puts "Valid switchs: Stats, Verbose"
+    puts "Valid switch states: On, Off"
+    abort()
+end
+
+
+agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://localhost" ) )
+obj = nil
+case switch_name
+    when switch_name = "STATS"
+        obj = switch_state == true ? RServiceBus::Message_StatisticOutputOn.new : RServiceBus::Message_StatisticOutputOff.new
+    when switch_name = "VERBOSE"
+        obj = switch_state == true ? RServiceBus::Message_VerboseOutputOn.new : RServiceBus::Message_VerboseOutputOff.new
+    else
+        puts "Switch name, #{ARGV[0]}, not recognized"
+        puts "Valid switchs: Stats, Verbose"
+        abort()
+end
+
+agent.sendMsg(obj, queue_name, "#{queue_name}Response")
