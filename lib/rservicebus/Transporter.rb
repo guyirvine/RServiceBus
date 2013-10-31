@@ -14,16 +14,9 @@ module RServiceBus
     
     class Transporter
         
-        def log( string, verbose=false )
-            if verbose == false ||
-                ( !ENV["VERBOSE"].nil? && ENV["VERBOSE"].upcase == "TRUE") then
-                puts string
-            end
-        end
-        
         def getValue( name, default=nil )
             value = ( ENV[name].nil?  || ENV[name] == ""  ) ? default : ENV[name];
-            log "Env value: #{name}: #{value}"
+            RServiceBus.log "Env value: #{name}: #{value}"
             return value
         end
         
@@ -33,7 +26,7 @@ module RServiceBus
             @source = Beanstalk::Pool.new([sourceUrl])
             @source.watch sourceQueueName
             
-            log "Connected to, #{sourceQueueName}@#{sourceUrl}"
+            RServiceBus.log "Connected to, #{sourceQueueName}@#{sourceUrl}"
             
             rescue Exception => e
             puts "Error connecting to Beanstalk"
@@ -50,7 +43,7 @@ module RServiceBus
         
         
         def disconnect
-            log "Disconnect from, #{@remoteUserName}@#{@remoteHostName}/#{@remoteQueueName}"
+            RServiceBus.log "Disconnect from, #{@remoteUserName}@#{@remoteHostName}/#{@remoteQueueName}"
             @gateway.shutdown! unless @gateway.nil?
             @gateway = nil
             @remoteHostName = nil
@@ -64,7 +57,7 @@ module RServiceBus
         
         
         def connect( remoteHostName )
-            log "connect called, #{remoteHostName}", true
+            RServiceBus.rlog "connect called, #{remoteHostName}"
             if @gateway.nil? || remoteHostName != @remoteHostName || @destination.nil? then
                 self.disconnect
             end
@@ -74,20 +67,20 @@ module RServiceBus
                 @remoteHostName = remoteHostName
                 @remoteUserName = getValue( "REMOTE_USER_#{remoteHostName.upcase}" )
                 if @remoteUserName.nil? then
-                    log "**** Username not specified for Host, #{remoteHostName}"
-                    log "**** Add an environment variable of the form, REMOTE_USER_#{remoteHostName.upcase}=[USERNAME]"
+                    RServiceBus.log "**** Username not specified for Host, #{remoteHostName}"
+                    RServiceBus.log "**** Add an environment variable of the form, REMOTE_USER_#{remoteHostName.upcase}=[USERNAME]"
                     abort()
                 end
                 
                 @localPort = getValue( "LOCAL_PORT", 27018 ).to_i
-                log "Local Port: #{@localPort}", true
+                RServiceBus.rlog "Local Port: #{@localPort}"
                 
                 begin
-                    log "Connect SSH, #{@remoteUserName}@#{@remoteHostName}"
+                    RServiceBus.log "Connect SSH, #{@remoteUserName}@#{@remoteHostName}"
                     # Open port 27018 to forward to 127.0.0.11300 on the remote host
                     @gateway = Net::SSH::Gateway.new(@remoteHostName, @remoteUserName)
                     @gateway.open('127.0.0.1', 11300, @localPort)
-                    log "Connected to SSH, #{@remoteUserName}@#{@remoteHostName}"
+                    RServiceBus.log "Connected to SSH, #{@remoteUserName}@#{@remoteHostName}"
                     
                     rescue Errno::EADDRINUSE => e
                     puts "*** Local transport port in use, #{@localPort}"
@@ -102,9 +95,9 @@ module RServiceBus
                 
                 begin
                     destinationUrl = "127.0.0.1:#{@localPort}"
-                    log "Connect to Remote Beanstalk, #{destinationUrl}", true
+                    RServiceBus.rlog "Connect to Remote Beanstalk, #{destinationUrl}"
                     @destination = Beanstalk::Pool.new([destinationUrl])
-                    log "Connected to Remote Beanstalk, #{destinationUrl}"
+                    RServiceBus.rlog "Connected to Remote Beanstalk, #{destinationUrl}"
                     rescue Exception => e
                     if e.message == "Beanstalk::NotConnected" then
                         puts "***Could not connect to destination, check beanstalk is running at, #{destinationUrl}"
@@ -123,10 +116,10 @@ module RServiceBus
             self.connect( msg.remoteHostName )
             
             @remoteQueueName = msg.remoteQueueName
-            log "Put msg, #{msg.remoteQueueName}", true
+            RServiceBus.rlog "Put msg, #{msg.remoteQueueName}"
             @destination.use( msg.remoteQueueName )
             @destination.put( job.body )
-            log "Msg put, #{msg.remoteQueueName}"
+            RServiceBus.log "Msg put, #{msg.remoteQueueName}"
             
             if !ENV['AUDIT_QUEUE_NAME'].nil? then
                 @source.use ENV['AUDIT_QUEUE_NAME']
@@ -135,13 +128,13 @@ module RServiceBus
             #removeJob
             job.delete
             
-            log "Job sent to, #{@remoteUserName}@#{@remoteHostName}/#{@remoteQueueName}"
+            RServiceBus.log "Job sent to, #{@remoteUserName}@#{@remoteHostName}/#{@remoteQueueName}"
             
             
             rescue Exception => e
             self.disconnect
             if e.message == "TIMED_OUT" then
-                log "No Msg", true
+                RServiceBus.rlog "No Msg"
                 return
             end
             raise e

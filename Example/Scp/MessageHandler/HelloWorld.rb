@@ -6,11 +6,11 @@ class MessageHandler_HelloWorld
 	def Handle( msg )
 		filePath = "#{@DataDir.path}/data.txt"
 
-		@Bus.log "Writing to file: #{filePath}", true
+		RServiceBus.rlog "Writing to file: #{filePath}"
 
 		IO.write( filePath, "File Content" )
 
-		@Bus.log "Scp file, #{filePath}", true
+		RServiceBus.rlog "Scp file, #{filePath}"
 	
 		@ScpUpload.upload( filePath )
 	end

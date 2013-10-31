@@ -25,8 +25,8 @@ module RServiceBus
         # @param [RServiceBus::Handler] handler
         ## @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
         def setAppResources( monitor )
-            @host.log "Checking app resources for: #{monitor.class.name}", true
-            @host.log "If your attribute is not getting set, check that it is in the 'attr_accessor' list", true
+            RServiceBus.rlog "Checking app resources for: #{monitor.class.name}"
+            RServiceBus.rlog "If your attribute is not getting set, check that it is in the 'attr_accessor' list"
             @appResources.each do |k,v|
                 if monitor.class.method_defined?( k ) then
                     monitor.instance_variable_set( "@#{k}", v.getResource() )

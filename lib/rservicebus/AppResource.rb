@@ -17,7 +17,7 @@ module RServiceBus
 
         def _connect
             @connection = self.connect(@uri)
-            @host.log "#{self.class.name}. Connected to, #{@uri.to_s}", true
+            RServiceBus.rlog "#{self.class.name}. Connected to, #{@uri.to_s}"
         end
 
         # Resources are attached resources, and can be specified using the URI syntax.

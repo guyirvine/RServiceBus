@@ -127,13 +127,13 @@ module RServiceBus
             
             fileList = Dir.glob( "#{@Path}/*" )
             fileList.each do |filePath|
-                @Bus.log "Ready to process, #{filePath}", true
+                RServiceBus.log "Ready to process, #{filePath}"
                 content = self.ProcessPath( filePath )
                 
                 if !@ArchiveDir.nil? then
                     basename = File.basename( filePath )
                     newFilePath = @ArchiveDir + "/" + basename + "." + DateTime.now.strftime( "%Y%m%d%H%M%S%L") + ".zip"
-                    @Bus.log "Writing to archive, #{newFilePath}", true
+                    RServiceBus.log "Writing to archive, #{newFilePath}"
                     
                     Zip::ZipOutputStream.open(newFilePath) {
                         |zos|
@@ -144,8 +144,8 @@ module RServiceBus
                 File.unlink( filePath )
                 
                 fileProcessed = fileProcessed + 1
-                @Bus.log "Processed #{fileProcessed} of #{fileList.length}.", true
-                @Bus.log "Allow system tick #{self.class.name}", true
+                RServiceBus.log "Processed #{fileProcessed} of #{fileList.length}."
+                RServiceBus.log "Allow system tick #{self.class.name}"
                 return if fileProcessed >= maxFilesProcessed
             end
             

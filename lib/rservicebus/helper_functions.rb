@@ -1,5 +1,5 @@
 module RServiceBus
-
+    
     
 	def RServiceBus.convertDTOToHash( obj )
 		hash = {};
@@ -13,17 +13,24 @@ module RServiceBus
         
 		return hash.to_json
 	end
-
+    
 	def RServiceBus.log(string, ver=false)
         return unless ENV['TESTING'].nil?
-    
+        
 		type = ver ? "VERB" : "INFO"
         if !ENV["VERBOSE"].nil? || !ver then
             timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
             puts "[#{type}] #{timestamp} :: #{string}"
         end
 	end
-
+    
+    def RServiceBus.rlog(string)
+        if !ENV["RSBVERBOSE"].nil? then
+            timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
+            puts "[RSB] #{timestamp} :: #{string}"
+        end
+    end
+    
     def RServiceBus.createAnonymousClass( name_for_class )
         newAnonymousClass = Class.new(Object)
         Object.const_set( name_for_class, newAnonymousClass )
@@ -35,19 +42,19 @@ module RServiceBus
         log "Env value: #{name}: #{value}"
         return value
     end
-
+    
     def RServiceBus.sendMsg( msg, responseQueue="agent" )
-	require "rservicebus/EndpointMapping"
-	endpointMapping = EndpointMapping.new
-	endpointMapping.Configure
-	queueName = endpointMapping.get( msg.class.name )
-
-    ENV["RSBMQ"] = "beanstalk://localhost" if ENV["RSBMQ"].nil?
-    agent = RServiceBus::Agent.new
-    Audit.new( agent ).audit( msg )
-	agent.sendMsg(msg, queueName, responseQueue)
-
-	rescue QueueNotFoundForMsg=>e
+        require "rservicebus/EndpointMapping"
+        endpointMapping = EndpointMapping.new
+        endpointMapping.Configure
+        queueName = endpointMapping.get( msg.class.name )
+        
+        ENV["RSBMQ"] = "beanstalk://localhost" if ENV["RSBMQ"].nil?
+        agent = RServiceBus::Agent.new
+        Audit.new( agent ).audit( msg )
+        agent.sendMsg(msg, queueName, responseQueue)
+        
+        rescue QueueNotFoundForMsg=>e
 		msg = "\n"
 		msg = "#{msg}*** Queue not found for, #{e.message}\n"
 		msg = "#{msg}*** Ensure you have an environment variable set for this Message Type, eg, \n"
@@ -79,8 +86,13 @@ module RServiceBus
         agent = RServiceBus::Agent.new
         msg = agent.checkForReply( queueName )
         Audit.new( agent ).auditIncoming( msg )
-
+        
         return msg
     end
+    
+    def RServiceBus.tick( string )
+        puts "[TICK] #{Time.new.strftime( '%Y-%m-%d %H:%M:%S.%6N' )} :: #{caller[0]}. #{string}"
+    end
+    
     
 end

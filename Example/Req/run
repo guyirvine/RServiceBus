@@ -6,3 +6,6 @@ VERBOSE=true \
 QUEUE_TIMEOUT=1 \
 CONTRACTS=./Contract.rb \
 ../rservicebus_examples
+
+#RSBVERBOSE=true \
+

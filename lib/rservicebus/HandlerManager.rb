@@ -26,7 +26,7 @@ module RServiceBus
         def setBusAttributeIfRequested( handler )
             if defined?( handler.Bus ) then
                 handler.Bus = @host
-                @host.log "Bus attribute set for: " + handler.class.name
+                RServiceBus.log "Bus attribute set for: " + handler.class.name
             end
             
             return self
@@ -38,7 +38,7 @@ module RServiceBus
         def setStateAttributeIfRequested( handler )
             if defined?( handler.State ) then
                 handler.State = @stateManager.Get( handler )
-                @host.log "Bus attribute set for: " + handler.class.name
+                RServiceBus.log "Bus attribute set for: " + handler.class.name
             end
             
             return self
@@ -54,14 +54,14 @@ module RServiceBus
         end
         
         def interrogateHandlerForAppResources( handler )
-            @host.log "Checking app resources for: #{handler.class.name}", true
-            @host.log "If your attribute is not getting set, check that it is in the 'attr_accessor' list", true
+            RServiceBus.rlog "Checking app resources for: #{handler.class.name}"
+            RServiceBus.rlog "If your attribute is not getting set, check that it is in the 'attr_accessor' list"
             
             @resourceListByHandlerName[handler.class.name] = Array.new
             @appResources.each do |k,v|
                 if handler.class.method_defined?( k ) then
                     @resourceListByHandlerName[handler.class.name] << k
-                    @host.log "Resource attribute, #{k}, found for: " + handler.class.name
+                    RServiceBus.log "Resource attribute, #{k}, found for: " + handler.class.name
                 end
             end
             
@@ -83,14 +83,14 @@ module RServiceBus
         # @param [RServiceBus::Handler] handler
         ## @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
         def setAppResources_to_be_removed( handler )
-            @host.log "Checking app resources for: #{handler.class.name}", true
-            @host.log "If your attribute is not getting set, check that it is in the 'attr_accessor' list", true
+            RServiceBus.rlog "Checking app resources for: #{handler.class.name}"
+            RServiceBus.rlog "If your attribute is not getting set, check that it is in the 'attr_accessor' list"
             @appResources.each do |k,v|
                 if handler.class.method_defined?( k ) then
                     v._connect
                     #                    v.Begin
                     handler.instance_variable_set( "@#{k}", v.getResource() )
-                    @host.log "App resource attribute, #{k}, set for: " + handler.class.name
+                    RServiceBus.log "App resource attribute, #{k}, set for: " + handler.class.name
                 end
             end
             
@@ -114,7 +114,7 @@ module RServiceBus
                 next if @resourceListByHandlerName[handler.class.name].nil?
                 @resourceListByHandlerName[handler.class.name].each do |k|
                     handler.instance_variable_set( "@#{k}", @appResources[k].getResource() )
-                    @host.log "App resource attribute, #{k}, set for: " + handler.class.name, true
+                    RServiceBus.rlog "App resource attribute, #{k}, set for: " + handler.class.name
                 end
             end
             
@@ -129,7 +129,7 @@ module RServiceBus
                 r = @appResources[resourceName]
                 r._connect
                 r.Begin
-                @host.log( "Preparing resource: #{resourceName}. Begin", true )
+                RServiceBus.rlog "Preparing resource: #{resourceName}. Begin"
             end
             
             self.setResourcesForHandlersNeededToProcessMsg( msgName )
@@ -138,11 +138,11 @@ module RServiceBus
         end
         
         def commitResourcesUsedToProcessMsg( msgName )
-            @host.log "HandlerManager.commitResourcesUsedToProcessMsg, #{msgName}", true
+            RServiceBus.rlog "HandlerManager.commitResourcesUsedToProcessMsg, #{msgName}"
             list = self.getListOfResourcesNeededToProcessMsg( msgName )
             list.each do |resourceName|
                 r = @appResources[resourceName]
-                @host.log "Commit resource, #{r.class.name}", true
+                RServiceBus.rlog "Commit resource, #{r.class.name}"
                 r.Commit
                 r.finished
             end
@@ -150,12 +150,12 @@ module RServiceBus
         end
         
         def rollbackResourcesUsedToProcessMsg( msgName )
-            @host.log "HandlerManager.rollbackResourcesUsedToProcessMsg, #{msgName}", true
+            RServiceBus.rlog "HandlerManager.rollbackResourcesUsedToProcessMsg, #{msgName}"
             list = self.getListOfResourcesNeededToProcessMsg( msgName )
             list.each do |resourceName|
                 begin
                     r = @appResources[resourceName]
-                    @host.log "Rollback resource, #{r.class.name}", true
+                    RServiceBus.rlog "Rollback resource, #{r.class.name}"
                     r.Rollback
                     r.finished
                     rescue Exception => e1

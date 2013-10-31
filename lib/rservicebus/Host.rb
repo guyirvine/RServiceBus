@@ -115,7 +115,7 @@ module RServiceBus
             
             @config.contractList.each do |path|
                 require path
-                log "Loaded Contract: #{path}", true
+                RServiceBus.rlog "Loaded Contract: #{path}"
             end
             
             return self
@@ -343,7 +343,7 @@ module RServiceBus
                 msgName = @msg.msg.class.name
                 handlerList = @handlerManager.getHandlerListForMsg(msgName)
                 
-                log "Handler found for: " + msgName, true
+                RServiceBus.rlog "Handler found for: " + msgName
                 begin
                     @queueForMsgsToBeSentOnComplete = Array.new
 
@@ -381,7 +381,7 @@ module RServiceBus
             # @param [String] serialized_object serialized RServiceBus::Message
             # @param [String] queueName endpoint to which the msg will be sent
             def _SendAlreadyWrappedAndSerialised( serialized_object, queueName )
-                log "Bus._SendAlreadyWrappedAndSerialised", true
+                RServiceBus.rlog "Bus._SendAlreadyWrappedAndSerialised"
 
                 if !@config.forwardSentMessagesTo.nil? then
                     @mq.send( @config.forwardSentMessagesTo, serialized_object )
@@ -395,18 +395,18 @@ module RServiceBus
             # @param [RServiceBus::Message] msg msg to be sent
             # @param [String] queueName endpoint to which the msg will be sent
             def _SendNeedsWrapping( msg, queueName )
-                log "Bus._SendNeedsWrapping", true
+                RServiceBus.rlog "Bus._SendNeedsWrapping"
 
                 rMsg = RServiceBus::Message.new( msg, @mq.localQueueName )
                 if queueName.index( "@" ).nil? then
                     q = queueName
-                    log "Sending, #{msg.class.name} to, queueName", true
+                    RServiceBus.rlog "Sending, #{msg.class.name} to, queueName"
                     else
                     parts = queueName.split( "@" )
                     rMsg.setRemoteQueueName( parts[0] )
                     rMsg.setRemoteHostName( parts[1] )
                     q = 'transport-out'
-                    log "Sending, #{msg.class.name} to, #{queueName}, via #{q}", true
+                    RServiceBus.rlog "Sending, #{msg.class.name} to, #{queueName}, via #{q}"
                 end
 
                 serialized_object = YAML::dump(rMsg)
@@ -429,7 +429,7 @@ module RServiceBus
             #
             # @param [RServiceBus::Message] msg msg to be sent
             def Reply( msg )
-                log "Reply with: " + msg.class.name + " To: " + @msg.returnAddress, true
+                RServiceBus.rlog "Reply with: " + msg.class.name + " To: " + @msg.returnAddress
                 @stats.incTotalReply
 
                 self.queueMsgForSendOnComplete( msg, @msg.returnAddress )
@@ -452,7 +452,7 @@ module RServiceBus
             #
             # @param [RServiceBus::Message] msg msg to be sent
             def Send( msg )
-                log "Bus.Send", true
+                RServiceBus.rlog "Bus.Send"
                 @stats.incTotalSent
                 
                 msgName = msg.class.name
@@ -465,7 +465,7 @@ module RServiceBus
             #
             # @param [RServiceBus::Message] msg msg to be sent
             def Publish( msg )
-                log "Bus.Publish", true
+                RServiceBus.rlog "Bus.Publish"
                 @stats.incTotalPublished
                 
                 subscriptions = @subscriptionManager.get(msg.class.name)
@@ -479,7 +479,7 @@ module RServiceBus
             #
             # @param [String] eventName event to be subscribes to
             def Subscribe( eventName )
-                log "Bus.Subscribe: " + eventName, true
+                RServiceBus.rlog "Bus.Subscribe: " + eventName
 
                 queueName = self.getEndpointForMsg( eventName )
                 subscription = Message_Subscription.new( eventName )

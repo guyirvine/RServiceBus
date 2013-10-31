@@ -12,7 +12,7 @@ end
         def getAgent( uri )
             ENV["RSBMQ"] = uri.to_s
 
-            RServiceBus.log "*** Agent.getAgent has been deprecated. Set the environment variable, RSBMQ, and simply create the class", true
+            RServiceBus.rlog "*** Agent.getAgent has been deprecated. Set the environment variable, RSBMQ, and simply create the class"
 	    return Agent.new
         end
         

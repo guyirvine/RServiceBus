@@ -23,7 +23,7 @@ module RServiceBus
                 exit()
             end
             
-            self.log( "EndpointMapping.configureMapping: #{match[1]}, #{match[2]}", true )
+            RServiceBus.rlog "EndpointMapping.configureMapping: #{match[1]}, #{match[2]}"
             @endpoints[match[1]] = match[2]
             
             @queueNameList.each do |q|

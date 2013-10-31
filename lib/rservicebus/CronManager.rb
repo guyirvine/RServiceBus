@@ -55,7 +55,7 @@ class CronManager
         @Bus = host
         @msgNames = msgNames
         
-        @Bus.log "Load Cron", true
+        RServiceBus.rlog "Load Cron"
         @list = Array.new
         ENV.each do |k,v|
             if k.start_with?( "RSBCRON_" ) then
@@ -75,7 +75,7 @@ class CronManager
         now = Time.now
         @list.each_with_index do |v,idx|
             if now > v['next'] then
-                @Bus.log "CronManager.Send, #{v['name']}", true
+                RServiceBus.rlog "CronManager.Send, #{v['name']}"
                 @Bus.Send( RServiceBus.createAnonymousClass( v['name'] ) )
                 @list[idx]['next'] = v['cron'].next(now)
             end

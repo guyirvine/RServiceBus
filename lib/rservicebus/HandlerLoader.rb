@@ -79,16 +79,16 @@ class HandlerLoader
 # @returns [RServiceBus::Handler] handler
 	def loadHandler(msgName, filePath, handlerName)
         if @listOfLoadedPaths.has_key?( filePath ) then
-            @host.log "Not reloading, #{filePath}"
+            RServiceBus.log "Not reloading, #{filePath}"
             return
         end
 
 		begin
-			@host.log "filePath: " + filePath, true
-			@host.log "handlerName: " + handlerName, true
+			RServiceBus.rlog "filePath: " + filePath
+			RServiceBus.rlog "handlerName: " + handlerName
 
 			handler = self.loadHandlerFromFile( handlerName, filePath )
-			@host.log "Loaded Handler: " + handlerName
+			RServiceBus.log "Loaded Handler: " + handlerName
 
             @handlerManager.addHandler( msgName, handler )
             
