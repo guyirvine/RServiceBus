@@ -15,7 +15,7 @@ def returnMsg( beanstalk, job, request_nbr )
             msgName = payload.match( '(\w*)', startIndex )[1]
 
             msg = YAML::load(payload)
-            if msg.getLastErrorMsg.nil? then
+            if msg.lastErrorString.nil? then
                 puts "*** Requested msg, #{request_nbr}, does not have a sourceQueue to which it can be returned"
                 puts "*** Only errored msgs can be Returned"
                 puts "*** Generally, msgs would not be manually moved between queues"
@@ -25,7 +25,7 @@ def returnMsg( beanstalk, job, request_nbr )
                 job.release
                 return
             end
-            queueName = msg.getLastErrorMsg.sourceQueue
+            queueName = msg.lastErrorSourceQueue
             puts "#" + "#{request_nbr.to_s}: #{msgName} to #{queueName}"
 
             beanstalk.use( queueName )

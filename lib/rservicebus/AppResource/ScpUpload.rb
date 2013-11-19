@@ -12,7 +12,11 @@ module RServiceBus
         def upload( source )
             #opportunity for smarts here. Could tar zip if it was a directory of files
 
-            Net::SCP.upload!(@uri.host, @uri.user, source, @uri.path )
+#            Net::SCP.upload!(@uri.host, @uri.user, source, @uri.path, :recursive )
+		Net::SSH.start( @uri.host, @uri.user ) do|ssh|
+			ssh.scp.upload!( source, @uri.path, :recursive => true )
+		end
+
         end
         
         def close

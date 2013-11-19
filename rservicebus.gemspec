@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'rservicebus'
-  s.version     = '0.1.53'
-  s.date        = '2013-10-31'
+  s.version     = '0.1.56'
+  s.date        = '2013-11-19'
   s.summary     = "RServiceBus"
   s.description = "A Ruby interpretation of NServiceBus"
   s.authors     = ["Guy Irvine"]
@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.add_dependency( "parse-cron" )
   s.executables << 'rservicebus'
   s.executables << 'rservicebus-init'
-  s.executables << 'ReturnErroredMessagesToSourceQueue'
+  s.executables << 'ReturnMessagesToSourceQueue'
   s.executables << 'SendEmptyMessage'
   s.executables << 'rservicebus-transport'
 end
