@@ -29,6 +29,10 @@ module RServiceBus
                 require "rservicebus/MQ/Redis"
                 mq = MQ_Redis.new( uri )
                 
+                when "rabbitmq"
+                require "rservicebus/MQ/RabbitMq"
+                mq = MQ_RabbitMq.new( uri )
+
                 else
                 abort("Scheme, #{uri.scheme}, not recognised when configuring mq, #{string}");
             end
