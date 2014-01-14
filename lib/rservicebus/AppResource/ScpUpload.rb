@@ -1,4 +1,5 @@
 require 'net/scp'
+require 'net/sftp'
 
 module RServiceBus
 
@@ -21,6 +22,19 @@ module RServiceBus
         end
         
         def close
+        end
+
+        def delete( path, filepattern )
+            RServiceBus.log "Host: #{@uri.host}, User: #{@uri.user}, File Pattern: #{filepattern}, Destination: #{@uri.path}", true
+            Net::SSH.start( @uri.host, @uri.user ) do |ssh|
+                ssh.sftp.connect do |sftp|
+                    files = sftp.dir.glob(path, filepattern)
+                    sftp.dir.foreach(path){
+                        |file|
+                        sftp.remove("#{path}/#{file.name}")
+                    }
+                end
+            end
         end
 
     end
