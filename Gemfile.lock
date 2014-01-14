@@ -13,6 +13,7 @@ GEM
     redis (3.0.1)
     uuidtools (2.1.2)
     zip (2.0.2)
+    net-sftp (2.1.2)
 
 PLATFORMS
   ruby
@@ -23,6 +24,7 @@ DEPENDENCIES
   haml
   json
   net-ssh-gateway
+  net-sftp
   parse-cron
   rake
   redis
