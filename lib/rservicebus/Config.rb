@@ -50,7 +50,7 @@ module RServiceBus
             
             return self
         end
-        
+
         def loadHostSection()
             @appName = self.getValue( "APPNAME", "RServiceBus" )
             @errorQueueName = self.getValue( "ERROR_QUEUE_NAME", "error" )
