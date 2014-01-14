@@ -2,11 +2,12 @@ module RServiceBus
     
     #Marshals configuration information for an rservicebus host
     class Config
-        attr_reader :appName, :messageEndpointMappings, :handlerPathList, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :subscriptionUri, :statOutputCountdown, :contractList, :libList, :forwardSentMessagesTo, :mqHost
+        attr_reader :appName, :messageEndpointMappings, :handlerPathList, :sagaPathList, :errorQueueName, :maxRetries, :forwardReceivedMessagesTo, :subscriptionUri, :statOutputCountdown, :contractList, :libList, :forwardSentMessagesTo, :mqHost
         
         @appName
         @messageEndpointMappings
         @handlerPathList
+        @sagaPathList
         @contractList
         
         @errorQueueName
@@ -50,14 +51,25 @@ module RServiceBus
             
             return self
         end
-
+        
+        def loadSagaPathList()
+            path = self.getValue( "SAGAPATH", "./Saga" )
+            @sagaPathList = Array.new
+            path.split( ";" ).each do |path|
+                path = path.strip.chomp( "/" )
+                @sagaPathList << path
+            end
+            
+            return self
+        end
+        
         def loadHostSection()
             @appName = self.getValue( "APPNAME", "RServiceBus" )
             @errorQueueName = self.getValue( "ERROR_QUEUE_NAME", "error" )
             @maxRetries = self.getValue( "MAX_RETRIES", "5" ).to_i
             @statOutputCountdown = self.getValue( "STAT_OUTPUT_COUNTDOWN", "100" ).to_i
             @subscriptionUri = self.getValue( "SUBSCRIPTION_URI", "file:///tmp/#{appName}_subscriptions.yaml" )
-
+            
             auditQueueName = self.getValue( "AUDIT_QUEUE_NAME" )
             if auditQueueName.nil? then
                 @forwardSentMessagesTo = self.getValue( "FORWARD_SENT_MESSAGES_TO" )
@@ -66,22 +78,22 @@ module RServiceBus
                 @forwardSentMessagesTo = auditQueueName
                 @forwardReceivedMessagesTo = auditQueueName
             end
-
+            
             return self
         end
         
         def ensureContractFileExists( path )
             if !( File.exists?( path ) ||
                  File.exists?( "#{path}.rb" ) ) then
-                puts "Error while processing contracts"
-                puts "*** path, #{path}, provided does not exist as a file"
-                abort()
+                 puts "Error while processing contracts"
+                 puts "*** path, #{path}, provided does not exist as a file"
+                 abort()
             end
             if !( File.extname( path ) == "" ||
                  File.extname( path ) == ".rb" ) then
-                puts "Error while processing contracts"
-                puts "*** path, #{path}, should point to a ruby file, with extention .rb"
-                abort()
+                 puts "Error while processing contracts"
+                 puts "*** path, #{path}, should point to a ruby file, with extention .rb"
+                 abort()
             end
         end
         
@@ -134,7 +146,7 @@ module RServiceBus
             end
             return self
         end
-
+        
         def configureMq
             @mqHost = self.getValue( "MQ", "beanstalk://localhost" )
             return self
@@ -153,7 +165,7 @@ module RServiceBus
             pathList.split( ";" ).each do |path|
                 
                 path = path.strip.chomp( "/" )
-
+                
                 if !Dir.exists?( "#{path}" ) then
                     puts "Error while processing working directory list"
                     puts "*** path, #{path}, does not exist"

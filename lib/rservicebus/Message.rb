@@ -1,17 +1,19 @@
 module RServiceBus
     
-    require 'zlib'
-    
+    require "zlib"
+    require "yaml"
+    require "uuidtools"
+
     #This is the top level message that is passed around the bus
     class Message
         
-        attr_reader :returnAddress, :msgId, :remoteQueueName, :remoteHostName, :lastErrorSourceQueue, :lastErrorString
+        attr_reader :returnAddress, :msgId, :remoteQueueName, :remoteHostName, :lastErrorSourceQueue, :lastErrorString, :correlationId
         
         # Constructor
         #
         # @param [Object] msg The msg to be sent
         # @param [Object] returnAddress A queue to which the destination message handler can send replies
-        def initialize( msg, returnAddress )
+        def initialize( msg, returnAddress, correlationId=nil )
             if ENV["RSBMSG_COMPRESS"].nil? then
                 @compressed = false
                 @_msg=YAML::dump(msg)
@@ -20,6 +22,7 @@ module RServiceBus
                 @_msg=Zlib::Deflate.deflate(YAML::dump(msg))
             end
             
+            @correlationId = correlationId
             @returnAddress=returnAddress
             
             @createdAt = DateTime.now

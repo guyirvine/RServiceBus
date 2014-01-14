@@ -1,0 +1,6 @@
+APPNAME=Saga \
+MAX_RETRIES=2 \
+VERBOSE=true \
+WORKING_DIR=./ \
+MESSAGE_ENDPOINT_MAPPINGS=Msg4:SagaFinished  \
+../rservicebus_examples

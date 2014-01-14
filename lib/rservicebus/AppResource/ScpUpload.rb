@@ -19,7 +19,7 @@ module RServiceBus
 		end
 
         end
-        
+
         def close
         end
 

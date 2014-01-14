@@ -27,8 +27,8 @@ module RServiceBus
             
             return false
         end
-        
-        
+
+
         def ProcessToHash( payload )
             headLine = payload.shift
             newPayload = Array.new

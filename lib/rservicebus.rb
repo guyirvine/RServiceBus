@@ -35,6 +35,7 @@ require "rservicebus/CronManager"
 require "rservicebus/CircuitBreaker"
 
 require "rservicebus/AppResource"
+require "rservicebus/ResourceManager"
 
 require "rservicebus/SubscriptionManager"
 require "rservicebus/SubscriptionStorage"
@@ -43,6 +44,14 @@ require "rservicebus/ConfigureSubscriptionStorage"
 require "rservicebus/ConfigureMonitor"
 
 require 'rservicebus/Agent'
+
+require 'rservicebus/SagaLoader.rb'
+require 'rservicebus/Saga/Manager.rb'
+require 'rservicebus/Saga/Data.rb'
+require 'rservicebus/Saga/Base.rb'
+
+require 'rservicebus/SagaStorage/InMemory.rb'
+require 'rservicebus/SagaStorage/Dir.rb'
 
 
 module RServiceBus
