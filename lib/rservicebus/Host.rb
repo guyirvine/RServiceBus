@@ -33,8 +33,8 @@ module RServiceBus
         
         
         @queueForMsgsToBeSentOnComplete
-        
-        
+
+
         #Provides a thin logging veneer
         #
         # @param [String] string Log entry
@@ -60,7 +60,13 @@ module RServiceBus
         #Thin veneer for Configuring state
         #
         def configureSagaStorage
-            @sagaStorage = SagaStorage_InMemory.new
+            string = RServiceBus.getValue( "SAGA_URI" )
+            if string.nil? then
+                string = "dir:///tmp"
+            end
+            
+            uri = URI.parse( string )
+            @sagaStorage = SagaStorage.Get( uri )
             return self;
         end
         
@@ -114,7 +120,7 @@ module RServiceBus
         #Load and configure Sagas
         def loadSagas()
             log "Load Sagas"
-            @sagaManager = Saga_Manager.new( self, @resourceManager )
+            @sagaManager = Saga_Manager.new( self, @resourceManager, @sagaStorage )
             @sagaLoader = SagaLoader.new( self, @sagaManager )
             
             @config.sagaPathList.each do |path|

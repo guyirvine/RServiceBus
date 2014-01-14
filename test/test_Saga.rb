@@ -76,11 +76,11 @@ class SagaTest < Test::Unit::TestCase
     def setup
         @Bus = RServiceBus::Test_Bus.new
         @ResourceManager = ResourceManager_For_Testing_Sagas.new
-        
+
         @SagaStorage = SagaStorage_InMemory_For_Testing.new( "" )
         @sagaManager = Saga_Manager_For_Testing.new( @Bus, @ResourceManager, @SagaStorage )
         @msg1 = RServiceBus::Message.new( Msg1.new( "One" ), "Q" )
-        
+
         @SagaStorage.Begin
     end
     

@@ -47,14 +47,14 @@ class SagaLoader
 
 		require requirePath
 		begin
-			saga = Object.const_get(sagaName).new();
+			saga = Object.const_get(sagaName);
 		rescue Exception => e
 			puts "Expected class name: " + sagaName + ", not found after require: " +  requirePath
 			puts "**** Check in " + filePath + " that the class is named : " + sagaName
 			puts "( In case its not that )"
 			raise e
 		end
-		
+
 		return saga
 	end
 	

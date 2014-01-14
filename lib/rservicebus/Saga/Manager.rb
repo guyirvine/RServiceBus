@@ -15,7 +15,8 @@ class Saga_Manager
         
         @sagaStorage = sagaStorage
 	end
-    
+
+
 	def GetMethodsByPrefix( saga, prefix )
         list = []
         saga.instance_methods.each do |name|
