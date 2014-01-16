@@ -7,7 +7,7 @@ module RServiceBus
     #This is the top level message that is passed around the bus
     class Message
         
-        attr_reader :returnAddress, :msgId, :remoteQueueName, :remoteHostName, :lastErrorSourceQueue, :lastErrorString, :correlationId
+        attr_reader :returnAddress, :msgId, :remoteQueueName, :remoteHostName, :lastErrorSourceQueue, :lastErrorString, :correlationId, :sendAt
         
         # Constructor
         #
@@ -54,6 +54,9 @@ module RServiceBus
             @remoteQueueName = queueName
         end
         
+        def sendAt( timestamp )
+            @sendAt = timestamp
+        end
         
         # @return [Object] The msg to be sent
         def msg

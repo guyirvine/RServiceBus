@@ -1,6 +1,6 @@
 module RServiceBus
-    
-    
+
+
     class NoHandlerFound<StandardError
     end
     class ClassNotFoundForMsg<StandardError
@@ -9,7 +9,7 @@ module RServiceBus
     end
     class PropertyNotSet<StandardError
     end
-    
+
     #Host process for rservicebus
     class Host
         attr_accessor :sagaData
@@ -42,7 +42,7 @@ module RServiceBus
         def log(string, ver=false)
             RServiceBus.log( string, ver )
         end
-        
+
         #Thin veneer for Configuring external resources
         #
         def configureAppResource
@@ -50,6 +50,14 @@ module RServiceBus
             return self;
         end
         
+        
+        #Thin veneer for Configuring SendAt
+        #
+        def configureSendAtManager
+            @sendAtManager = SendAtManager.new( self )
+            return self;
+        end
+
         #Thin veneer for Configuring state
         #
         def configureStateManager
@@ -64,12 +72,12 @@ module RServiceBus
             if string.nil? then
                 string = "dir:///tmp"
             end
-            
+
             uri = URI.parse( string )
             @sagaStorage = SagaStorage.Get( uri )
             return self;
         end
-        
+
         #Thin veneer for Configuring Cron
         #
         def configureCircuitBreaker
@@ -92,7 +100,7 @@ module RServiceBus
             
             return self
         end
-        
+
         #Subscriptions are specified by adding events to the
         #msg endpoint mapping
         def sendSubscriptions
@@ -195,6 +203,7 @@ module RServiceBus
             self.configureStatistics()
             .loadContracts()
             .loadLibs()
+            .configureSendAtManager()
             .configureStateManager()
             .configureSagaStorage()
 			.configureAppResource()
@@ -355,8 +364,11 @@ module RServiceBus
                     @cronManager.Run
                     self.sendQueuedMsgs
                     @queueForMsgsToBeSentOnComplete = nil
-                    
-                    
+
+
+                    @sendAtManager.Process
+
+
                     @circuitBreaker.Success
                     
                     rescue Exception => e
@@ -401,8 +413,8 @@ module RServiceBus
                     end
                     
                     
-                    if @sagaManager.Handle( @msg ) == false then
-                        raise NoHandlerFound.new( msgName ) if handlerList.length == 0
+                    if @sagaManager.Handle( @msg ) == false && handlerList.length == 0 then
+                        raise NoHandlerFound.new( msgName )
                     end
                     
                     
@@ -437,14 +449,14 @@ module RServiceBus
                 
                 @mq.send( queueName, serialized_object )
             end
-            
+
             #Sends a msg across the bus
             #
             # @param [RServiceBus::Message] msg msg to be sent
             # @param [String] queueName endpoint to which the msg will be sent
             def _SendNeedsWrapping( msg, queueName, correlationId )
                 RServiceBus.rlog "Bus._SendNeedsWrapping"
-                
+
                 rMsg = RServiceBus::Message.new( msg, @mq.localQueueName, correlationId )
                 if queueName.index( "@" ).nil? then
                     q = queueName
@@ -460,19 +472,23 @@ module RServiceBus
                 serialized_object = YAML::dump(rMsg)
                 self._SendAlreadyWrappedAndSerialised( serialized_object, q )
             end
-            
+
             def sendQueuedMsgs
                 @queueForMsgsToBeSentOnComplete.each do |row|
-                    self._SendNeedsWrapping( row["msg"], row["queueName"], row["correlationId"] )
+                    if row['timestamp'].nil? then
+                        self._SendNeedsWrapping( row["msg"], row["queueName"], row["correlationId"] )
+                    else
+                        @sendAtManager.Add( row )
+                    end
                 end
             end
-            
-            def queueMsgForSendOnComplete( msg, queueName )
+
+            def queueMsgForSendOnComplete( msg, queueName, timestamp=nil )
                 correlationId = sagaData.nil? ? nil : sagaData.correlationId
                 correlationId = @msg.correlationId.nil? ? correlationId : @msg.correlationId
-                @queueForMsgsToBeSentOnComplete << Hash["msg", msg, "queueName", queueName, "correlationId", correlationId]
+                @queueForMsgsToBeSentOnComplete << Hash["msg", msg, "queueName", queueName, "correlationId", correlationId, "timestamp",timestamp ]
             end
-            
+
             #Sends a msg back across the bus
             #Reply queues are specified in each msg. It works like
             #email, where the reply address can actually be anywhere
@@ -501,16 +517,16 @@ module RServiceBus
             #msg destination is specified at the infrastructure level
             #
             # @param [RServiceBus::Message] msg msg to be sent
-            def Send( msg )
+            def Send( msg, timestamp=nil )
                 RServiceBus.rlog "Bus.Send"
                 @stats.incTotalSent
-                
+
                 msgName = msg.class.name
                 queueName = self.getEndpointForMsg( msgName )
                 
-                self.queueMsgForSendOnComplete( msg, queueName )
+                self.queueMsgForSendOnComplete( msg, queueName, timestamp )
             end
-            
+
             #Sends an event to all subscribers across the bus
             #
             # @param [RServiceBus::Message] msg msg to be sent
@@ -524,7 +540,7 @@ module RServiceBus
                 end
                 
             end
-            
+
             #Sends a subscription request across the Bus
             #
             # @param [String] eventName event to be subscribes to

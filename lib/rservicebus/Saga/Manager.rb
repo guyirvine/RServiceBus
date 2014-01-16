@@ -2,7 +2,7 @@ module RServiceBus
 
 
 class Saga_Manager
-    
+
 	def initialize( host, resourceManager, sagaStorage )
 		@handler = Hash.new
 		@startWith = Hash.new
@@ -103,6 +103,7 @@ class Saga_Manager
         return handled if handled == true
 
 
+        return false if rmsg.correlationId.nil?
         data = @sagaStorage.Get( rmsg.correlationId )
         return handled if data.nil?
         methodName = "Handle_#{msg.class.name}"

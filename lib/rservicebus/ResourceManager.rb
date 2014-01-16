@@ -31,7 +31,7 @@ module RServiceBus
                 r = @appResources[name]
                 r._connect
                 r.Begin
-                RServiceBus.rlog "Preparing resource: #{resourceName}. Begin"
+                RServiceBus.rlog "Preparing resource: #{name}. Begin"
             end
             @currentResources[name] = @appResources[name]
             return @appResources[name]

@@ -52,6 +52,9 @@ require "rservicebus/Saga/Base.rb"
 
 require "rservicebus/SagaStorage"
 
+require "rservicebus/SendAtManager"
+
+
 module RServiceBus
 
 
