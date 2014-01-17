@@ -484,8 +484,8 @@ module RServiceBus
             end
 
             def queueMsgForSendOnComplete( msg, queueName, timestamp=nil )
-                correlationId = sagaData.nil? ? nil : sagaData.correlationId
-                correlationId = @msg.correlationId.nil? ? correlationId : @msg.correlationId
+                correlationId = @sagaData.nil? ? nil : @sagaData.correlationId
+                correlationId = (!@msg.nil? && !@msg.correlationId.nil?) ? @msg.correlationId : correlationId
                 @queueForMsgsToBeSentOnComplete << Hash["msg", msg, "queueName", queueName, "correlationId", correlationId, "timestamp",timestamp ]
             end
 

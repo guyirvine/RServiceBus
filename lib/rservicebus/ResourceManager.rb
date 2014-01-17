@@ -58,11 +58,11 @@ module RServiceBus
                     v.Rollback
                     v.finished
                     rescue Exception => e1
-                    @host.log "Caught nested exception rolling back, #{v.class.name}, for msg, #{msgName}"
-                    @host.log "****"
-                    @host.log e1.message
-                    @host.log e1.backtrace
-                    @host.log "****"
+                    puts "Caught nested exception rolling back, #{v.class.name}, for msg, #{msgName}"
+                    puts "****"
+                    puts e1.message
+                    puts e1.backtrace
+                    puts "****"
                 end
             end
             
