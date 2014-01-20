@@ -550,7 +550,7 @@ module RServiceBus
                 queueName = self.getEndpointForMsg( eventName )
                 subscription = Message_Subscription.new( eventName )
                 
-                self._SendNeedsWrapping( subscription, queueName )
+                self._SendNeedsWrapping( subscription, queueName, nil )
             end
             
         end
