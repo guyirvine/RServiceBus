@@ -6,7 +6,7 @@ require "rservicebus/AppResource/Smb"
 
 	def connect(uri)
 		self.processUri
-                remote = SMB.opendir( s, "b" )
+        remote = SMB.opendir( s, "b" )
 		return remote	
 	end
 

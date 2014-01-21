@@ -13,7 +13,7 @@ module RServiceBus
             if string.nil? then
                 string = "dir:///tmp"
             end
-            
+
             uri = URI.parse( string )
             @stateStorage = StateStorage.Get( uri )
             

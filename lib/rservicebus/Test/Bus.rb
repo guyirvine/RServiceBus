@@ -1,11 +1,13 @@
 module RServiceBus
 
 class Test_Bus
-	attr_accessor :publishList, :sendList, :replyList, :logList
+	attr_accessor :publishList, :sendList, :replyList, :logList, :sagaData
+    
 	@publishList
 	@sendList
 	@replyList
 	@logList
+    @sagaData
 
 	def initialize
 		@publishList = Array.new

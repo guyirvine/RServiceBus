@@ -3,7 +3,7 @@ module RServiceBus
     require 'rservicebus/Monitor'
     require 'rservicebus/Monitor/Message'
 
-    #Configure AppResources for an rservicebus host
+    #Configure Monitors for an rservicebus host
     class ConfigureMonitor
         
         @resourceList
@@ -11,10 +11,10 @@ module RServiceBus
         # Constructor
         #
         # @param [RServiceBus::Host] host instance
-        # @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
-        def initialize( host, appResources )
+        # @param [Hash] resourceManager As hash[k,v] where k is the name of a resource, and v is the resource
+        def initialize( host, resourceManager )
             @host = host
-            @appResources = appResources
+            @resourceManager = resourceManager
             
             @handlerList = Hash.new
             @resourceList = Hash.new
@@ -23,11 +23,10 @@ module RServiceBus
         # Assigns appropriate resources to writable attributes in the handler that match keys in the resource hash
         #
         # @param [RServiceBus::Handler] handler
-        ## @param [Hash] appResources As hash[k,v] where k is the name of a resource, and v is the resource
         def setAppResources( monitor )
             RServiceBus.rlog "Checking app resources for: #{monitor.class.name}"
             RServiceBus.rlog "If your attribute is not getting set, check that it is in the 'attr_accessor' list"
-            @appResources.each do |k,v|
+            @resourceManager.getAll.each do |k,v|
                 if monitor.class.method_defined?( k ) then
                     monitor.instance_variable_set( "@#{k}", v.getResource() )
                     @resourceList[monitor.class.name] = Array.new if @resourceList[monitor.class.name].nil?
