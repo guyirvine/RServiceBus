@@ -5,11 +5,11 @@ module RServiceBus
 
     class ScpUploadHelper
         attr_reader :uri
-        
+
         def initialize( uri )
             @uri = uri
         end
-        
+
         def upload( source )
             #opportunity for smarts here. Could tar zip if it was a directory of files
 
@@ -28,8 +28,7 @@ module RServiceBus
             RServiceBus.log "Host: #{@uri.host}, User: #{@uri.user}, File Pattern: #{filepattern}, Destination: #{@uri.path}", true
             Net::SSH.start( @uri.host, @uri.user ) do |ssh|
                 ssh.sftp.connect do |sftp|
-                    files = sftp.dir.glob(path, filepattern)
-                    sftp.dir.foreach(path){
+                    sftp.dir.glob(path, filepattern) {
                         |file|
                         sftp.remove("#{path}/#{file.name}")
                     }
@@ -40,13 +39,13 @@ module RServiceBus
     end
 
     class AppResource_ScpUpload<AppResource
-        
+
         def connect(uri)
             return ScpUploadHelper.new( uri )
-            
+
             return inputDir;
         end
-        
+
     end
-    
+
 end
