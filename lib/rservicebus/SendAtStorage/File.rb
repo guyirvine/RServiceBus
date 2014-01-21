@@ -36,7 +36,7 @@ module RServiceBus
         #Finish
         def Save
             content = YAML::dump( @list )
-            IO.write( @uri.path, content )
+            File.open( @uri.path, "w" ) { |f| f.write( YAML::dump( content ) ) }
         end
         
         

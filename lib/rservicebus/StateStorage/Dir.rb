@@ -43,7 +43,7 @@ module RServiceBus
         #Finish
         def Commit
             @list.each do |e|
-                IO.write( e['path'], YAML::dump( e['hash'] ) )
+                File.open( e['path'], "w" ) { |f| f.write( YAML::dump( e['hash'] ) ) }
             end
         end
         

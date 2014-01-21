@@ -50,7 +50,7 @@ module RServiceBus
         #Finish
         def Commit
             @list.each do |e|
-                IO.write( e['path'], YAML::dump( e['data'] ) )
+                File.open( e['path'], "w" ) { |f| f.write( YAML::dump( e['data'] ) ) }
             end
             @deleted.each do |correlationId|
                 File.unlink( self.getPath( correlationId ) )

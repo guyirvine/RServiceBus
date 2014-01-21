@@ -32,7 +32,7 @@ class SubscriptionStorage_File<SubscriptionStorage
 		subscriptions[eventName] << queueName
 		subscriptions[eventName] = subscriptions[eventName].uniq
 
-        IO.write( @uri.path, YAML::dump(subscriptions ) )
+        File.open( @uri.path, "w" ) { |f| f.write( YAML::dump(subscriptions ) ) }
 
 		return subscriptions
 	end
