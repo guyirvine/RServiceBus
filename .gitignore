@@ -7,3 +7,4 @@ rservicebus-*.gem
 build
 *.xcworkspace
 */archive/*
+*.sublime*
