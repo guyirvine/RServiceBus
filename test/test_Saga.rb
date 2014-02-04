@@ -54,7 +54,7 @@ class SagaMsg1Msg2<RServiceBus::Saga_Base
 end
 
 class Saga_Manager_For_Testing<RServiceBus::Saga_Manager
-    attr_reader :correlation
+    attr_reader :correlation, :resourceManager
 
 end
 
@@ -65,9 +65,6 @@ end
 
 class ResourceManager_For_Testing_Sagas<RServiceBus::ResourceManager
     
-    def initialize
-    end
-    
 end
 
 
@@ -75,10 +72,13 @@ class SagaTest < Test::Unit::TestCase
     
     def setup
         @Bus = RServiceBus::Test_Bus.new
-        @ResourceManager = ResourceManager_For_Testing_Sagas.new
+        stateManager = nil
 
         @SagaStorage = SagaStorage_InMemory_For_Testing.new( "" )
+        stateManager = nil
+        @ResourceManager = ResourceManager_For_Testing_Sagas.new( stateManager, @SagaStorage )
         @sagaManager = Saga_Manager_For_Testing.new( @Bus, @ResourceManager, @SagaStorage )
+        
         @msg1 = RServiceBus::Message.new( Msg1.new( "One" ), "Q" )
 
         @SagaStorage.Begin
@@ -92,7 +92,7 @@ class SagaTest < Test::Unit::TestCase
     
     def test_StartSaga
         @sagaManager.RegisterSaga( SagaMsg1Msg2 )
-        
+
         assert_equal 0, @SagaStorage.hash.keys.length
         @sagaManager.Handle( @msg1 )
         assert_equal 1, @SagaStorage.hash.keys.length

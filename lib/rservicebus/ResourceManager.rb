@@ -1,6 +1,6 @@
 module RServiceBus
     
-    #Co0ordinate Transactions across resources, handlers, and Sagas
+    #Coordinate Transactions across resources, handlers, and Sagas
     class ResourceManager
 
         # Constructor

@@ -50,7 +50,7 @@ class SagaMsg1Msg2<RServiceBus::Saga_Base
 	end
 
 	def Handle_Msg3( msg )
-        self.finish
+        self.Finish
 	end
 
 
@@ -76,9 +76,6 @@ end
 
 class ResourceManager_For_Testing_Sagas<RServiceBus::ResourceManager
     
-    def initialize
-    end
-    
 end
 
 
@@ -91,9 +88,10 @@ class SagaStorageDirTest < Test::Unit::TestCase
 
 
         @Bus = RServiceBus::Test_Bus.new
-        @ResourceManager = ResourceManager_For_Testing_Sagas.new
 
         @SagaStorage = SagaStorage_Dir_For_Testing.new( URI.parse( "dir:///tmp/" ) )
+        stateManager = nil
+        @ResourceManager = ResourceManager_For_Testing_Sagas.new( stateManager, @SagaStorage )
         @sagaManager = Saga_Manager_For_Testing.new( @Bus, @ResourceManager, @SagaStorage )
         @msg1 = RServiceBus::Message.new( Msg1.new( "One" ), "Q" )
 
