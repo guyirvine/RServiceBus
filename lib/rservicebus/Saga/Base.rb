@@ -11,7 +11,7 @@ class Saga_Base
 	def sendTimeout( msg, milliseconds )
 	end
 
-    def finish
+    def Finish
         @data.finished = true
     end
 

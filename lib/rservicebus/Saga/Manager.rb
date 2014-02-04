@@ -70,13 +70,15 @@ class Saga_Manager
         end
 
 		@saga[saga.name] = s
+        
+        self.interrogateSagaForAppResources( s )
 	end
 
     
     def prepSaga( saga )
         if !@resourceListBySagaName[saga.class.name].nil? then
             @resourceListBySagaName[saga.class.name].each do |k,v|
-                saga.instance_variable_set( "@#{k}", resourceManager.get(k).getResource() )
+                saga.instance_variable_set( "@#{k}", @resourceManager.get(k).getResource() )
                 RServiceBus.rlog "App resource attribute, #{k}, set for: " + saga.class.name
             end
         end
@@ -117,6 +119,7 @@ class Saga_Manager
     def ProcessMsg( saga, data, methodName, msg )
         @host.sagaData = data
         saga.data = data
+        self.prepSaga( saga )
 
         if saga.class.method_defined?( methodName ) then
             saga.send methodName, msg
