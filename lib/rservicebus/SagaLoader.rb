@@ -94,7 +94,11 @@ class SagaLoader
 # @param [String] path directory to check
 # @return [Array] a list of paths to files found in the given path
 	def getListOfFilesForDir( path )
-		return Dir[path + "/*"];
+        list = Dir[path + "/*"];
+
+        RServiceBus.rlog "SagaLoader.getListOfFilesForDir. path: #{path}, list: #{list}"
+
+        return list
 	end
 
 #Extract the top level dir or file name as it is the msg name
@@ -114,6 +118,8 @@ class SagaLoader
 #
 # @param [String] baseDir directory to check - should not have trailing slash
 	def loadSagasFromPath(baseDir)
+        RServiceBus.rlog "SagaLoader.loadSagasFromPath. baseDir: #{baseDir}"
+        
 		self.getListOfFilesForDir(baseDir).each do |filePath|
 			if !filePath.end_with?( "." ) then
                 

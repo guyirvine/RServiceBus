@@ -188,6 +188,8 @@ module RServiceBus
         end
         
         def initialize()
+            RServiceBus.rlog "Current directory: #{Dir.pwd}"
+            
             @config = ConfigFromEnv.new
 			.loadHostSection()
 			.loadContracts()
