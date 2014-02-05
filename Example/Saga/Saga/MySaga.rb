@@ -1,5 +1,5 @@
 
-class MySaga<RServiceBus::Saga_Base
+class Saga_MySaga<RServiceBus::Saga_Base
 	attr_accessor :Bus
 
 	def StartWith_Msg1( msg )
@@ -8,7 +8,7 @@ class MySaga<RServiceBus::Saga_Base
 
 	def Handle_Msg3( msg )
 		@Bus.Send( Msg4.new( msg.name + ", 4" ) )
-		self.finish
+		self.Finish
 	end
 
 end

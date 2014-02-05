@@ -77,7 +77,7 @@ class SagaLoader
 			RServiceBus.log "Loaded Saga: " + sagaName
 
             @sagaManager.RegisterSaga( saga )
-
+	
             @listOfLoadedPaths[filePath] = 1
 		rescue Exception => e
 			puts "Exception loading saga from file: " + filePath
@@ -106,7 +106,7 @@ class SagaLoader
 		
         sagaName = baseName.sub( extName, "" )
 		
-		return sagaName
+		return "Saga_#{sagaName}"
 	end
 
 
