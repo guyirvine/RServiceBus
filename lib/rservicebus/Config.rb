@@ -176,6 +176,10 @@ module RServiceBus
                     @handlerPathList << "#{path}/MessageHandler"
                 end
                 
+                if Dir.exists?( "#{path}/Saga" ) then
+                    @sagaPathList << "#{path}/Saga"
+                end
+                
                 if File.exists?( "#{path}/Contract.rb" ) then
                     @contractList << "#{path}/Contract.rb"
                 end

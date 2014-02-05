@@ -108,7 +108,10 @@ class HandlerLoader
 # @param [String] path directory to check
 # @return [Array] a list of paths to files found in the given path
 	def getListOfFilesForDir( path )
-		return Dir[path + "/*"];
+        list = Dir[path + "/*"];
+        RServiceBus.rlog "HandlerLoader.getListOfFilesForDir. path: #{path}, list: #{list}"
+        
+        return list
 	end
 
 #Multiple handlers for the same msg can be placed inside a top level directory.
@@ -153,6 +156,7 @@ class HandlerLoader
 #
 # @param [String] baseDir directory to check - should not have trailing slash
 	def loadHandlersFromTopLevelPath(baseDir)
+        RServiceBus.rlog "HandlerLoader.loadHandlersFromTopLevelPath. baseDir: #{baseDir}"
 		self.getListOfFilesForDir(baseDir).each do |filePath|
 			if !filePath.end_with?( "." ) then
 
