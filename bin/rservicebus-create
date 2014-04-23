@@ -1,0 +1,121 @@
+#!/usr/bin/env ruby
+
+#################################
+# Contract
+def contract( name )
+
+content = %{
+class First
+end
+
+}
+
+File.write( "#{name}/Contract.rb", content )
+
+end
+
+#################################
+# Rakefile
+def rakefile( name )
+
+content = %{
+require 'rake/testtask'
+
+Rake::TestTask.new do |t|
+  t.libs << 'test'
+end
+
+desc "Run tests"
+task :default => :test
+
+}
+
+File.write( "#{name}/Rakefile", content )
+
+end
+
+#################################
+# Procfile
+def procfile( name )
+
+content = %{
+#{name}: env APPNAME=#{name.capitalize} VERBOSE=true MAX_RETRIES=0 WORKING_DIR=$HOME_DIR rservicebus
+
+}
+
+File.write( "#{name}/Procfile", content )
+
+end
+
+
+#################################
+# MessageHandler
+def messagehandler( name )
+
+content = %{
+class MessageHandler_First
+
+	def Handle( msg )
+	
+	end
+
+end
+
+}
+
+Dir.mkdir( "#{name}/MessageHandler" )
+File.write( "#{name}/MessageHandler/First.rb", content )
+
+end
+
+#################################
+# Test
+def test( name )
+
+content = %{
+require 'test/unit'
+require './Contract'
+require './MessageHandler/First'
+
+
+class Test_MessageHandler_First<MessageHandler_First
+
+
+
+end
+
+class FirstTest < Test::Unit::TestCase
+
+	def setup
+		@handler = Test_MessageHandler_First.new
+	end
+
+	def test_Basic
+		@handler.Handle( First.new )
+
+		assert_equal false, @handler.nil?
+	end
+end
+
+}
+
+Dir.mkdir( "#{name}/test" )
+File.write( "#{name}/test/test_First.rb", content )
+
+end
+
+
+################################################################
+
+abort "usage: #{File.basename( $0 )} <name>" if ARGV.length != 1
+
+#################################
+name = ARGV[0].downcase
+
+#################################
+Dir.mkdir( name )
+contract( name )
+rakefile( name )
+procfile( name )
+messagehandler( name )
+test( name )
