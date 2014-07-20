@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'rservicebus'
-  s.version     = '0.1.66'
-  s.date        = '2014-02-06'
+  s.version     = '0.1.69'
+  s.date        = '2014-04-24'
   s.summary     = "RServiceBus"
   s.description = "A Ruby interpretation of NServiceBus"
   s.authors     = ["Guy Irvine"]
@@ -18,4 +18,5 @@ Gem::Specification.new do |s|
   s.executables << 'ReturnMessagesToSourceQueue'
   s.executables << 'SendEmptyMessage'
   s.executables << 'rservicebus-transport'
+  s.executables << 'rservicebus-create'
 end
