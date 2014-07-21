@@ -15,17 +15,17 @@ module RServiceBus
 	end
 
 	def RServiceBus.log(string, ver=false)
-        return if RServiceBus.checkEnvironmentVariable(ENV["TESTING"])
+        return if RServiceBus.checkEnvironmentVariable("TESTING")
 
 		type = ver ? "VERB" : "INFO"
-        if RServiceBus.checkEnvironmentVariable(ENV["VERBOSE"]) || !ver then
+        if RServiceBus.checkEnvironmentVariable("VERBOSE") || !ver then
             timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
             puts "[#{type}] #{timestamp} :: #{string}"
         end
 	end
 
     def RServiceBus.rlog(string)
-        if RServiceBus.checkEnvironmentVariable(ENV["RSBVERBOSE"]) then
+        if RServiceBus.checkEnvironmentVariable("RSBVERBOSE") then
             timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
             puts "[RSB] #{timestamp} :: #{string}"
         end

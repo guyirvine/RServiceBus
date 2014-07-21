@@ -14,7 +14,7 @@ module RServiceBus
         # @param [Object] msg The msg to be sent
         # @param [Object] returnAddress A queue to which the destination message handler can send replies
         def initialize( msg, returnAddress, correlationId=nil )
-            if !RServiceBus.checkEnvironmentVariable(ENV['RSBMSG_COMPRESS']) then
+            if !RServiceBus.checkEnvironmentVariable('RSBMSG_COMPRESS') then
                 @compressed = false
                 @_msg=YAML::dump(msg)
                 else
