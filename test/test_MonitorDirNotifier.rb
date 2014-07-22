@@ -4,11 +4,10 @@ require 'mocha/test_unit'
 
 class Test_Monitor_DirNotifier<RServiceBus::Monitor_DirNotifier
 
-  attr_accessor :filelist, :send_called
+  attr_accessor :filelist
 
   def initialize
     @filelist = []
-    @send_called = false
     super()
   end
 
@@ -29,9 +28,7 @@ class Test_Monitor_DirNotifier<RServiceBus::Monitor_DirNotifier
     return @filelist
   end
 
-  def send payload, uri
-    @send_called = true
-  end
+  def send payload, uri; end
 
 end
 
@@ -157,6 +154,7 @@ class DirNotifierTest<Test::Unit::TestCase
     filename = 'test_processing.txt'
 
     dirNotifier = Test_Monitor_DirNotifier.new
+    dirNotifier.expects(:send)
 
     dirNotifier.connect(URI(directory + "?processing=" + processingDir))
     dirNotifier.filelist << Pathname.new(directory).join(filename)
@@ -164,7 +162,6 @@ class DirNotifierTest<Test::Unit::TestCase
     dirNotifier.Look
 
     assert_equal(Pathname.new(processingDir).join(filename), dirNotifier.filelist[0])
-    assert(dirNotifier.send_called)
   end
 
   def test_NoFilterDefined
