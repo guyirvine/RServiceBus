@@ -163,8 +163,31 @@ class DirNotifierTest<Test::Unit::TestCase
 
     dirNotifier.Look
 
-    assert_equal(dirNotifier.filelist[0], Pathname.new(processingDir).join(filename))
+    assert_equal(Pathname.new(processingDir).join(filename), dirNotifier.filelist[0])
     assert(dirNotifier.send_called)
+  end
+
+  def test_NoFilterDefined
+    directory = '/tmp/incoming'
+    processingDir = '/tmp/processing'
+
+    dirNotifier = Test_Monitor_DirNotifier.new
+
+    dirNotifier.connect(URI(directory + "?processing=" + processingDir))
+
+    assert_equal("*", dirNotifier.Filter)
+  end
+
+  def test_SetsFilter
+    directory = '/tmp/incoming'
+    processingDir = '/tmp/processing'
+    filter = "test.txt"
+
+    dirNotifier = Test_Monitor_DirNotifier.new
+
+    dirNotifier.connect(URI(directory + "?processing=" + processingDir + '&filter=' + filter))
+
+    assert_equal("test.txt", dirNotifier.Filter)
   end
 
 end

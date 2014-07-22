@@ -6,7 +6,7 @@ module RServiceBus
 
     class Monitor_DirNotifier<Monitor
 
-        attr_reader :Path, :ProcessingFolder
+        attr_reader :Path, :ProcessingFolder, :Filter
 
         def connect(uri)
             #Pass the path through the Dir object to check syntax on startup
@@ -62,6 +62,11 @@ module RServiceBus
 
                     @ProcessingFolder = processingUri.path
                 end
+
+                @Filter = "*"
+                if parts.has_key? "filter" then
+                    @Filter = parts["filter"][0]
+                end
             end
         end
 
@@ -88,7 +93,7 @@ module RServiceBus
         end
 
         def get_files
-            return Dir.glob( "#{@Path}/*" ).select { |f| File.file?(f) }
+            return Dir.glob( Pathname.new("#{@Path}").join(@Filter) ).select { |f| File.file?(f) }
         end
 
         def send_notification path
