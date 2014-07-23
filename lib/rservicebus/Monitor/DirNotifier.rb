@@ -1,6 +1,4 @@
 require 'cgi'
-require 'zip/zip'
-require 'zlib'
 
 module RServiceBus
 
@@ -94,10 +92,6 @@ module RServiceBus
 
         def get_files
             return Dir.glob( Pathname.new("#{@Path}").join(@Filter) ).select { |f| File.file?(f) }
-        end
-
-        def send_notification path
-
         end
 
     end
