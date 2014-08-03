@@ -30,7 +30,8 @@ module RServiceBus
                 ssh.sftp.connect do |sftp|
                     sftp.dir.glob(path, filepattern) {
                         |file|
-                        sftp.remove("#{path}/#{file.name}")
+                        r = sftp.remove("#{path}/#{file.name}")
+			r.wait
                     }
                 end
             end
