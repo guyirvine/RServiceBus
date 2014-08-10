@@ -97,7 +97,7 @@ module RServiceBus
     def RServiceBus.checkEnvironmentVariable( string )
         return false if ENV[string].nil?
         return true if ENV[string] == true || ENV[string] =~ (/(true|t|yes|y|1)$/i)
-        return false if ENV[string] == false || ENV[string].blank? || ENV[string] =~ (/(false|f|no|n|0)$/i)
+        return false if ENV[string] == false || ENV[string].nil? || ENV[string] =~ (/(false|f|no|n|0)$/i)
         raise ArgumentError.new("invalid value for Environment Variable: \"#{string}\"")
     end
 end
