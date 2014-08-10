@@ -10,6 +10,6 @@ queue_name = ARGV[1]
 response_queue_name = "#{queue_name}Response" if ARGV.length >= 3
 beanstalkHost = "beanstalk://localhost" if ARGV.length == 4
 
-agent = RServiceBus::Agent.new.getAgent( URI.parse( "beanstalk://localhost" ) )
+agent = RServiceBus::Agent.new.getAgent( URI.parse( beanstalkHost) )
 msg = RServiceBus.createAnonymousClass( msg_name )
 agent.sendMsg(msg, queue_name, response_queue_name)
