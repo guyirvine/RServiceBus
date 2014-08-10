@@ -8,3 +8,5 @@ build
 *.xcworkspace
 */archive/*
 *.sublime*
+.idea/*
+.gitignore
