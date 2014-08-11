@@ -1,6 +1,7 @@
 require 'test/unit'
 require './lib/rservicebus/Monitor/DirNotifier.rb'
 require 'mocha/test_unit'
+require 'pathname'
 
 class Test_Monitor_DirNotifier<RServiceBus::Monitor_DirNotifier
 

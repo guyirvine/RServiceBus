@@ -39,7 +39,7 @@ end
 def procfile( name )
 
 content = %{
-#{name}: env APPNAME=#{name.capitalize} VERBOSE=true MAX_RETRIES=0 WORKING_DIR=#{Dir.pwd} rservicebus
+#{name}: env APPNAME=#{name.capitalize} VERBOSE=true MAX_RETRIES=0 WORKING_DIR=#{Dir.pwd}/#{name} rservicebus
 
 }
 
