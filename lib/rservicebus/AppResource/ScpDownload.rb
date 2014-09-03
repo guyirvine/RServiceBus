@@ -20,14 +20,17 @@ module RServiceBus
     def close
     end
 
-    def delete( path, filepattern )
+    def delete( filepattern )
       RServiceBus.log "Host: #{@uri.host}, User: #{@uri.user}, File Pattern: #{filepattern}, Source: #{@uri.path}", true
-      regexp = Regexp.new filepattern
+      regexp = Regexp.new filepattern unless filepattern.nil?
+
       Net::SSH.start( @uri.host, @uri.user ) do |ssh|
         ssh.sftp.connect do |sftp|
-          sftp.dir.foreach(path) do |entry|
-            if entry.name =~ regexp then
-              r = sftp.remove("#{path}/#{entry.name}")
+          sftp.dir.foreach(@uri.path) do |entry|
+            next if entry.name == '.' || entry.name == '..'
+            if filepattern.nil? || entry.name =~ regexp then
+              puts "#{@uri.path}/#{entry.name}"
+              r = sftp.remove("#{@uri.path}/#{entry.name}")
               r.wait
             end
           end
