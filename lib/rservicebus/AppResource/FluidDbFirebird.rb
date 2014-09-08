@@ -1,6 +1,6 @@
 module RServiceBus
     
-    require "FluidDb/Firebird"
+    require 'FluidDb/Firebird'
     
     #Implementation of an AppResource - Redis
     class AppResource_FluidDbFirebird<AppResource

@@ -1,9 +1,9 @@
-require "./RServiceBus"
-require "./Contract"
+require './RServiceBus'
+require './Contract'
 
 
 if ARGV.length > 1 then
-	abort( "Usage: RServiceBus [config file name]" )
+	abort('Usage: RServiceBus [config file name]')
 end
 
 configFilePath = ARGV.length == 0 ? nil : ARGV[0]

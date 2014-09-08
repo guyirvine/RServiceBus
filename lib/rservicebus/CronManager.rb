@@ -47,7 +47,7 @@ class CronManager
             hash['cron'] = CronParser.new(cron_string)
             hash['next'] = hash['cron'].next(Time.now)
             @list << hash
-            @Bus.log( "Cron set for, #{n}, #{cron_string}" )
+            @Bus.log( "Cron set for, #{n}, #{cron_string}, next run, #{hash['next']}" )
         end
     end
     
@@ -55,16 +55,16 @@ class CronManager
         @Bus = host
         @msgNames = msgNames
         
-        RServiceBus.rlog "Load Cron"
+        RServiceBus.rlog 'Load Cron'
         @list = Array.new
         ENV.each do |k,v|
-            if k.start_with?( "RSBCRON_" ) then
-                self.addCron( k.sub( "RSBCRON_", "" ), v )
-                elsif k.start_with?( "RSBCRON" ) then
-                v.split( ";" ).each do |v|
-                    parts = v.split( " ", 6 )
+            if k.start_with?('RSBCRON_') then
+                self.addCron( k.sub( 'RSBCRON_', ''), v )
+                elsif k.start_with?('RSBCRON') then
+                v.split(';').each do |v|
+                    parts = v.split( ' ', 6 )
                     
-                    self.addCron( parts.pop, parts.join( " " ) )
+                    self.addCron( parts.pop, parts.join(' ') )
                 end
             end
             

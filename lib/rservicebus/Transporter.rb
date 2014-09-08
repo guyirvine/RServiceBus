@@ -15,24 +15,24 @@ module RServiceBus
     class Transporter
         
         def getValue( name, default=nil )
-            value = ( ENV[name].nil?  || ENV[name] == ""  ) ? default : ENV[name];
+            value = ( ENV[name].nil?  || ENV[name] == '') ? default : ENV[name];
             RServiceBus.log "Env value: #{name}: #{value}"
             return value
         end
         
         def connectToSourceBeanstalk
-            sourceQueueName = getValue( 'SOURCE_QUEUE_NAME', "transport-out" )
-            sourceUrl = getValue( 'SOURCE_URL', "127.0.0.1:11300" )
+            sourceQueueName = getValue( 'SOURCE_QUEUE_NAME', 'transport-out')
+            sourceUrl = getValue( 'SOURCE_URL', '127.0.0.1:11300')
             @source = Beanstalk::Pool.new([sourceUrl])
             @source.watch sourceQueueName
             
             RServiceBus.log "Connected to, #{sourceQueueName}@#{sourceUrl}"
             
             rescue Exception => e
-            puts "Error connecting to Beanstalk"
+            puts 'Error connecting to Beanstalk'
             puts "Host string, #{sourceUrl}"
-            if e.message == "Beanstalk::NotConnected" then
-                puts "***Most likely, beanstalk is not running. Start beanstalk, and try running this again."
+            if e.message == 'Beanstalk::NotConnected' then
+                puts '***Most likely, beanstalk is not running. Start beanstalk, and try running this again.'
                 puts "***If you still get this error, check beanstalk is running at, #{sourceUrl}"
                 else
                 puts e.message
@@ -72,7 +72,7 @@ module RServiceBus
                     abort()
                 end
                 
-                @localPort = getValue( "LOCAL_PORT", 27018 ).to_i
+                @localPort = getValue( 'LOCAL_PORT', 27018 ).to_i
                 RServiceBus.rlog "Local Port: #{@localPort}"
                 
                 begin
@@ -88,7 +88,7 @@ module RServiceBus
                     abort()
                     rescue Errno::EACCES => e
                     puts "*** Local transport port specified, #{@localPort}, needs sudo access"
-                    puts "*** Change local transport port using format, LOCAL_PORT=27018"
+                    puts '*** Change local transport port using format, LOCAL_PORT=27018'
                     abort()
                     
                 end
@@ -99,7 +99,7 @@ module RServiceBus
                     @destination = Beanstalk::Pool.new([destinationUrl])
                     RServiceBus.rlog "Connected to Remote Beanstalk, #{destinationUrl}"
                     rescue Exception => e
-                    if e.message == "Beanstalk::NotConnected" then
+                    if e.message == 'Beanstalk::NotConnected' then
                         puts "***Could not connect to destination, check beanstalk is running at, #{destinationUrl}"
                         raise CouldNotConnectToDestination.new
                     end
@@ -120,10 +120,10 @@ module RServiceBus
             @destination.use( msg.remoteQueueName )
             @destination.put( job.body )
             RServiceBus.log "Msg put, #{msg.remoteQueueName}"
-            
-            if !ENV['AUDIT_QUEUE_NAME'].nil? then
-                @source.use ENV['AUDIT_QUEUE_NAME']
-                @source.put job.body
+
+            unless ENV['AUDIT_QUEUE_NAME'].nil? then
+              @source.use ENV['AUDIT_QUEUE_NAME']
+              @source.put job.body
             end
             #removeJob
             job.delete
@@ -133,8 +133,8 @@ module RServiceBus
             
             rescue Exception => e
             self.disconnect
-            if e.message == "TIMED_OUT" then
-                RServiceBus.rlog "No Msg"
+            if e.message == 'TIMED_OUT' then
+                RServiceBus.rlog 'No Msg'
                 return
             end
             raise e

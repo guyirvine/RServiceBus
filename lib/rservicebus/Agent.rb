@@ -10,9 +10,9 @@ end
         @mq
 
         def getAgent( uri )
-            ENV["RSBMQ"] = uri.to_s
+            ENV['RSBMQ'] = uri.to_s
 
-            RServiceBus.rlog "*** Agent.getAgent has been deprecated. Set the environment variable, RSBMQ, and simply create the class"
+            RServiceBus.rlog '*** Agent.getAgent has been deprecated. Set the environment variable, RSBMQ, and simply create the class'
 	    return Agent.new
         end
         
@@ -31,10 +31,10 @@ end
             msg = RServiceBus::Message.new( messageObj, returnAddress )
 
             
-            if queueName.index( "@" ).nil? then
+            if queueName.index('@').nil? then
                 q = queueName
                 else
-                parts = queueName.split( "@" )
+                parts = queueName.split('@')
                 msg.setRemoteQueueName( parts[0] )
                 msg.setRemoteHostName( parts[1] )
                 q = 'transport-out'

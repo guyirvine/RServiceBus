@@ -2,7 +2,7 @@
 class BaseHelperClass
 
 	def InnerMsg
-		return "InnerMsg"
+		return 'InnerMsg'
 	end
 
 	def GetMsg

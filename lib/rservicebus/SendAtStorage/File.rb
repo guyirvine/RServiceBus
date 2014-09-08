@@ -6,11 +6,11 @@ module RServiceBus
             @list = self.load( uri.path )
         end
         def load( path )
-            return Array.new if !File.exists?( path )
+            return Array.new unless File.exists?(path)
 
             content = IO.read( path )
 
-            return Array.new if content == ""
+            return Array.new if content == ''
 
             return YAML::load( content )
         end
@@ -36,7 +36,7 @@ module RServiceBus
         #Finish
         def Save
             content = YAML::dump( @list )
-            File.open( @uri.path, "w" ) { |f| f.write( YAML::dump( content ) ) }
+            File.open( @uri.path, 'w') { |f| f.write( YAML::dump( content ) ) }
         end
         
         

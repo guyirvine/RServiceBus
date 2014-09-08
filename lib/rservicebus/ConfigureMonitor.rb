@@ -44,29 +44,29 @@ module RServiceBus
 
             env.each do |k,v|
                 if v.is_a?(String) and
-					k.start_with?( "RSBOB_" ) then
+					k.start_with?('RSBOB_') then
                     uri = URI.parse( v )
-                    name = k.sub( "RSBOB_", "" )
+                    name = k.sub( 'RSBOB_', '')
                     monitor = nil?
                     case uri.scheme
-                        when "csvdir"
-                        require "rservicebus/Monitor/CsvDir"
+                        when 'csvdir'
+                        require 'rservicebus/Monitor/CsvDir'
 						monitor = Monitor_CsvDir.new( @host, name, uri )
 
-                        when "xmldir"
-                        require "rservicebus/Monitor/XmlDir"
+                        when 'xmldir'
+                        require 'rservicebus/Monitor/XmlDir'
 						monitor = Monitor_XmlDir.new( @host, name, uri )
 
-                        when "dir"
-                        require "rservicebus/Monitor/Dir"
+                        when 'dir'
+                        require 'rservicebus/Monitor/Dir'
 						monitor = Monitor_Dir.new( @host, name, uri )
                         
-                        when "dirnotifier"
-                        require "rservicebus/Monitor/DirNotifier"
+                        when 'dirnotifier'
+                        require 'rservicebus/Monitor/DirNotifier'
 						monitor = Monitor_DirNotifier.new( @host, name, uri )
 
-                        when "csvperlinedir"
-                        require "rservicebus/Monitor/CsvPerLine"
+                        when 'csvperlinedir'
+                        require 'rservicebus/Monitor/CsvPerLine'
 						monitor = Monitor_CsvPerLineDir.new( @host, name, uri )
                         else
 						abort("Scheme, #{uri.scheme}, not recognised when configuring Monitor, #{k}=#{v}");

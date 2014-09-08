@@ -4,11 +4,11 @@
 # Contract
 def contract( name )
 
-content = %{
+content = '
 class First
 end
 
-}
+'
 
 File.write( "#{name}/Contract.rb", content )
 
@@ -52,7 +52,7 @@ end
 # MessageHandler
 def messagehandler( name )
 
-content = %{
+content = '
 class MessageHandler_First
 
 	def Handle( msg )
@@ -61,7 +61,7 @@ class MessageHandler_First
 
 end
 
-}
+'
 
 Dir.mkdir( "#{name}/MessageHandler" )
 File.write( "#{name}/MessageHandler/First.rb", content )

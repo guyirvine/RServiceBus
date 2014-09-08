@@ -23,15 +23,15 @@ class SagaLoader
 #
 # @param [String] filePath the path to be cleaned
 	def getRequirePath( filePath )
-		if !filePath.start_with?( "/" ) then
-			filePath = "./" + filePath
-		end
+		unless filePath.start_with?('/') then
+      filePath = './' + filePath
+    end
 		
 		if File.exists?( filePath ) then
-			return filePath.sub( ".rb", "")
+			return filePath.sub( '.rb', '')
 		end		
 
-		abort( "Filepath, " + filePath + ", given for Saga require doesn't exist" );
+		abort( 'Filepath, ' + filePath + ", given for Saga require doesn't exist" );
 	end
 
 # Instantiate the saga named in sagaName from the file name in filePath
@@ -49,9 +49,9 @@ class SagaLoader
 		begin
 			saga = Object.const_get(sagaName);
 		rescue Exception => e
-			puts "Expected class name: " + sagaName + ", not found after require: " +  requirePath
-			puts "**** Check in " + filePath + " that the class is named : " + sagaName
-			puts "( In case its not that )"
+			puts 'Expected class name: ' + sagaName + ', not found after require: ' +  requirePath
+			puts '**** Check in ' + filePath + ' that the class is named : ' + sagaName
+			puts '( In case its not that )'
 			raise e
 		end
 
@@ -70,17 +70,17 @@ class SagaLoader
         end
 
 		begin
-			RServiceBus.rlog "filePath: " + filePath
-			RServiceBus.rlog "sagaName: " + sagaName
+			RServiceBus.rlog 'filePath: ' + filePath
+			RServiceBus.rlog 'sagaName: ' + sagaName
 
 			saga = self.loadSagaFromFile( sagaName, filePath )
-			RServiceBus.log "Loaded Saga: " + sagaName
+			RServiceBus.log 'Loaded Saga: ' + sagaName
 
             @sagaManager.RegisterSaga( saga )
 	
             @listOfLoadedPaths[filePath] = 1
 		rescue Exception => e
-			puts "Exception loading saga from file: " + filePath
+			puts 'Exception loading saga from file: ' + filePath
 			puts e.message
 			puts e.backtrace[0]
 
@@ -94,7 +94,7 @@ class SagaLoader
 # @param [String] path directory to check
 # @return [Array] a list of paths to files found in the given path
 	def getListOfFilesForDir( path )
-        list = Dir[path + "/*"];
+        list = Dir[path + '/*'];
 
         RServiceBus.rlog "SagaLoader.getListOfFilesForDir. path: #{path}, list: #{list}"
 
@@ -108,7 +108,7 @@ class SagaLoader
 		baseName = File.basename( filePath )
 		extName = File.extname( baseName )
 		
-        sagaName = baseName.sub( extName, "" )
+        sagaName = baseName.sub( extName, '')
 		
 		return "Saga_#{sagaName}"
 	end
@@ -121,11 +121,11 @@ class SagaLoader
         RServiceBus.rlog "SagaLoader.loadSagasFromPath. baseDir: #{baseDir}"
         
 		self.getListOfFilesForDir(baseDir).each do |filePath|
-			if !filePath.end_with?( "." ) then
-                
-				sagaName = self.getSagaName( filePath )
-                self.loadSaga( filePath, sagaName )
-			end
+      unless filePath.end_with?('.') then
+
+        sagaName = self.getSagaName(filePath)
+        self.loadSaga(filePath, sagaName)
+      end
 		end
         
 		return self

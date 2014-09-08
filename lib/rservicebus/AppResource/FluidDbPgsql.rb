@@ -1,6 +1,6 @@
 module RServiceBus
     
-    require "FluidDb/Pgsql"
+    require 'FluidDb/Pgsql'
     
     #Implementation of an AppResource - Redis
     class AppResource_FluidDbPgsql<AppResource
@@ -11,17 +11,17 @@ module RServiceBus
 
         # Transaction Semantics
         def Begin
-            @connection.execute( "BEGIN", [] )
+            @connection.execute( 'BEGIN', [] )
         end
 
         # Transaction Semantics
         def Commit
-            @connection.execute( "COMMIT", [] )
+            @connection.execute( 'COMMIT', [] )
         end
 
         # Transaction Semantics
         def Rollback
-            @connection.execute( "ROLLBACK", [] )
+            @connection.execute( 'ROLLBACK', [] )
         end
         
     end

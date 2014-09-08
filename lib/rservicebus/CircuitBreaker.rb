@@ -21,10 +21,10 @@ module RServiceBus
 
         def initialize( host )
             @host = host
-            @maxNumberOfFailures = RServiceBus.getValue( "RSBCB_MAX", 5 )
-            @secondsToBreak = RServiceBus.getValue( "RSBCB_SECONDS_TO_BREAK", 60 ).to_i
-            @secondsToReset = RServiceBus.getValue( "RSBCB_SECONDS_TO_RESET", 60 ).to_i
-            @resetOnSuccess = RServiceBus.getValue( "RSBCB_RESET_ON_SUCCESS", false )
+            @maxNumberOfFailures = RServiceBus.getValue( 'RSBCB_MAX', 5 )
+            @secondsToBreak = RServiceBus.getValue( 'RSBCB_SECONDS_TO_BREAK', 60 ).to_i
+            @secondsToReset = RServiceBus.getValue( 'RSBCB_SECONDS_TO_RESET', 60 ).to_i
+            @resetOnSuccess = RServiceBus.getValue( 'RSBCB_RESET_ON_SUCCESS', false )
             
             self.reset
         end

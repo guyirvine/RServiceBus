@@ -6,9 +6,9 @@ module RServiceBus
     class Monitor_CsvPerLineDir<Monitor_Dir
         
         def checkPayloadForNumberOfColumns( payload )
-            if !@QueryStringParts.nil? && @QueryStringParts.has_key?("cols") then
+            if !@QueryStringParts.nil? && @QueryStringParts.has_key?('cols') then
                 
-                cols = @QueryStringParts["cols"][0].to_i
+                cols = @QueryStringParts['cols'][0].to_i
                 payload.each_with_index do |row, idx|
                     if row.length != cols then
                         raise "Expected number of columns, #{cols}, Actual number of columns, #{row.length}, on line, #{idx}"
@@ -19,9 +19,9 @@ module RServiceBus
         end
         
         def checkSendHash
-            if !@QueryStringParts.nil? && @QueryStringParts.has_key?("hash") then
-                flag = @QueryStringParts["hash"][0]
-                return flag == "Y"
+            if !@QueryStringParts.nil? && @QueryStringParts.has_key?('hash') then
+                flag = @QueryStringParts['hash'][0]
+                return flag == 'Y'
             end
             
             return false

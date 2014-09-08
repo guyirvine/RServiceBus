@@ -1,7 +1,7 @@
 module RServiceBus
     
-    require "rservicebus/MQ"
-    require "redis"
+    require 'rservicebus/MQ'
+    require 'redis'
     
     # Beanstalk client implementation.
     #
@@ -18,7 +18,7 @@ module RServiceBus
 
                 rescue Exception => e
                 puts e.message
-                puts "Error connecting to Redis for mq"
+                puts 'Error connecting to Redis for mq'
                 puts "Host string, #{string}"
                 abort()
             end

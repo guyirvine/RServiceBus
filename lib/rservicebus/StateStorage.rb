@@ -4,10 +4,10 @@ module RServiceBus
 
         def StateStorage.Get( uri )
             case uri.scheme
-                when "dir"
+                when 'dir'
                     require 'rservicebus/StateStorage/Dir.rb'
                     return StateStorage_Dir.new( uri )
-                    when "inmem"
+                    when 'inmem'
                     require 'rservicebus/StateStorage/InMemory.rb'
                     return StateStorage_InMemory.new( uri )
                 else

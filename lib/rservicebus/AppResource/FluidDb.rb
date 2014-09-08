@@ -1,6 +1,6 @@
 module RServiceBus
     
-    require "FluidDb/Db"
+    require 'FluidDb/Db'
     
     #Implementation of an AppResource - Redis
     class AppResource_FluidDb<AppResource

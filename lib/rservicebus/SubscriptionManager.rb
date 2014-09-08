@@ -24,12 +24,12 @@ class SubscriptionManager
 	end
 
 	def add( eventName, queueName )
-		RServiceBus.log "Adding subscription for, " + eventName + ", to, " + queueName
+		RServiceBus.log 'Adding subscription for, ' + eventName + ', to, ' + queueName
 		@subscriptions = @subscriptionStorage.add( eventName, queueName )
 	end
 
 	def remove( eventName, queueName )
-		raise "Method, remove, needs to be implemented for this subscription storage"
+		raise 'Method, remove, needs to be implemented for this subscription storage'
 	end
 end
 

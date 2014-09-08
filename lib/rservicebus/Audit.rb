@@ -4,10 +4,10 @@ class Audit
 
     def initialize( mq )
         @mq = mq
-        auditQueueName = RServiceBus.getValue( "AUDIT_QUEUE_NAME" )
+        auditQueueName = RServiceBus.getValue('AUDIT_QUEUE_NAME')
         if auditQueueName.nil? then
-                @forwardSentMessagesTo = RServiceBus.getValue( "FORWARD_SENT_MESSAGES_TO" )
-                @forwardReceivedMessagesTo = RServiceBus.getValue( "FORWARD_RECEIVED_MESSAGES_TO" )
+                @forwardSentMessagesTo = RServiceBus.getValue('FORWARD_SENT_MESSAGES_TO')
+                @forwardReceivedMessagesTo = RServiceBus.getValue('FORWARD_RECEIVED_MESSAGES_TO')
             else
                 @forwardSentMessagesTo = auditQueueName
                 @forwardReceivedMessagesTo = auditQueueName
@@ -19,14 +19,14 @@ class Audit
     end
 
     def auditOutgoing( obj )
-        if !@forwardSentMessagesTo.nil? then
-            self.auditToQueue( obj )
-        end
+      unless @forwardSentMessagesTo.nil? then
+        self.auditToQueue(obj)
+      end
     end
     def auditIncoming( obj )
-        if !@forwardReceivedMessagesTo.nil? then
-            self.auditToQueue( obj )
-        end
+      unless @forwardReceivedMessagesTo.nil? then
+        self.auditToQueue(obj)
+      end
     end
 
 

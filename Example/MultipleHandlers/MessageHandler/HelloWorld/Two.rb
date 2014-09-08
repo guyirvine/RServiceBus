@@ -5,7 +5,7 @@ class MessageHandler_HelloWorld_Two
 	@Bus
 
 	def Handle( msg )
-		puts "MessageHandler_HelloWorld_Two: HelloWorld"
-		@Bus.Reply( "Reply from MessageHandler_HelloWorld_Two" )
+		puts 'MessageHandler_HelloWorld_Two: HelloWorld'
+		@Bus.Reply('Reply from MessageHandler_HelloWorld_Two')
 	end
 end

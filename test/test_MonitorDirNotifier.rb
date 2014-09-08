@@ -88,8 +88,8 @@ class DirNotifierTest<Test::Unit::TestCase
 
     dirNotifier = Test_Monitor_DirNotifier.new
 
-    dirNotifier.expects(:puts).with("***** Processing Directory is not specified.")
-    dirNotifier.expects(:puts).with("***** Specify the Processing Directory as a query string in the Path URI")
+    dirNotifier.expects(:puts).with('***** Processing Directory is not specified.')
+    dirNotifier.expects(:puts).with('***** Specify the Processing Directory as a query string in the Path URI')
     dirNotifier.expects(:puts).with("***** eg, '/#{directory}?processing=*ProcessingDir*")
 
     assert_raise SystemExit do
@@ -110,7 +110,7 @@ class DirNotifierTest<Test::Unit::TestCase
     dirNotifier.expects(:puts).with("***** eg, mkdir #{directory}")
 
     assert_raise SystemExit do
-      dirNotifier.connect(URI("/tmp?processing=" + directory))
+      dirNotifier.connect(URI('/tmp?processing=' + directory))
     end
 
   end
@@ -128,7 +128,7 @@ class DirNotifierTest<Test::Unit::TestCase
     dirNotifier.expects(:puts).with("***** eg, rm #{filename} && mkdir #{filename}")
 
     assert_raise SystemExit do
-      dirNotifier.connect(URI("/tmp?processing=" + filename))
+      dirNotifier.connect(URI('/tmp?processing=' + filename))
     end
 
   end

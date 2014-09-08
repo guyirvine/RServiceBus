@@ -1,4 +1,4 @@
-require "./Contract.rb"
+require './Contract.rb'
 
 #Need to create a postgresql db called rservicebus_test, and a table called table_tbl
 
@@ -9,7 +9,7 @@ class MessageHandler_HelloWorld
     
 	def Handle( msg )
         
-        @Test.execute( "UPDATE table1 SET field1 = 2", [] );
+        @Test.execute( 'UPDATE table1 SET field1 = 2', [] );
         
         @Bus.Send( TestMsg.new )
 

@@ -8,7 +8,7 @@ class MessageHandler_HelloWorld
 
 		RServiceBus.rlog "Writing to file: #{filePath}"
 
-		IO.write( filePath, "File Content" )
+		IO.write( filePath, 'File Content')
 
 		RServiceBus.rlog "Scp file, #{filePath}"
 	

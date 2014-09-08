@@ -1,4 +1,4 @@
-require "./Contract.rb"
+require './Contract.rb'
 
 class MessageHandler_HelloWorld
 
@@ -6,7 +6,7 @@ class MessageHandler_HelloWorld
 
 	def Handle( msg )
 #raise "Manually generated error for testng"
-		puts "Handling Hello World: " + msg.name
-		@Bus.Reply( "Hey." + @Redis.get( msg.name ) )
+		puts 'Handling Hello World: ' + msg.name
+		@Bus.Reply( 'Hey.' + @Redis.get( msg.name ) )
 	end
 end

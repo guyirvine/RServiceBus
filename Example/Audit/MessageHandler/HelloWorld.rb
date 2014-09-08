@@ -5,7 +5,7 @@ class MessageHandler_HelloWorld
 
 	def Handle( msg )
 #raise "Manually generated error for testng"
-		puts "Handling Hello World: " + msg.name
-		@Bus.Reply( "Hey. " + msg.name )
+		puts 'Handling Hello World: ' + msg.name
+		@Bus.Reply( 'Hey. ' + msg.name )
 	end
 end

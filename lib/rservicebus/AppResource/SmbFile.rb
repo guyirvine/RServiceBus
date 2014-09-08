@@ -1,6 +1,6 @@
 module RServiceBus
 
-require "rservicebus/AppResource/Smb"
+require 'rservicebus/AppResource/Smb'
 
     class AppResource_SmbFile<AppResource_Smb
 

@@ -15,10 +15,10 @@ module RServiceBus
             #Pass the path through the Dir object to check syntax on startup
             begin
                 inputDir = Dir.new( uri.path )
-                if !File.writable?( uri.path ) then
-                    puts "***** Directory is not writable, #{uri.path}."
-                    puts "***** Make the directory, #{uri.path}, writable and try again."
-                    abort()
+                unless File.writable?(uri.path) then
+                  puts "***** Directory is not writable, #{uri.path}."
+                  puts "***** Make the directory, #{uri.path}, writable and try again."
+                  abort()
                 end
                 rescue Errno::ENOENT => e
                     puts "***** Directory does not exist, #{uri.path}."
@@ -38,32 +38,32 @@ module RServiceBus
             return if uri.query.nil?
             parts = CGI.parse(uri.query)
             @QueryStringParts = parts
-            if parts.has_key?("archive") then
-                archiveUri = URI.parse( parts["archive"][0] )
-                if !File.directory?( archiveUri.path ) then
-                    puts "***** Archive file name templating not yet supported."
-                    puts "***** Directory's only."
-                    abort()
+            if parts.has_key?('archive') then
+                archiveUri = URI.parse( parts['archive'][0] )
+                unless File.directory?(archiveUri.path) then
+                  puts '***** Archive file name templating not yet supported.'
+                  puts "***** Directory's only."
+                  abort()
                 end
                 @ArchiveDir = archiveUri.path
             end
             
-            if parts.has_key?("inputfilter") then
-                if parts["inputfilter"].count > 1 then
-                    puts "Too many inputfilters specified."
-                    puts "*** ZIP, or GZ are the only valid inputfilters."
+            if parts.has_key?('inputfilter') then
+                if parts['inputfilter'].count > 1 then
+                    puts 'Too many inputfilters specified.'
+                    puts '*** ZIP, or GZ are the only valid inputfilters.'
                     abort();
                 end
                 
-                if parts["inputfilter"][0] == "ZIP" then
-                    elsif parts["inputfilter"][0] == "GZ" then
-                    elsif parts["inputfilter"][0] == "TAR" then
+                if parts['inputfilter'][0] == 'ZIP' then
+                    elsif parts['inputfilter'][0] == 'GZ' then
+                    elsif parts['inputfilter'][0] == 'TAR' then
                     else
-                    puts "Invalid inputfilter specified."
-                    puts "*** ZIP, or GZ are the only valid inputfilters."
+                    puts 'Invalid inputfilter specified.'
+                    puts '*** ZIP, or GZ are the only valid inputfilters.'
                     abort();
                 end
-                @InputFilter << parts["inputfilter"][0]
+                @InputFilter << parts['inputfilter'][0]
             end
             
             
@@ -88,15 +88,15 @@ module RServiceBus
         end
         
         def ReadContentFromTarFile( filePath )
-            raise "Not supported yet"
-            content = ""
+            raise 'Not supported yet'
+            content = ''
             #            Gem::Package::TarReader.new( filePath ).each do |entry|
             #    content = entry.read
             return content
         end
         
         def ReadContentFromFile( filePath )
-            content = ""
+            content = ''
             if @InputFilter.length > 0 then
                 if @InputFilter[0] == 'ZIP' then
                     entry, content = self.ReadContentFromZipFile( filePath )
@@ -129,17 +129,17 @@ module RServiceBus
             fileList.each do |filePath|
                 RServiceBus.log "Ready to process, #{filePath}"
                 content = self.ProcessPath( filePath )
-                
-                if !@ArchiveDir.nil? then
-                    basename = File.basename( filePath )
-                    newFilePath = @ArchiveDir + "/" + basename + "." + DateTime.now.strftime( "%Y%m%d%H%M%S%L") + ".zip"
-                    RServiceBus.log "Writing to archive, #{newFilePath}"
-                    
-                    Zip::ZipOutputStream.open(newFilePath) {
-                        |zos|
-                        zos.put_next_entry(basename)
-                        zos.puts content
-                    }
+
+                unless @ArchiveDir.nil? then
+                  basename = File.basename(filePath)
+                  newFilePath = @ArchiveDir + '/' + basename + '.' + DateTime.now.strftime('%Y%m%d%H%M%S%L') + '.zip'
+                  RServiceBus.log "Writing to archive, #{newFilePath}"
+
+                  Zip::ZipOutputStream.open(newFilePath) {
+                      |zos|
+                    zos.put_next_entry(basename)
+                    zos.puts content
+                  }
                 end
                 File.unlink( filePath )
                 

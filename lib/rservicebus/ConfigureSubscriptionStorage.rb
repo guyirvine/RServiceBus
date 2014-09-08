@@ -1,6 +1,6 @@
 module RServiceBus
     
-    require "uri"
+    require 'uri'
     
     #Configure SubscriptionStorage for an rservicebus host
     class ConfigureSubscriptionStorage
@@ -9,12 +9,12 @@ module RServiceBus
             uri = URI.parse( uri_string )
             
             case uri.scheme
-                when "redis"
-                require "rservicebus/SubscriptionStorage/Redis"
+                when 'redis'
+                require 'rservicebus/SubscriptionStorage/Redis'
                 s = SubscriptionStorage_Redis.new( appName, uri )
                 
-                when "file"
-                require "rservicebus/SubscriptionStorage/File"
+                when 'file'
+                require 'rservicebus/SubscriptionStorage/File'
                 s = SubscriptionStorage_File.new( appName, uri )
                 
                 else

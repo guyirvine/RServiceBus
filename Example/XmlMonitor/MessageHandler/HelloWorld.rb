@@ -6,6 +6,6 @@ class MessageHandler_HelloWorld
     @OutputDir
     
 	def Handle( msg )
-        IO.write( @OutputDir.path + "/output.txt", msg.payload.to_s )
+        IO.write( @OutputDir.path + '/output.txt', msg.payload.to_s )
 	end
 end

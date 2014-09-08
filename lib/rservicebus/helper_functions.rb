@@ -3,7 +3,7 @@ module RServiceBus
 
 	def RServiceBus.convertDTOToHash( obj )
 		hash = {};
-		obj.instance_variables.each {|var| hash[var.to_s.delete("@")] = obj.instance_variable_get(var) }
+		obj.instance_variables.each {|var| hash[var.to_s.delete('@')] = obj.instance_variable_get(var) }
 
 		return hash
 	end
@@ -15,18 +15,18 @@ module RServiceBus
 	end
 
 	def RServiceBus.log(string, ver=false)
-        return if RServiceBus.checkEnvironmentVariable("TESTING")
+        return if RServiceBus.checkEnvironmentVariable('TESTING')
 
-		type = ver ? "VERB" : "INFO"
-        if RServiceBus.checkEnvironmentVariable("VERBOSE") || !ver then
-            timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
+		type = ver ? 'VERB' : 'INFO'
+        if RServiceBus.checkEnvironmentVariable('VERBOSE') || !ver then
+            timestamp = Time.new.strftime('%Y-%m-%d %H:%M:%S')
             puts "[#{type}] #{timestamp} :: #{string}"
         end
 	end
 
     def RServiceBus.rlog(string)
-        if RServiceBus.checkEnvironmentVariable("RSBVERBOSE") then
-            timestamp = Time.new.strftime( "%Y-%m-%d %H:%M:%S" )
+        if RServiceBus.checkEnvironmentVariable('RSBVERBOSE') then
+            timestamp = Time.new.strftime('%Y-%m-%d %H:%M:%S')
             puts "[RSB] #{timestamp} :: #{string}"
         end
     end
@@ -38,18 +38,18 @@ module RServiceBus
     end
 
     def RServiceBus.getValue( name, default=nil )
-        value = ( ENV[name].nil?  || ENV[name] == ""  ) ? default : ENV[name];
+        value = ( ENV[name].nil?  || ENV[name] == '') ? default : ENV[name];
         log "Env value: #{name}: #{value}"
         return value
     end
 
-    def RServiceBus.sendMsg( msg, responseQueue="agent" )
-        require "rservicebus/EndpointMapping"
+    def RServiceBus.sendMsg( msg, responseQueue='agent')
+        require 'rservicebus/EndpointMapping'
         endpointMapping = EndpointMapping.new
         endpointMapping.Configure
         queueName = endpointMapping.get( msg.class.name )
 
-        ENV["RSBMQ"] = "beanstalk://localhost" if ENV["RSBMQ"].nil?
+        ENV['RSBMQ'] = 'beanstalk://localhost' if ENV['RSBMQ'].nil?
         agent = RServiceBus::Agent.new
         Audit.new( agent ).audit( msg )
         agent.sendMsg(msg, queueName, responseQueue)
@@ -62,13 +62,13 @@ module RServiceBus
 		raise StandardError.new( msg )
     end
 
-    def RServiceBus.sendMsg( msg, responseQueue="agent" )
-        require "rservicebus/EndpointMapping"
+    def RServiceBus.sendMsg( msg, responseQueue='agent')
+        require 'rservicebus/EndpointMapping'
         endpointMapping = EndpointMapping.new
         endpointMapping.Configure
         queueName = endpointMapping.get( msg.class.name )
 
-        ENV["RSBMQ"] = "beanstalk://localhost" if ENV["RSBMQ"].nil?
+        ENV['RSBMQ'] = 'beanstalk://localhost' if ENV['RSBMQ'].nil?
         agent = RServiceBus::Agent.new
         Audit.new( agent ).auditOutgoing( msg )
         agent.sendMsg(msg, queueName, responseQueue)
@@ -82,7 +82,7 @@ module RServiceBus
     end
 
     def RServiceBus.checkForReply( queueName )
-        ENV["RSBMQ"] = "beanstalk://localhost" if ENV["RSBMQ"].nil?
+        ENV['RSBMQ'] = 'beanstalk://localhost' if ENV['RSBMQ'].nil?
         agent = RServiceBus::Agent.new
         msg = agent.checkForReply( queueName )
         Audit.new( agent ).auditIncoming( msg )

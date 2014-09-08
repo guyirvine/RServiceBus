@@ -1,6 +1,6 @@
 module RServiceBus
     
-    require "redis"
+    require 'redis'
     
     #Implementation of an AppResource - Redis
     class AppResource_Redis<AppResource

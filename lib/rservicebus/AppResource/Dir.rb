@@ -5,9 +5,9 @@ module RServiceBus
         def connect(uri)
             begin
                 inputDir = Dir.new( uri.path )
-                if !File.writable?( uri.path ) then
-                    puts "*** Warning. Directory is not writable, #{uri.path}."
-                    puts "*** Warning. Make the directory, #{uri.path}, writable and try again."
+                unless File.writable?(uri.path) then
+                  puts "*** Warning. Directory is not writable, #{uri.path}."
+                  puts "*** Warning. Make the directory, #{uri.path}, writable and try again."
                 end
                 rescue Errno::ENOENT => e
                 puts "***** Directory does not exist, #{uri.path}."

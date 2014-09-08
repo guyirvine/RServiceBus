@@ -1,5 +1,5 @@
 
-content = ""
+content = ''
 (1..1000).each do |idx|
 	content = content + "ASDFGHJKLKJHGFVGHJBGCHVHBKJVJGC BMBNJKHVBJLB\n"	
 end

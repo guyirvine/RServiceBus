@@ -9,9 +9,9 @@ module RServiceBus
             #Check if the State Dir has been specified
             #If it has, make sure it exists, and is writable
 
-            string = RServiceBus.getValue( "STATE_URI" )
+            string = RServiceBus.getValue('STATE_URI')
             if string.nil? then
-                string = "dir:///tmp"
+                string = 'dir:///tmp'
             end
 
             uri = URI.parse( string )

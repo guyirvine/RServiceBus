@@ -1,2 +1,2 @@
 
-IO.write( "./input/1.txt", "This is a string" )
+IO.write( './input/1.txt', 'This is a string')

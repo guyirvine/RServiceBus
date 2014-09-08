@@ -20,14 +20,14 @@ class Saga_Manager
 	def GetMethodsByPrefix( saga, prefix )
         list = []
         saga.instance_methods.each do |name|
-            list.push name.to_s.sub( prefix, "" ) if name.to_s.slice( 0,prefix.length ) == prefix
+            list.push name.to_s.sub( prefix, '') if name.to_s.slice( 0,prefix.length ) == prefix
         end
         
         return list
 	end
     
 	def GetStartWithMethodNames( saga )
-		return self.GetMethodsByPrefix( saga, "StartWith_" )
+		return self.GetMethodsByPrefix( saga, 'StartWith_')
 	end
     
     # setBusAttributeIfRequested
@@ -36,7 +36,7 @@ class Saga_Manager
     def setBusAttributeIfRequested( saga )
         if defined?( saga.Bus ) then
             saga.Bus = @host
-            RServiceBus.log "Bus attribute set for: " + saga.class.name
+            RServiceBus.log 'Bus attribute set for: ' + saga.class.name
         end
         
         return self
@@ -76,12 +76,12 @@ class Saga_Manager
 
     
     def prepSaga( saga )
-        if !@resourceListBySagaName[saga.class.name].nil? then
-            @resourceListBySagaName[saga.class.name].each do |k,v|
-                saga.instance_variable_set( "@#{k}", @resourceManager.get(k).getResource() )
-                RServiceBus.rlog "App resource attribute, #{k}, set for: " + saga.class.name
-            end
+      unless @resourceListBySagaName[saga.class.name].nil? then
+        @resourceListBySagaName[saga.class.name].each do |k, v|
+          saga.instance_variable_set("@#{k}", @resourceManager.get(k).getResource())
+          RServiceBus.rlog "App resource attribute, #{k}, set for: " + saga.class.name
         end
+      end
 
     end
 
@@ -91,16 +91,16 @@ class Saga_Manager
         msg = rmsg.msg
 
         RServiceBus.log "SagaManager, started processing, #{msg.class.name}", true
-        if !@startWith[msg.class.name].nil? then
-            @startWith[msg.class.name].each do |saga|
-                data = Saga_Data.new( saga )
-                @sagaStorage.Set( data )
+        unless @startWith[msg.class.name].nil? then
+          @startWith[msg.class.name].each do |saga|
+            data = Saga_Data.new(saga)
+            @sagaStorage.Set(data)
 
-                methodName = "StartWith_#{msg.class.name}"
-                self.ProcessMsg( saga, data, methodName, msg )
-                
-                handled = true
-            end
+            methodName = "StartWith_#{msg.class.name}"
+            self.ProcessMsg(saga, data, methodName, msg)
+
+            handled = true
+          end
         end
         return handled if handled == true
 

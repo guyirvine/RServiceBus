@@ -48,7 +48,7 @@ module RServiceBus
         end
 
         def incr( key )
-			@keyHash[key] = 0 if !@keyHash.has_key?( key )
+			@keyHash[key] = 0 unless @keyHash.has_key?(key)
             
             @keyHash[key] = @keyHash[key] + 1
             return @keyHash[key]

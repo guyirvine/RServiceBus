@@ -37,15 +37,15 @@ class HandlerLoader
 #
 # @param [String] filePath the path to be cleaned
 	def getRequirePath( filePath )
-		if !filePath.start_with?( "/" ) then
-			filePath = "./" + filePath
-		end
+		unless filePath.start_with?('/') then
+      filePath = './' + filePath
+    end
 		
 		if File.exists?( filePath ) then
-			return filePath.sub( ".rb", "")
+			return filePath.sub( '.rb', '')
 		end		
 
-		abort( "Filepath, " + filePath + ", given for MessageHandler require doesn't exist" );
+		abort( 'Filepath, ' + filePath + ", given for MessageHandler require doesn't exist" );
 	end
 
 # Instantiate the handler named in handlerName from the file name in filePath
@@ -63,9 +63,9 @@ class HandlerLoader
 		begin
 			handler = Object.const_get(handlerName).new();
 		rescue Exception => e
-			puts "Expected class name: " + handlerName + ", not found after require: " +  requirePath
-			puts "**** Check in " + filePath + " that the class is named : " + handlerName
-			puts "( In case its not that )"
+			puts 'Expected class name: ' + handlerName + ', not found after require: ' +  requirePath
+			puts '**** Check in ' + filePath + ' that the class is named : ' + handlerName
+			puts '( In case its not that )'
 			raise e
 		end
 		
@@ -84,17 +84,17 @@ class HandlerLoader
         end
 
 		begin
-			RServiceBus.rlog "filePath: " + filePath
-			RServiceBus.rlog "handlerName: " + handlerName
+			RServiceBus.rlog 'filePath: ' + filePath
+			RServiceBus.rlog 'handlerName: ' + handlerName
 
 			handler = self.loadHandlerFromFile( handlerName, filePath )
-			RServiceBus.log "Loaded Handler: " + handlerName
+			RServiceBus.log 'Loaded Handler: ' + handlerName
 
             @handlerManager.addHandler( msgName, handler )
             
             @listOfLoadedPaths[filePath] = 1
 		rescue Exception => e
-			puts "Exception loading handler from file: " + filePath
+			puts 'Exception loading handler from file: ' + filePath
 			puts e.message
 			puts e.backtrace[0]
 
@@ -108,7 +108,7 @@ class HandlerLoader
 # @param [String] path directory to check
 # @return [Array] a list of paths to files found in the given path
 	def getListOfFilesForDir( path )
-        list = Dir[path + "/*"];
+        list = Dir[path + '/*'];
         RServiceBus.rlog "HandlerLoader.getListOfFilesForDir. path: #{path}, list: #{list}"
         
         return list
@@ -122,17 +122,17 @@ class HandlerLoader
 # @param [String] baseDir directory to check for handlers of the given msgName
 	def loadHandlersFromSecondLevelPath(msgName, baseDir)
 		self.getListOfFilesForDir(baseDir).each do |filePath|
-			if !filePath.end_with?( "." ) then
-				extName = File.extname( filePath )
-				if !File.directory?( filePath ) &&
-						extName == ".rb" then
+      unless filePath.end_with?('.') then
+        extName = File.extname(filePath)
+        if !File.directory?(filePath) &&
+            extName == '.rb' then
 
-					fileName = File.basename( filePath ).sub( ".rb", "" )
-					handlerName = "MessageHandler_#{msgName}_#{fileName}"
+          fileName = File.basename(filePath).sub('.rb', '')
+          handlerName = "MessageHandler_#{msgName}_#{fileName}"
 
-					self.loadHandler( msgName, filePath, handlerName )
-				end
-			end
+          self.loadHandler(msgName, filePath, handlerName)
+        end
+      end
 		end
 
 		return self
@@ -145,7 +145,7 @@ class HandlerLoader
 	def getMsgName( filePath )
 		baseName = File.basename( filePath )
 		extName = File.extname( baseName )
-		fileName = baseName.sub( extName, "" )
+		fileName = baseName.sub( extName, '')
 
 		msgName = fileName
 		
@@ -158,16 +158,16 @@ class HandlerLoader
 	def loadHandlersFromTopLevelPath(baseDir)
         RServiceBus.rlog "HandlerLoader.loadHandlersFromTopLevelPath. baseDir: #{baseDir}"
 		self.getListOfFilesForDir(baseDir).each do |filePath|
-			if !filePath.end_with?( "." ) then
+      unless filePath.end_with?('.') then
 
-				msgName = self.getMsgName( filePath )
-				if File.directory?( filePath ) then
-					self.loadHandlersFromSecondLevelPath( msgName, filePath )
-				else
-					handlerName = "MessageHandler_#{msgName}"
-					self.loadHandler( msgName, filePath, handlerName )
-				end
-			end
+        msgName = self.getMsgName(filePath)
+        if File.directory?(filePath) then
+          self.loadHandlersFromSecondLevelPath(msgName, filePath)
+        else
+          handlerName = "MessageHandler_#{msgName}"
+          self.loadHandler(msgName, filePath, handlerName)
+        end
+      end
 		end
 
 		return self

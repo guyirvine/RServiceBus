@@ -1,4 +1,4 @@
-require "./Contract.rb"
+require './Contract.rb'
 
 #Need to create a postgresql db called rservicebus_test, and a table called table_tbl
 

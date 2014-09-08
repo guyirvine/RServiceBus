@@ -26,7 +26,7 @@ module RServiceBus
         def setBusAttributeIfRequested( handler )
             if defined?( handler.Bus ) then
                 handler.Bus = @host
-                RServiceBus.log "Bus attribute set for: " + handler.class.name
+                RServiceBus.log 'Bus attribute set for: ' + handler.class.name
             end
             
             return self
@@ -38,7 +38,7 @@ module RServiceBus
         def setStateAttributeIfRequested( handler )
             if defined?( handler.State ) then
                 handler.State = @stateManager.Get( handler )
-                RServiceBus.log "Bus attribute set for: " + handler.class.name
+                RServiceBus.log 'Bus attribute set for: ' + handler.class.name
             end
             
             return self

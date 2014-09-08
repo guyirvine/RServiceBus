@@ -59,10 +59,10 @@ module RServiceBus
                     v.finished
                     rescue Exception => e1
                     puts "Caught nested exception rolling back, #{v.class.name}, for msg, #{msgName}"
-                    puts "****"
+                    puts '****'
                     puts e1.message
                     puts e1.backtrace
-                    puts "****"
+                    puts '****'
                 end
             end
             

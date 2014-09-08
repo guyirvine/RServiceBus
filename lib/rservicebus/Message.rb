@@ -1,8 +1,8 @@
 module RServiceBus
 
-    require "zlib"
-    require "yaml"
-    require "uuidtools"
+    require 'zlib'
+    require 'yaml'
+    require 'uuidtools'
 
     #This is the top level message that is passed around the bus
     class Message
@@ -14,12 +14,12 @@ module RServiceBus
         # @param [Object] msg The msg to be sent
         # @param [Object] returnAddress A queue to which the destination message handler can send replies
         def initialize( msg, returnAddress, correlationId=nil )
-            if !RServiceBus.checkEnvironmentVariable('RSBMSG_COMPRESS') then
-                @compressed = false
-                @_msg=YAML::dump(msg)
-                else
-                @compressed = true
-                @_msg=Zlib::Deflate.deflate(YAML::dump(msg))
+            unless RServiceBus.checkEnvironmentVariable('RSBMSG_COMPRESS') then
+              @compressed = false
+              @_msg=YAML::dump(msg)
+            else
+              @compressed = true
+              @_msg=Zlib::Deflate.deflate(YAML::dump(msg))
             end
 
             @correlationId = correlationId
@@ -66,10 +66,10 @@ module RServiceBus
                 return YAML::load( @_msg )
             end
             rescue ArgumentError => e
-            raise e if e.message.index( "undefined class/module " ).nil?
+            raise e if e.message.index('undefined class/module ').nil?
 
             puts e.message
-            msg_name = e.message.sub( "undefined class/module ", "" )
+            msg_name = e.message.sub( 'undefined class/module ', '')
 
             raise ClassNotFoundForMsg.new( msg_name )
         end

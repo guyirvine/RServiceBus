@@ -14,7 +14,7 @@ class SubscriptionStorage_File<SubscriptionStorage
 	end
 
 	def getAll
-		RServiceBus.log "Load subscriptions"
+		RServiceBus.log 'Load subscriptions'
         return Hash.new unless File.exists?( @uri.path )
         
         return YAML::load( File.open( @uri.path ) )
@@ -32,13 +32,13 @@ class SubscriptionStorage_File<SubscriptionStorage
 		subscriptions[eventName] << queueName
 		subscriptions[eventName] = subscriptions[eventName].uniq
 
-        File.open( @uri.path, "w" ) { |f| f.write( YAML::dump(subscriptions ) ) }
+        File.open( @uri.path, 'w') { |f| f.write( YAML::dump(subscriptions ) ) }
 
 		return subscriptions
 	end
 
 	def remove( eventName, queueName )
-		raise "Method, remove, needs to be implemented for this subscription storage"
+		raise 'Method, remove, needs to be implemented for this subscription storage'
 	end
 
 end

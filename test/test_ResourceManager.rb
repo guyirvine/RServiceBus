@@ -55,46 +55,46 @@ end
 class ResourceManagerTest < Test::Unit::TestCase
     
     def setup
-        ENV['SAGA_URI'] = "immem://"
-        @sa = RServiceBus::SagaStorage.Get( URI.parse("inmem://path") )
+        ENV['SAGA_URI'] = 'immem://'
+        @sa = RServiceBus::SagaStorage.Get( URI.parse('inmem://path') )
         
-        ENV['STATE_URI'] = "immem://"
+        ENV['STATE_URI'] = 'immem://'
         @st = RServiceBus::StateManager.new
         @r = RServiceBus::ResourceManager.new( @st, @sa )
     end
     
 	def test_GetAll
         
-        @r.add( "one", "one" )
-        @r.add( "two", "two" )
+        @r.add( 'one', 'one')
+        @r.add( 'two', 'two')
         
-        assert_equal Hash["one","one", "two","two"], @r.getAll
+        assert_equal Hash['one', 'one', 'two', 'two'], @r.getAll
         
     end
     
     def test_Get
         ta_before = Test_AppResource.new( nil, nil )
         
-        @r.add( "test", ta_before )
+        @r.add( 'test', ta_before )
         
-        ta_after = @r.get( "test" )
-        assert_equal "Test_AppResource", ta_after.class.name
+        ta_after = @r.get('test')
+        assert_equal 'Test_AppResource', ta_after.class.name
         
     end
     
     def test_Commit
         ta_before = Test_AppResource.new( nil, nil )
         
-        @r.add( "test", ta_before )
+        @r.add( 'test', ta_before )
         
         @r.Begin
-        ta_after = @r.get( "test" )
+        ta_after = @r.get('test')
         tr = ta_after.r
-        assert_equal "Test_Resource", tr.class.name
+        assert_equal 'Test_Resource', tr.class.name
         assert_equal false, tr.commit_called
         
-        @r.Commit( "MsgName" )
-        assert_equal "Test_AppResource", ta_after.class.name
+        @r.Commit('MsgName')
+        assert_equal 'Test_AppResource', ta_after.class.name
         assert_equal true, tr.commit_called
         
     end
@@ -102,16 +102,16 @@ class ResourceManagerTest < Test::Unit::TestCase
     def test_Rollback
         ta_before = Test_AppResource.new( nil, nil )
         
-        @r.add( "test", ta_before )
+        @r.add( 'test', ta_before )
         
         @r.Begin
-        ta_after = @r.get( "test" )
+        ta_after = @r.get('test')
         tr = ta_after.r
-        assert_equal "Test_Resource", tr.class.name
+        assert_equal 'Test_Resource', tr.class.name
         assert_equal false, tr.commit_called
         
-        @r.Rollback( "MsgName" )
-        assert_equal "Test_AppResource", ta_after.class.name
+        @r.Rollback('MsgName')
+        assert_equal 'Test_AppResource', ta_after.class.name
         assert_equal false, tr.commit_called
         assert_equal true, tr.rollback_called
         

@@ -12,18 +12,18 @@ module RServiceBus
         # The method which actually connects to the resource.
         #
         def connect(uri)
-            raise "Method, connect, needs to be implemented for resource"
+            raise 'Method, connect, needs to be implemented for resource'
         end
         
         # The method which actually connects to the resource.
         #
         def Look
-            raise "Method, Look, needs to be implemented for the Monitor"
+            raise 'Method, Look, needs to be implemented for the Monitor'
         end
         
         def _connect
             @connection = self.connect(@uri)
-            @Bus.log "#{self.class.name}. Connected to, #{@uri.to_s}" unless !ENV["QUIET"].nil?
+            @Bus.log "#{self.class.name}. Connected to, #{@uri.to_s}" if ENV['QUIET'].nil?
         end
         
         # Resources are attached resources, and can be specified using the URI syntax.
@@ -49,8 +49,8 @@ module RServiceBus
             begin
                 self.finished
                 rescue Exception => e
-                puts "** Monitor. An error was raised while closing connection to, " + @uri.to_s
-                puts "Message: " + e.message
+                puts '** Monitor. An error was raised while closing connection to, ' + @uri.to_s
+                puts 'Message: ' + e.message
                 puts e.backtrace
             end
             

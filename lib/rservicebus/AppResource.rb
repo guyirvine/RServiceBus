@@ -1,6 +1,6 @@
 module RServiceBus
     
-    require "uri"
+    require 'uri'
     
     # Wrapper base class for resources used by applications, allowing rservicebus to configure the resource
     # - dependency injection.
@@ -12,7 +12,7 @@ module RServiceBus
         # The method which actually connects to the resource.
         #
         def connect(uri)
-            raise "Method, connect, needs to be implemented for resource"
+            raise 'Method, connect, needs to be implemented for resource'
         end
 
         def _connect
@@ -48,8 +48,8 @@ module RServiceBus
             begin
                 self.finished
                 rescue Exception => e
-                puts "** AppResource. An error was raised while closing connection to, " + @uri.to_s
-                puts "Message: " + e.message
+                puts '** AppResource. An error was raised while closing connection to, ' + @uri.to_s
+                puts 'Message: ' + e.message
                 puts e.backtrace
             end
 

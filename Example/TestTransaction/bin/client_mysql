@@ -1,6 +1,6 @@
 #!/usr/local/bin/ruby
 
-msgName = ARGV.length == 0 ? "Failure" : "Success"
+msgName = ARGV.length == 0 ? 'Failure' : 'Success'
 
 `/usr/local/mysql/bin/mysql -D test -e "UPDATE table1 SET field1 = 1"`
 puts `/usr/local/mysql/bin/mysql -D test -e "SELECT * FROM table1"`

@@ -1,6 +1,6 @@
 module RServiceBus
     
-    require "FluidDb/Mysql"
+    require 'FluidDb/Mysql'
     
     #Implementation of an AppResource - Redis
     class AppResource_FluidDbMysql<AppResource
@@ -11,17 +11,17 @@ module RServiceBus
         
         # Transaction Semantics
         def Begin
-            @connection.execute( "BEGIN", [] )
+            @connection.execute( 'BEGIN', [] )
         end
         
         # Transaction Semantics
         def Commit
-            @connection.execute( "COMMIT", [] )
+            @connection.execute( 'COMMIT', [] )
         end
         
         # Transaction Semantics
         def Rollback
-            @connection.execute( "ROLLBACK", [] )
+            @connection.execute( 'ROLLBACK', [] )
         end
 
     end

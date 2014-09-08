@@ -39,12 +39,12 @@ end
 class SagaMsg1Msg2<RServiceBus::Saga_Base
     
 	def StartWith_Msg1( msg )
-        self.data["Bob1"] = "John1"
-        self.data["sfield2"] = msg.field1
+        self.data['Bob1'] = 'John1'
+        self.data['sfield2'] = msg.field1
 	end
 	def Handle_Msg2( msg )
-        self.data["Bob1"] = msg.field2
-        self.data["Bob2"] = msg.field2
+        self.data['Bob1'] = msg.field2
+        self.data['Bob2'] = msg.field2
 	end
 	def Handle_Msg3( msg )
         self.finish
@@ -74,18 +74,18 @@ class SagaTest < Test::Unit::TestCase
         @Bus = RServiceBus::Test_Bus.new
         stateManager = nil
 
-        @SagaStorage = SagaStorage_InMemory_For_Testing.new( "" )
+        @SagaStorage = SagaStorage_InMemory_For_Testing.new('')
         stateManager = nil
         @ResourceManager = ResourceManager_For_Testing_Sagas.new( stateManager, @SagaStorage )
         @sagaManager = Saga_Manager_For_Testing.new( @Bus, @ResourceManager, @SagaStorage )
         
-        @msg1 = RServiceBus::Message.new( Msg1.new( "One" ), "Q" )
+        @msg1 = RServiceBus::Message.new( Msg1.new('One'), 'Q')
 
         @SagaStorage.Begin
     end
     
 	def test_SagaMsgDerivation
-		assert_equal ["Msg1"], @sagaManager.GetStartWithMethodNames( SagaMsg1Msg2 )
+		assert_equal ['Msg1'], @sagaManager.GetStartWithMethodNames( SagaMsg1Msg2 )
         
 	end
     
@@ -103,8 +103,8 @@ class SagaTest < Test::Unit::TestCase
         data = @SagaStorage.hash[@SagaStorage.hash.keys[0]]
         assert_equal 2, data.length
         
-        assert_equal "John1", data["Bob1"]
-        assert_equal "One", data["sfield2"]
+        assert_equal 'John1', data['Bob1']
+        assert_equal 'One', data['sfield2']
         
         
     end
@@ -116,7 +116,7 @@ class SagaTest < Test::Unit::TestCase
         assert_equal 1, @SagaStorage.hash.keys.length
 
 
-        msg2 = RServiceBus::Message.new( Msg2.new( "BB", "AA" ), "Q", @SagaStorage.hash.keys[0] )
+        msg2 = RServiceBus::Message.new( Msg2.new( 'BB', 'AA'), 'Q', @SagaStorage.hash.keys[0] )
 
 
         @sagaManager.Handle( msg2 )
@@ -124,9 +124,9 @@ class SagaTest < Test::Unit::TestCase
         data = @SagaStorage.hash[@SagaStorage.hash.keys[0]]
         assert_equal 3, data.length
 
-        assert_equal "BB", data["Bob1"]
-        assert_equal "BB", data["Bob2"]
-        assert_equal "One", data["sfield2"]
+        assert_equal 'BB', data['Bob1']
+        assert_equal 'BB', data['Bob2']
+        assert_equal 'One', data['sfield2']
 
 
     end

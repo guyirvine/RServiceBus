@@ -1,7 +1,7 @@
 module RServiceBus
     
-    require "beanstalk-client"
-    require "rservicebus/MQ"
+    require 'beanstalk-client'
+    require 'rservicebus/MQ'
     
     # Beanstalk client implementation.
     #
@@ -16,16 +16,16 @@ module RServiceBus
             begin
                 @beanstalk = Beanstalk::Pool.new([string])
                 
-                @max_job_size = @beanstalk.stats["max-job-size"]
+                @max_job_size = @beanstalk.stats['max-job-size']
                 if @max_job_size < 4194304 then
                     puts "***WARNING: Lowest recommended.max-job-size is 4m, current max-job-size, #{@max_job_size.to_f / (1024*1024)}m"
-                    puts "***WARNING: Set the job size with the -z switch, eg /usr/local/bin/beanstalkd -z 4194304"
+                    puts '***WARNING: Set the job size with the -z switch, eg /usr/local/bin/beanstalkd -z 4194304'
                 end
                 rescue Exception => e
-                puts "Error connecting to Beanstalk"
+                puts 'Error connecting to Beanstalk'
                 puts "Host string, #{string}"
-                if e.message == "Beanstalk::NotConnected" then
-                    puts "***Most likely, beanstalk is not running. Start beanstalk, and try running this again."
+                if e.message == 'Beanstalk::NotConnected' then
+                    puts '***Most likely, beanstalk is not running. Start beanstalk, and try running this again.'
                     puts "***If you still get this error, check beanstalk is running at, #{string}"
                     else
                     puts e.message
@@ -46,7 +46,7 @@ module RServiceBus
             begin
                 @job = @beanstalk.reserve @timeout
                 rescue Exception => e
-                if e.message == "TIMED_OUT" then
+                if e.message == 'TIMED_OUT' then
                     raise NoMsgToProcess.new
                 end
                 raise e
@@ -68,7 +68,7 @@ module RServiceBus
         # At least called in the Host rescue block, to ensure all network links are healthy
         def send( queueName, msg )
             if msg.length > @max_job_size then
-                puts "***Attempting to send a msg which will not fit on queue."
+                puts '***Attempting to send a msg which will not fit on queue.'
                 puts "***Msg size, #{msg.length}, max msg size, #{@max_job_size}."
                 raise JobTooBigError.new( "Msg size, #{msg.length}, max msg size, #{@max_job_size}" )
             end

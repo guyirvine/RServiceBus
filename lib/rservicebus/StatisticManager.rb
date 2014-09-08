@@ -17,8 +17,8 @@ class StatisticManager
 
 		@totalByMessageType = Hash.new
         
-        @output = !RServiceBus.getValue( "VERBOSE", nil ).nil?
-        @maxStatOutputCountdown = RServiceBus.getValue( "STAT_OUTPUT_COUNTDOWN", "1" ).to_i
+        @output = !RServiceBus.getValue( 'VERBOSE', nil ).nil?
+        @maxStatOutputCountdown = RServiceBus.getValue( 'STAT_OUTPUT_COUNTDOWN', '1').to_i
         @statOutputCountdown = 0
 	end
 

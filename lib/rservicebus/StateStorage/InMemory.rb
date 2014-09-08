@@ -14,7 +14,7 @@ module RServiceBus
         #Get
         def Get( handler )
             hash = @hash[handler.class.name]
-            @list << Hash["name", handler.class.name, "hash", hash]
+            @list << Hash['name', handler.class.name, 'hash', hash]
 
             return hash
         end

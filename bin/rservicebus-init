@@ -89,13 +89,14 @@ END_DATA
 class Init
     
     def Run
-        IO.write( "README.md", ContentReadMe.string );
-        IO.write( "Client.rb", ContentClient.string );
-        IO.write( "Contract.rb", ContentContract.string );
-        IO.write( "run", ContentRun.string );
+        IO.write( 'README.md', ContentReadMe.string );
+        IO.write( 'Client.rb', ContentClient.string );
+        IO.write( 'Contract.rb', ContentContract.string );
+        IO.write( 'run', ContentRun.string );
         
-        Dir.mkdir( "./MessageHandler" ) unless Dir.exists? "./MessageHandler";
-        IO.write( "MessageHandler/HelloWorld.rb", ContentMessageHandler.string );
+        Dir.mkdir('./MessageHandler') unless Dir.exists? './MessageHandler'
+        ;
+        IO.write( 'MessageHandler/HelloWorld.rb', ContentMessageHandler.string );
     end
     
 end

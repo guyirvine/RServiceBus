@@ -17,7 +17,7 @@ module RServiceBus
         def configureMapping( mapping )
             match = mapping.match( /(.+):(.+)/ )
             if match.nil? then
-                log "Mapping string provided is invalid"
+                log 'Mapping string provided is invalid'
                 log "The entire mapping string is: #{mapping}"
                 log "*** Could not find ':' in mapping entry, #{line}"
                 exit()
@@ -28,29 +28,29 @@ module RServiceBus
             
             @queueNameList.each do |q|
                 if q != match[2] && q.downcase == match[2].downcase then
-                    log( "*** Two queues specified with only case sensitive difference." )
+                    log('*** Two queues specified with only case sensitive difference.')
                     log( "*** #{q} != #{match[2]}" )
-                    log( "*** If you meant these queues to be the same, please match case and restart the bus." )
+                    log('*** If you meant these queues to be the same, please match case and restart the bus.')
                 end
             end
             @queueNameList << match[2]
         end
         
         def Configure( localQueueName=nil )
-            self.log( "EndpointMapping.Configure" )
+            self.log('EndpointMapping.Configure')
             
             @queueNameList = []
             @queueNameList << localQueueName unless localQueueName.nil?
-            
-            if !self.getValue( "MESSAGE_ENDPOINT_MAPPING" ).nil? then
-                log( "*** MESSAGE_ENDPOINT_MAPPING environment variable was detected")
-                log( "*** You may have intended MESSAGE_ENDPOINT_MAPPINGS, note the 'S' on the end")
+
+            unless self.getValue('MESSAGE_ENDPOINT_MAPPING').nil? then
+              log('*** MESSAGE_ENDPOINT_MAPPING environment variable was detected')
+              log("*** You may have intended MESSAGE_ENDPOINT_MAPPINGS, note the 'S' on the end")
             end
             
-            mappings = self.getValue( "MESSAGE_ENDPOINT_MAPPINGS" )
+            mappings = self.getValue('MESSAGE_ENDPOINT_MAPPINGS')
             return self if mappings.nil?
             
-            mappings.split( ";" ).each do |mapping|
+            mappings.split(';').each do |mapping|
                 self.configureMapping( mapping )
             end
             
@@ -70,7 +70,7 @@ module RServiceBus
         end
         
         def getSubscriptionEndpoints
-            return @endpoints.keys.select { |el| el.end_with?( "Event" ) }
+            return @endpoints.keys.select { |el| el.end_with?('Event') }
         end
     end
     

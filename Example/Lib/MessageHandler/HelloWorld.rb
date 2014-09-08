@@ -1,5 +1,5 @@
-require "HelperClass"
-require "BaseHelperClass"
+require 'HelperClass'
+require 'BaseHelperClass'
 
 class MessageHandler_HelloWorld
 
@@ -7,7 +7,7 @@ class MessageHandler_HelloWorld
 
 	def Handle( msg )
 #raise "Manually generated error for testng"
-		puts "Handling Hello World: " + msg.name
+		puts 'Handling Hello World: ' + msg.name
 		@Bus.Reply( HelperClass.new.GetMsg )
 	end
 end

@@ -1,6 +1,6 @@
 module RServiceBus
     
-    require "FluidDb/TinyTds"
+    require 'FluidDb/TinyTds'
     
     #Implementation of an AppResource - Redis
     class AppResource_FluidDbTinyTds<AppResource

@@ -5,7 +5,7 @@ require './lib/rservicebus/Monitor/CsvDir.rb'
 class Test_Monitor_CsvDir<RServiceBus::Monitor_CsvDir
     
     def setCols( cols )
-        @QueryStringParts = Hash["cols", [cols]]
+        @QueryStringParts = Hash['cols', [cols]]
     end
     
 end
@@ -16,7 +16,7 @@ class ConfigTest < Test::Unit::TestCase
         monitor = Test_Monitor_CsvDir.new
         monitor.setCols( 2 )
         
-        monitor.ProcessContent( "1, 2" )
+        monitor.ProcessContent('1, 2')
         
     end
     
@@ -26,7 +26,7 @@ class ConfigTest < Test::Unit::TestCase
         
         error_raised = false
         begin
-            monitor.ProcessContent( "1, 2, 3" )
+            monitor.ProcessContent('1, 2, 3')
             rescue
             error_raised = true
         end

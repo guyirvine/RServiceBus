@@ -1,7 +1,7 @@
 module RServiceBus
     
-    require "bunny"
-    require "rservicebus/MQ"
+    require 'bunny'
+    require 'rservicebus/MQ'
     
     # Beanstalk client implementation.
     #
@@ -22,10 +22,10 @@ module RServiceBus
                 @x = @ch.default_exchange
 
                 rescue Exception => e
-                puts "Error connecting to Beanstalk"
+                puts 'Error connecting to Beanstalk'
                 puts "Host string, #{string}"
-                if e.message == "Beanstalk::NotConnected" then
-                    puts "***Most likely, beanstalk is not running. Start beanstalk, and try running this again."
+                if e.message == 'Beanstalk::NotConnected' then
+                    puts '***Most likely, beanstalk is not running. Start beanstalk, and try running this again.'
                     puts "***If you still get this error, check beanstalk is running at, #{string}"
                     else
                     puts e.message

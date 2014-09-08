@@ -1,4 +1,4 @@
-require "./Contract.rb"
+require './Contract.rb'
 
 class MessageHandler_HelloWorld
 
@@ -7,6 +7,6 @@ class MessageHandler_HelloWorld
 	@Bus
 
 	def Handle( msg )
-		@Bus.Publish( HelloWorldEvent.new( "Hello World" ) )
+		@Bus.Publish( HelloWorldEvent.new('Hello World') )
 	end
 end

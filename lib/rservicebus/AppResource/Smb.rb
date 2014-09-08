@@ -1,5 +1,5 @@
 module RServiceBus
-require "net/smb"
+require 'net/smb'
 
 
     class AppResource_Smb<AppResource
@@ -7,10 +7,10 @@ require "net/smb"
 	def processUri
 		host = @uri.host
 
-		parts = @uri.path.split( "/" )
+		parts = @uri.path.split('/')
 		parts.shift
 		share = parts.shift
-		path = parts.join( "/" )
+		path = parts.join('/')
 		
 		@clean_path = "smb://#{host}/#{share}/#{URI.decode(path)}"
 

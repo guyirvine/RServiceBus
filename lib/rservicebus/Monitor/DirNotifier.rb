@@ -10,10 +10,10 @@ module RServiceBus
             #Pass the path through the Dir object to check syntax on startup
             begin
                 self.open_folder uri.path
-                if !self.file_writable?( uri.path ) then
-                    puts "***** Directory is not writable, #{uri.path}."
-                    puts "***** Make the directory, #{uri.path}, writable and try again."
-                    abort()
+                unless self.file_writable?(uri.path) then
+                  puts "***** Directory is not writable, #{uri.path}."
+                  puts "***** Make the directory, #{uri.path}, writable and try again."
+                  abort()
                 end
                 rescue Errno::ENOENT => e
                     puts "***** Directory does not exist, #{uri.path}."
@@ -30,21 +30,21 @@ module RServiceBus
             @Path = uri.path
 
             if uri.query.nil?
-                puts "***** Processing Directory is not specified."
-                puts "***** Specify the Processing Directory as a query string in the Path URI"
+                puts '***** Processing Directory is not specified.'
+                puts '***** Specify the Processing Directory as a query string in the Path URI'
                 puts "***** eg, '/#{uri.path}?processing=*ProcessingDir*"
                 abort()
             else
                 parts = CGI.parse(uri.query)
 
-                if parts.has_key? "processing" then
-                    processingUri = URI.parse parts["processing"][0]
+                if parts.has_key? 'processing' then
+                    processingUri = URI.parse parts['processing'][0]
                     begin
                         self.open_folder processingUri.path
-                        if !self.file_writable?( processingUri.path ) then
-                            puts "***** Processing Directory is not writable, #{processingUri.path}."
-                            puts "***** Make the directory, #{processingUri.path}, writable and try again."
-                            abort()
+                        unless self.file_writable?(processingUri.path) then
+                          puts "***** Processing Directory is not writable, #{processingUri.path}."
+                          puts "***** Make the directory, #{processingUri.path}, writable and try again."
+                          abort()
                         end
                         rescue Errno::ENOENT => e
                             puts "***** Processing Directory does not exist, #{processingUri.path}."
@@ -61,9 +61,9 @@ module RServiceBus
                     @ProcessingFolder = processingUri.path
                 end
 
-                @Filter = "*"
-                if parts.has_key? "filter" then
-                    @Filter = parts["filter"][0]
+                @Filter = '*'
+                if parts.has_key? 'filter' then
+                    @Filter = parts['filter'][0]
                 end
             end
         end

@@ -30,8 +30,8 @@ class Test_Bus
 
 	def log( string, verbose=false )
 		item = Hash.new
-		item["string"] = string
-		item["verbose"] = verbose
+		item['string'] = string
+		item['verbose'] = verbose
 		@logList << item
 	end
 end

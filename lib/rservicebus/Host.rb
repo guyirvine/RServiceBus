@@ -68,9 +68,9 @@ module RServiceBus
         #Thin veneer for Configuring state
         #
         def configureSagaStorage
-            string = RServiceBus.getValue( "SAGA_URI" )
+            string = RServiceBus.getValue('SAGA_URI')
             if string.nil? then
-                string = "dir:///tmp"
+                string = 'dir:///tmp'
             end
 
             uri = URI.parse( string )
@@ -104,7 +104,7 @@ module RServiceBus
         #Subscriptions are specified by adding events to the
         #msg endpoint mapping
         def sendSubscriptions
-            log "Send Subscriptions"
+            log 'Send Subscriptions'
 
             @endpointMapping.getSubscriptionEndpoints.each { |eventName| self.Subscribe( eventName ) }
 
@@ -114,7 +114,7 @@ module RServiceBus
         #Load and configure Message Handlers
         #
         def loadHandlers()
-            log "Load Message Handlers"
+            log 'Load Message Handlers'
             @handlerManager = HandlerManager.new( self, @resourceManager, @stateManager )
             @handlerLoader = HandlerLoader.new( self, @handlerManager )
 
@@ -127,7 +127,7 @@ module RServiceBus
 
         #Load and configure Sagas
         def loadSagas()
-            log "Load Sagas"
+            log 'Load Sagas'
             @sagaManager = Saga_Manager.new( self, @resourceManager, @sagaStorage )
             @sagaLoader = SagaLoader.new( self, @sagaManager )
 
@@ -148,7 +148,7 @@ module RServiceBus
         #Load Contracts
         #
         def loadContracts()
-            log "Load Contracts"
+            log 'Load Contracts'
 
             @config.contractList.each do |path|
                 require path
@@ -161,7 +161,7 @@ module RServiceBus
         #For each directory given, find and load all librarys
         #
         def loadLibs()
-            log "Load Libs"
+            log 'Load Libs'
 
             @config.libList.each do |path|
                 $:.unshift path
@@ -224,15 +224,15 @@ module RServiceBus
         #Ignition
         #
         def run
-            log "Starting the Host"
+            log 'Starting the Host'
 
             log "Watching, #{@mq.localQueueName}"
             $0 = "rservicebus - #{@mq.localQueueName}"
-            if !@config.forwardReceivedMessagesTo.nil? then
-                log "Forwarding all received messages to: " + @config.forwardReceivedMessagesTo.to_s
+            unless @config.forwardReceivedMessagesTo.nil? then
+              log 'Forwarding all received messages to: ' + @config.forwardReceivedMessagesTo.to_s
             end
-            if !@config.forwardSentMessagesTo.nil? then
-                log "Forwarding all sent messages to: " + @config.forwardSentMessagesTo.to_s
+            unless @config.forwardSentMessagesTo.nil? then
+              log 'Forwarding all sent messages to: ' + @config.forwardSentMessagesTo.to_s
             end
 
             self.StartListeningToEndpoints
@@ -241,7 +241,7 @@ module RServiceBus
         #Receive a msg, prep it, and handle any errors that may occur
         # - Most of this should be queue independant
         def StartListeningToEndpoints
-            log "Waiting for messages. To exit press CTRL+C"
+            log 'Waiting for messages. To exit press CTRL+C'
             #            statOutputCountdown = 0
             messageLoop = true
             retries = @config.maxRetries
@@ -260,28 +260,28 @@ module RServiceBus
                     begin
                         @stats.incTotalProcessed
                         @msg = YAML::load(body)
-                        if @msg.msg.class.name == "RServiceBus::Message_Subscription" then
+                        if @msg.msg.class.name == 'RServiceBus::Message_Subscription' then
                             @subscriptionManager.add( @msg.msg.eventName, @msg.returnAddress )
-                            elsif @msg.msg.class.name == "RServiceBus::Message_StatisticOutputOn" then
+                            elsif @msg.msg.class.name == 'RServiceBus::Message_StatisticOutputOn' then
                             @stats.output = true
-                            log "Turn on Stats logging"
-                            elsif @msg.msg.class.name == "RServiceBus::Message_StatisticOutputOff" then
+                            log 'Turn on Stats logging'
+                            elsif @msg.msg.class.name == 'RServiceBus::Message_StatisticOutputOff' then
                             @stats.output = false
-                            log "Turn off Stats logging"
-                            elsif @msg.msg.class.name == "RServiceBus::Message_VerboseOutputOn" then
-                            ENV["VERBOSE"] = "true"
-                            log "Turn on Verbose logging"
-                            elsif @msg.msg.class.name == "RServiceBus::Message_VerboseOutputOff" then
-                            ENV.delete( "VERBOSE" )
-                            log "Turn off Verbose logging"
+                            log 'Turn off Stats logging'
+                            elsif @msg.msg.class.name == 'RServiceBus::Message_VerboseOutputOn' then
+                            ENV['VERBOSE'] = 'true'
+                            log 'Turn on Verbose logging'
+                            elsif @msg.msg.class.name == 'RServiceBus::Message_VerboseOutputOff' then
+                            ENV.delete('VERBOSE')
+                            log 'Turn off Verbose logging'
 
 
                             else
 
                             self.HandleMessage()
 
-                            if !@config.forwardReceivedMessagesTo.nil? then
-                                self._SendAlreadyWrappedAndSerialised(body,@config.forwardReceivedMessagesTo)
+                            unless @config.forwardReceivedMessagesTo.nil? then
+                              self._SendAlreadyWrappedAndSerialised(body, @config.forwardReceivedMessagesTo)
                             end
                         end
                         @mq.ack
@@ -307,16 +307,16 @@ module RServiceBus
                         #This has been re-rasied from a rescue in the handler
                         puts "*** #{e.message}"
                         #"Property, #{e.message}, not set for, #{handler.class.name}"
-                        propertyName = e.message[10, e.message.index(",", 10)-10]
+                        propertyName = e.message[10, e.message.index(',', 10)-10]
                         puts "*** Ensure the environment variable, RSB_#{propertyName}, has been set at startup."
 
                         rescue Exception => e
                         sleep 0.5
 
-                        puts "*** Exception occurred"
+                        puts '*** Exception occurred'
                         puts e.message
                         puts e.backtrace
-                        puts "***"
+                        puts '***'
 
                         if retries > 0 then
                             retries = retries - 1
@@ -326,19 +326,19 @@ module RServiceBus
                             @circuitBreaker.Failure
 
                             @stats.incTotalErrored
-                            if e.class.name == "Beanstalk::NotConnected" then
-                                puts "Lost connection to beanstalkd."
-                                puts "*** Start or Restart beanstalkd and try again."
+                            if e.class.name == 'Beanstalk::NotConnected' then
+                                puts 'Lost connection to beanstalkd.'
+                                puts '*** Start or Restart beanstalkd and try again.'
                                 abort();
                             end
 
-                            if e.class.name == "Redis::CannotConnectError" then
-                                puts "Lost connection to redis."
-                                puts "*** Start or Restart redis and try again."
+                            if e.class.name == 'Redis::CannotConnectError' then
+                                puts 'Lost connection to redis.'
+                                puts '*** Start or Restart redis and try again.'
                                 abort();
                             end
 
-                            errorString = e.message + ". " + e.backtrace.join( ". " )
+                            errorString = e.message + '. ' + e.backtrace.join('. ')
                             #                            log errorString
 
                             @msg.addErrorMsg( @mq.localQueueName, errorString )
@@ -349,7 +349,7 @@ module RServiceBus
                         end
                     end
                     rescue SystemExit, Interrupt
-                    puts "Exiting on request ..."
+                    puts 'Exiting on request ...'
                     messageLoop = false
 
                     rescue NoMsgToProcess => e
@@ -374,13 +374,13 @@ module RServiceBus
                     @circuitBreaker.Success
 
                     rescue Exception => e
-                    if e.message == "SIGTERM" || e.message == "SIGINT" then
-                        puts "Exiting on request ..."
+                    if e.message == 'SIGTERM' || e.message == 'SIGINT' then
+                        puts 'Exiting on request ...'
                         messageLoop = false
                         else
-                        puts "*** This is really unexpected."
+                        puts '*** This is really unexpected.'
                         messageLoop = false
-                        puts "Message: " + e.message
+                        puts 'Message: ' + e.message
                         puts e.backtrace
                     end
                 end
@@ -395,7 +395,7 @@ module RServiceBus
                 handlerList = @handlerManager.getHandlerListForMsg(msgName)
 
 
-                RServiceBus.rlog "Handler found for: " + msgName
+                RServiceBus.rlog 'Handler found for: ' + msgName
                 begin
                     @queueForMsgsToBeSentOnComplete = Array.new
 
@@ -409,7 +409,7 @@ module RServiceBus
                             raise PropertyNotSet.new( "Property, #{e.message}, not set for, #{handler.class.name}" )
                             rescue Exception => e
                             puts "E #{e.message}"
-                            log "An error occurred in Handler: " + handler.class.name
+                            log 'An error occurred in Handler: ' + handler.class.name
                             raise e
                         end
                     end
@@ -443,10 +443,10 @@ module RServiceBus
             # @param [String] serialized_object serialized RServiceBus::Message
             # @param [String] queueName endpoint to which the msg will be sent
             def _SendAlreadyWrappedAndSerialised( serialized_object, queueName )
-                RServiceBus.rlog "Bus._SendAlreadyWrappedAndSerialised"
+                RServiceBus.rlog 'Bus._SendAlreadyWrappedAndSerialised'
 
-                if !@config.forwardSentMessagesTo.nil? then
-                    @mq.send( @config.forwardSentMessagesTo, serialized_object )
+                unless @config.forwardSentMessagesTo.nil? then
+                  @mq.send(@config.forwardSentMessagesTo, serialized_object)
                 end
 
                 @mq.send( queueName, serialized_object )
@@ -457,14 +457,14 @@ module RServiceBus
             # @param [RServiceBus::Message] msg msg to be sent
             # @param [String] queueName endpoint to which the msg will be sent
             def _SendNeedsWrapping( msg, queueName, correlationId )
-                RServiceBus.rlog "Bus._SendNeedsWrapping"
+                RServiceBus.rlog 'Bus._SendNeedsWrapping'
 
                 rMsg = RServiceBus::Message.new( msg, @mq.localQueueName, correlationId )
-                if queueName.index( "@" ).nil? then
+                if queueName.index('@').nil? then
                     q = queueName
                     RServiceBus.rlog "Sending, #{msg.class.name} to, queueName"
                     else
-                    parts = queueName.split( "@" )
+                    parts = queueName.split('@')
                     rMsg.setRemoteQueueName( parts[0] )
                     rMsg.setRemoteHostName( parts[1] )
                     q = 'transport-out'
@@ -478,7 +478,7 @@ module RServiceBus
             def sendQueuedMsgs
                 @queueForMsgsToBeSentOnComplete.each do |row|
                     if row['timestamp'].nil? then
-                        self._SendNeedsWrapping( row["msg"], row["queueName"], row["correlationId"] )
+                        self._SendNeedsWrapping( row['msg'], row['queueName'], row['correlationId'] )
                     else
                         @sendAtManager.Add( row )
                     end
@@ -488,7 +488,7 @@ module RServiceBus
             def queueMsgForSendOnComplete( msg, queueName, timestamp=nil )
                 correlationId = @sagaData.nil? ? nil : @sagaData.correlationId
                 correlationId = (!@msg.nil? && !@msg.correlationId.nil?) ? @msg.correlationId : correlationId
-                @queueForMsgsToBeSentOnComplete << Hash["msg", msg, "queueName", queueName, "correlationId", correlationId, "timestamp",timestamp ]
+                @queueForMsgsToBeSentOnComplete << Hash['msg', msg, 'queueName', queueName, 'correlationId', correlationId, 'timestamp',timestamp ]
             end
 
             #Sends a msg back across the bus
@@ -497,7 +497,7 @@ module RServiceBus
             #
             # @param [RServiceBus::Message] msg msg to be sent
             def Reply( msg )
-                RServiceBus.rlog "Reply with: " + msg.class.name + " To: " + @msg.returnAddress
+                RServiceBus.rlog 'Reply with: ' + msg.class.name + ' To: ' + @msg.returnAddress
                 @stats.incTotalReply
 
                 self.queueMsgForSendOnComplete( msg, @msg.returnAddress )
@@ -509,9 +509,9 @@ module RServiceBus
 
                 return @mq.localQueueName if @handlerManager.canMsgBeHandledLocally(msgName)
 
-                log "No end point mapping found for: " + msgName
-                log "**** Check environment variable MessageEndpointMappings contains an entry named : " + msgName
-                raise "No end point mapping found for: " + msgName
+                log 'No end point mapping found for: ' + msgName
+                log '**** Check environment variable MessageEndpointMappings contains an entry named : ' + msgName
+                raise 'No end point mapping found for: ' + msgName
             end
 
 
@@ -520,7 +520,7 @@ module RServiceBus
             #
             # @param [RServiceBus::Message] msg msg to be sent
             def Send( msg, timestamp=nil )
-                RServiceBus.rlog "Bus.Send"
+                RServiceBus.rlog 'Bus.Send'
                 @stats.incTotalSent
 
                 msgName = msg.class.name
@@ -533,7 +533,7 @@ module RServiceBus
             #
             # @param [RServiceBus::Message] msg msg to be sent
             def Publish( msg )
-                RServiceBus.rlog "Bus.Publish"
+                RServiceBus.rlog 'Bus.Publish'
                 @stats.incTotalPublished
 
                 subscriptions = @subscriptionManager.get(msg.class.name)
@@ -547,7 +547,7 @@ module RServiceBus
             #
             # @param [String] eventName event to be subscribes to
             def Subscribe( eventName )
-                RServiceBus.rlog "Bus.Subscribe: " + eventName
+                RServiceBus.rlog 'Bus.Subscribe: ' + eventName
 
                 queueName = self.getEndpointForMsg( eventName )
                 subscription = Message_Subscription.new( eventName )

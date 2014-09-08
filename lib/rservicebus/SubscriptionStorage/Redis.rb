@@ -1,6 +1,6 @@
 module RServiceBus
 
-require "redis"
+require 'redis'
 
 #Implementation of Subscription Storage to Redis
 class SubscriptionStorage_Redis<SubscriptionStorage
@@ -18,9 +18,9 @@ class SubscriptionStorage_Redis<SubscriptionStorage
 	end
 
 	def getAll
-		RServiceBus.log "Load subscriptions"
+		RServiceBus.log 'Load subscriptions'
 		begin
-			content = @redis.get( @appName + ".Subscriptions" )
+			content = @redis.get( @appName + '.Subscriptions')
 			if content.nil? then
 				subscriptions = Hash.new
 			else
@@ -28,10 +28,10 @@ class SubscriptionStorage_Redis<SubscriptionStorage
 			end
 			return subscriptions
 		rescue Exception => e
-			puts "Error connecting to redis"
-			if e.message == "Redis::CannotConnectError" ||
-					e.message == "Redis::ECONNREFUSED" then
-				puts "***Most likely, redis is not running. Start redis, and try running this again."
+			puts 'Error connecting to redis'
+			if e.message == 'Redis::CannotConnectError' ||
+					e.message == 'Redis::ECONNREFUSED' then
+				puts '***Most likely, redis is not running. Start redis, and try running this again.'
 			else
 				puts e.message
 				puts e.backtrace
@@ -41,7 +41,7 @@ class SubscriptionStorage_Redis<SubscriptionStorage
 	end
 
 	def add( eventName, queueName )
-		content = @redis.get( @appName + ".Subscriptions" )
+		content = @redis.get( @appName + '.Subscriptions')
 		if content.nil? then
 			subscriptions = Hash.new
 		else
@@ -55,13 +55,13 @@ class SubscriptionStorage_Redis<SubscriptionStorage
 		subscriptions[eventName] << queueName
 		subscriptions[eventName] = subscriptions[eventName].uniq
 
-		@redis.set( @appName + ".Subscriptions", YAML::dump(subscriptions ) )
+		@redis.set( @appName + '.Subscriptions', YAML::dump(subscriptions ) )
 
 		return subscriptions
 	end
 
 	def remove( eventName, queueName )
-		raise "Method, remove, needs to be implemented for this subscription storage"
+		raise 'Method, remove, needs to be implemented for this subscription storage'
 	end
 
 end

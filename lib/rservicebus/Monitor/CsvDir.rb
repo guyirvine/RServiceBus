@@ -8,9 +8,9 @@ module RServiceBus
 
         def checkPayloadForNumberOfColumns( payload )
             return if @QueryStringParts.nil?
-            return unless @QueryStringParts.has_key?("cols")
+            return unless @QueryStringParts.has_key?('cols')
             
-            cols = @QueryStringParts["cols"][0].to_i
+            cols = @QueryStringParts['cols'][0].to_i
             payload.each_with_index do |row, idx|
                 if row.length != cols then
                     raise "Expected number of columns, #{cols}, Actual number of columns, #{row.length}, on line, #{idx}"
@@ -20,9 +20,9 @@ module RServiceBus
         end
 
         def checkSendHash
-            if !@QueryStringParts.nil? && @QueryStringParts.has_key?("hash") then
-                flag = @QueryStringParts["hash"][0]
-                return flag == "Y"
+            if !@QueryStringParts.nil? && @QueryStringParts.has_key?('hash') then
+                flag = @QueryStringParts['hash'][0]
+                return flag == 'Y'
             end
             
             return false

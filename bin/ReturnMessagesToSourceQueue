@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
-require "yaml"
-require "beanstalk-client"
-require "rservicebus"
+require 'yaml'
+require 'beanstalk-client'
+require 'rservicebus'
 
 def returnMsg( beanstalk, job, request_nbr )
-    firstMatch = "ruby/object:"
+    firstMatch = 'ruby/object:'
 
             payload = job.body
 
@@ -17,16 +17,16 @@ def returnMsg( beanstalk, job, request_nbr )
             msg = YAML::load(payload)
             if msg.lastErrorString.nil? then
                 puts "*** Requested msg, #{request_nbr}, does not have a sourceQueue to which it can be returned"
-                puts "*** Only errored msgs can be Returned"
-                puts "*** Generally, msgs would not be manually moved between queues"
-                puts "*** If you do need to, try"
-                puts "*** beanstalk-admin-dump <source queue name> | beanstalk-admin-load <destination queue name>"
+                puts '*** Only errored msgs can be Returned'
+                puts '*** Generally, msgs would not be manually moved between queues'
+                puts '*** If you do need to, try'
+                puts '*** beanstalk-admin-dump <source queue name> | beanstalk-admin-load <destination queue name>'
 
                 job.release
                 return
             end
             queueName = msg.lastErrorSourceQueue
-            puts "#" + "#{request_nbr.to_s}: #{msgName} to #{queueName}"
+            puts '#' + "#{request_nbr.to_s}: #{msgName} to #{queueName}"
 
             beanstalk.use( queueName )
             beanstalk.put( payload )
@@ -37,14 +37,14 @@ end
 
 index=nil
 if ARGV.length == 0 then
-        queueName = "error"
+        queueName = 'error'
 elsif ARGV.length == 1 then
         queueName = ARGV[0]
 elsif ARGV.length == 2 then
         queueName = ARGV[0]
         index = ARGV[1].to_i
 else
-        abort( "Usage: ReturnMessagesToSourceQueue [queue name] [index]" )
+        abort('Usage: ReturnMessagesToSourceQueue [queue name] [index]')
 end
 
 begin
@@ -52,12 +52,12 @@ begin
     beanstalk = Beanstalk::Pool.new([host])
     
     tubes = beanstalk.list_tubes[host]
-    if !tubes.include?(queueName) then
-        abort( "Nothing waiting on the Beanstalk queue, #{queueName}" )
+    unless tubes.include?(queueName) then
+      abort("Nothing waiting on the Beanstalk queue, #{queueName}")
     end
     
     tubeStats = beanstalk.stats_tube(queueName)
-    number_of_messages = tubeStats["current-jobs-ready"]
+    number_of_messages = tubeStats['current-jobs-ready']
     if index.nil? then
         puts
         puts "Attempting to return #{number_of_messages} to their source queue"
@@ -71,7 +71,7 @@ begin
                 returnMsg( beanstalk, job, request_nbr )
             end
             rescue Exception => e
-            if e.message == "TIMED_OUT" then
+            if e.message == 'TIMED_OUT' then
                 else
                 raise
             end
@@ -79,7 +79,7 @@ begin
     else
         if index > number_of_messages then
             puts "*** Requested msg, #{index}, is greater than the number of msgs in the queue, #{number_of_messages}"
-            puts "*** Try a smaller index, or remove the index number to return all msgs"
+            puts '*** Try a smaller index, or remove the index number to return all msgs'
             abort();
         end
 
@@ -102,7 +102,7 @@ begin
             end
 
             rescue Exception => e
-            if e.message == "TIMED_OUT" then
+            if e.message == 'TIMED_OUT' then
                 else
                 raise
             end
@@ -110,5 +110,5 @@ begin
     end
     
     rescue Beanstalk::NotConnected=>e
-    puts "Beanstalk not running"
+    puts 'Beanstalk not running'
 end
