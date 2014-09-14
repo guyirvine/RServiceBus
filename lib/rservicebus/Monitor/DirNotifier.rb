@@ -1,4 +1,6 @@
 require 'cgi'
+require 'fileutils'
+require 'pathname'
 
 module RServiceBus
 
