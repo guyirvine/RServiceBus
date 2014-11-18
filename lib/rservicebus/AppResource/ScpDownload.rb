@@ -13,7 +13,7 @@ module RServiceBus
     def download( destination )
       RServiceBus.log "Host: #{@uri.host}, User: #{@uri.user}, Source: #{@uri.path}, Destination: #{destination}", true
       Net::SCP.start( @uri.host, @uri.user ) do |scp|
-        scp.download( @uri.path, destination, :recursive => true )
+        scp.download!( @uri.path, destination, :recursive => true )
       end
     end
 
