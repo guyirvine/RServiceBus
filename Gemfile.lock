@@ -3,7 +3,8 @@ GEM
   specs:
     beanstalk-client (1.1.1)
     fluiddb (0.1.17)
-    haml (4.0.5)
+    haml (5.0.0)
+      temple (>= 0.8.0)
       tilt
     json (1.8.1)
     metaclass (0.0.4)
@@ -17,7 +18,8 @@ GEM
     parse-cron (0.1.4)
     rake (10.3.2)
     redis (3.1.0)
-    tilt (2.0.1)
+    temple (0.8.2)
+    tilt (2.0.10)
     uuidtools (2.1.5)
     zip (2.0.2)
 
