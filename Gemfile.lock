@@ -5,7 +5,7 @@ GEM
     fluiddb (0.1.17)
     haml (4.0.5)
       tilt
-    json (1.8.1)
+    json (2.3.0)
     metaclass (0.0.4)
     mocha (1.1.0)
       metaclass (~> 0.0.1)
